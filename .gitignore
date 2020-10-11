@@ -28,3 +28,7 @@ out/
 
 # Dump files:
 *.hprof
+
+src/Parser/parser.java
+src/Parser/sym.java
+src/Scanner/scanner.java
