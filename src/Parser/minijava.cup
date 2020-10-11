@@ -14,17 +14,20 @@ import java_cup.runtime.*;
 /* Terminals (lexical tokens returned by the scanner): */
 
 /* reserved words */
-terminal DISPLAY;
+terminal DISPLAY, IF, WHILE, PRINTLN, TRUE, FALSE, CLASS, RETURN, NEW, PUBLIC, STATIC, VOID, MAIN, ELSE, LENGTH, EXTENDS, THIS;
 
 /* operators */
-terminal PLUS, BECOMES;
+terminal PLUS, BECOMES, MINUS, MULTIPLY, AND, LESS, NOT;
 
 /* delimiters */
-terminal LPAREN, RPAREN, SEMICOLON;
+terminal LPAREN, RPAREN, SEMICOLON, PERIOD, COMMA, LBRACKET, RBRACKET, LCURLY, RCURLY;
+
+/* data types */
+terminal INT, BOOLEAN, INT_ARRAY;
 
 /* identifiers */
 terminal String IDENTIFIER;
-
+terminal Integer INTEGER_LITERAL;
 
 /* Nonterminals (constructed by parser): */
 

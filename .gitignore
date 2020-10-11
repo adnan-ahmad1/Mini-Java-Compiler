@@ -32,3 +32,4 @@ out/
 src/Parser/parser.java
 src/Parser/sym.java
 src/Scanner/scanner.java
+SamplePrograms/Example2.java

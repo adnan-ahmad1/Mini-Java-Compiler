@@ -94,6 +94,8 @@ import Parser.sym;
      ComplexSymbol cs = (ComplexSymbol)s; 
      if (cs.sym == sym.IDENTIFIER) {
        return "ID(" + (String)cs.value + ")";
+     } else if (cs.sym == sym.INTEGER_LITERAL) {
+        return "INTEGER(" + (String)cs.value + ")";
      } else if (cs.sym == sym.error) {
        return "<UNEXPECTED(" + (String)cs.value + ")>";
      } else {
@@ -114,24 +116,62 @@ white = {eol}|[ \t]
 
 /* reserved words (first so that they take precedence over identifiers) */
 "display" { return symbol(sym.DISPLAY); }
+"if" { return symbol(sym.IF); }
+"while" { return symbol(sym.WHILE); }
+"System.out.println" { return symbol(sym.PRINTLN); }
+"true" { return symbol(sym.TRUE); }
+"false" { return symbol(sym.FALSE); }
+"class" { return symbol(sym.CLASS); }
+"return" { return symbol(sym.RETURN); }
+"new" { return symbol(sym.NEW); }
+"public" { return symbol(sym.PUBLIC); }
+"static" { return symbol(sym.STATIC); }
+"void" { return symbol(sym.VOID); }
+"main" { return symbol(sym.MAIN); }
+"else" { return symbol(sym.ELSE); }
+"length" { return symbol(sym.LENGTH); }
+"extends" { return symbol(sym.EXTENDS); }
+"this" { return symbol(sym.THIS); }
 
 /* operators */
 "+" { return symbol(sym.PLUS); }
 "=" { return symbol(sym.BECOMES); }
+"-" { return symbol(sym.MINUS); }
+"*" { return symbol(sym.MULTIPLY); }
+"&&" { return symbol(sym.AND); }
+"<" { return symbol(sym.LESS); }
+"!" { return symbol(sym.NOT); }
 
 /* delimiters */
 "(" { return symbol(sym.LPAREN); }
 ")" { return symbol(sym.RPAREN); }
 ";" { return symbol(sym.SEMICOLON); }
+"." { return symbol(sym.PERIOD); }
+"," { return symbol(sym.COMMA); }
+"[" { return symbol(sym.LBRACKET); }
+"]" { return symbol(sym.RBRACKET); }
+"{" { return symbol(sym.LCURLY); }
+"}" { return symbol(sym.RCURLY); }
+
+/* data types */
+"int" { return symbol(sym.INT); }
+"boolean" { return symbol(sym.BOOLEAN); }
+"int []" { return symbol(sym.INT_ARRAY); }
 
 /* identifiers */
 {letter} ({letter}|{digit}|_)* {
   return symbol(sym.IDENTIFIER, yytext());
 }
 
+ "0"|([1-9]({digit})*) {
+  return symbol(sym.INTEGER_LITERAL, yytext());
+}
 
 /* whitespace */
 {white}+ { /* ignore whitespace */ }
+
+/* comments */
+"/*"([^"*"]|("*"+[^"*/"]))*"*"+"/" { /* ignore comments */ }
 
 /* lexical errors (last so other matches take precedence) */
 . {
