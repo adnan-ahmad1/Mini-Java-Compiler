@@ -156,14 +156,13 @@ white = {eol}|[ \t]
 /* data types */
 "int" { return symbol(sym.INT); }
 "boolean" { return symbol(sym.BOOLEAN); }
-"int []" { return symbol(sym.INT_ARRAY); }
 
 /* identifiers */
 {letter} ({letter}|{digit}|_)* {
   return symbol(sym.IDENTIFIER, yytext());
 }
 
- "0"|([1-9]({digit})*) {
+"0"|([1-9]({digit})*) {
   return symbol(sym.INTEGER_LITERAL, yytext());
 }
 
@@ -172,6 +171,7 @@ white = {eol}|[ \t]
 
 /* comments */
 "/*"([^"*"]|("*"+[^"*/"]))*"*"+"/" { /* ignore comments */ }
+"//"[^({eol}|<<EOF>>)]*. { /* ignore comments */ }
 
 /* lexical errors (last so other matches take precedence) */
 . {

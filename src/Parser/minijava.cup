@@ -23,7 +23,7 @@ terminal PLUS, BECOMES, MINUS, MULTIPLY, AND, LESS, NOT;
 terminal LPAREN, RPAREN, SEMICOLON, PERIOD, COMMA, LBRACKET, RBRACKET, LCURLY, RCURLY;
 
 /* data types */
-terminal INT, BOOLEAN, INT_ARRAY;
+terminal INT, BOOLEAN;
 
 /* identifiers */
 terminal String IDENTIFIER;

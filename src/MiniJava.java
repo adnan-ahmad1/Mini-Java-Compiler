@@ -16,6 +16,8 @@ public class MiniJava {
             filename = args[1];
         }
 
+        boolean crashed = false;
+
         try {
             // create a scanner on the input file
             ComplexSymbolFactory sf = new ComplexSymbolFactory();
@@ -23,6 +25,10 @@ public class MiniJava {
             scanner s = new scanner(in, sf);
             Symbol t = s.next_token();
             while (t.sym != sym.EOF) {
+
+                if (t.sym == sym.error) {
+                    crashed = true;
+                }
                 // print each token that we scan
                 System.out.print(s.symbolToString(t) + " ");
                 t = s.next_token();
@@ -35,5 +41,12 @@ public class MiniJava {
             // print out a stack dump
             e.printStackTrace();
         }
+
+        // if error was encountered, exit with 1
+        if (crashed) {
+            System.exit(1);
+        }
+
+        System.exit(0);
     }
 }
