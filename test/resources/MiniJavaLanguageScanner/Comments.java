@@ -20,3 +20,7 @@ public static void returnTrue(boolean a) {
 }
 
 // test test // test
+
+/* /* /* */
+
+/* *** */ int c = 45; /* *** */

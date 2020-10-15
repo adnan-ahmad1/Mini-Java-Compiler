@@ -40,6 +40,7 @@ public class MiniJava {
                     e.toString());
             // print out a stack dump
             e.printStackTrace();
+            System.exit(1);
         }
 
         // if error was encountered, exit with 1

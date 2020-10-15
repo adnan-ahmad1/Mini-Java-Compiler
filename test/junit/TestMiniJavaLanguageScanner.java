@@ -82,4 +82,9 @@ public class TestMiniJavaLanguageScanner {
     public void testObject() {
         runScannerTestCase("TestObject");
     }
+
+    @Test
+    public void testError() {
+        runScannerTestCase("Error");
+    }
 }

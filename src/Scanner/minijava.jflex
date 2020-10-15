@@ -115,7 +115,6 @@ white = {eol}|[ \t]
 /* Token definitions */
 
 /* reserved words (first so that they take precedence over identifiers) */
-"display" { return symbol(sym.DISPLAY); }
 "if" { return symbol(sym.IF); }
 "while" { return symbol(sym.WHILE); }
 "System.out.println" { return symbol(sym.PRINTLN); }
