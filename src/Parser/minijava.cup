@@ -41,7 +41,7 @@ nonterminal Identifier Identifier;
 
 /* Precedence declarations: */
 
-precedence left PLUS;
+precedence left PLUS, MINUS, MULTIPLY, DIVIDE, AND, LESS;
 
 
 /* Productions: */
@@ -56,7 +56,18 @@ Program ::= Statement:s
 Statement   ::= AssignStatement:s
                 {: RESULT = s; :}
             | DisplayStatement:s
-                {: RESULT = s; :};
+                {: RESULT = s; :}
+            | IF LPAREN Expression:arg1 RPAREN Statement:arg2 ELSE Statement:arg3
+                {:RESULT = new If(arg1, arg2, arg3, arg1xleft); :}
+            | WHILE LPAREN Expression:arg1 RPAREN Statement:arg2
+                {: RESULT = new While(arg1, arg2, arg1xleft); :}
+            | PRINTLN LPAREN Expression:arg1 RPAREN SEMICOLON
+                {: RESULT = new Print(arg1, arg1xleft); :}
+            | Identifier:id BECOMES Expression:arg1 SEMICOLON
+                {: RESULT = new Assign(id, arg1, idxleft); :}
+            | Identifier:id LBRACKET Expression:arg1 RBRACKET BECOMES Expression:arg2 SEMICOLON
+                {: RESULT = new ArrayAssign(id, arg1, ag2, idxleft); :}
+            |
 
 AssignStatement ::= Identifier:id BECOMES Expression:expr SEMICOLON
                     {: RESULT = new Assign(id, expr, idxleft); :};
@@ -69,4 +80,24 @@ Expression    ::= IDENTIFIER:name
         | Expression:arg1 PLUS Expression:arg2
             {: RESULT = new Plus(arg1, arg2, arg1xleft); :}
         | LPAREN Expression:expr RPAREN
-            {: RESULT = expr; :};
+            {: RESULT = expr; :}
+        | Expression:arg1 MINUS Expression:arg2
+            {: RESULT = new Minus(arg1, arg2, arg1xleft); :}
+        | Expression:arg1 AND Expression:arg2
+            {: RESULT = new And(arg1, arg2, arg1xleft); :}
+        | Expression:arg1 MULTIPLY Expression:arg2
+            {: RESULT = new Times(arg1, arg2, arg1xleft); :}
+        | Expression:arg1 LESS Expression:arg2
+            {: RESULT = new LessThan(arg1, arg2, arg1xleft); :}
+        | Expression:arg1 LBRACKET Expression:arg2 RBRACKET
+            {: RESULT = new ArrayLookup(arg1, arg2, arg1xleft); :}
+        | Expression:arg1 PERIOD LENGTH
+            {: RESULT = new ArrayLength(arg1, arg1xleft); :}
+        | NEW INT LBRACKET Expression:arg1 RBRACKET
+            {: RESULT = new NewArray(arg1, arg1xleft); :}
+        | NEW Identifier:id LPAREN RPAREN
+            {: RESULT = new NewObject(id, idxleft); :}
+        | NOT Expression:arg1
+            {: RESULT = new Not(arg1, arg1xleft); :}
+        | LPAREN Expression:arg1 RPAREN
+            {: RESULT = arg1; :}
