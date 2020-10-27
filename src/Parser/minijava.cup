@@ -41,7 +41,7 @@ nonterminal Identifier Identifier;
 
 /* Precedence declarations: */
 
-precedence left PLUS, MINUS, MULTIPLY, DIVIDE, AND, LESS;
+precedence left PLUS, MINUS, MULTIPLY, AND, LESS;
 
 
 /* Productions: */
@@ -67,7 +67,17 @@ Statement   ::= AssignStatement:s
                 {: RESULT = new Assign(id, arg1, idxleft); :}
             | Identifier:id LBRACKET Expression:arg1 RBRACKET BECOMES Expression:arg2 SEMICOLON
                 {: RESULT = new ArrayAssign(id, arg1, ag2, idxleft); :}
-            |
+            | LCURLY StatementList:SL RCURLY
+                {: RESULT = new Block(SL, SLxleft); :}
+            | LCURLY RCURLY
+            | {: RESULT = new Block(new StatementList(new Location(0,0)), new Location(0,0));
+
+StatementList ::= Statement:s
+                  {: StatementList SL = new StatementList(new Location(0,0));
+                     SL.add(s);
+                     RESULT = SL; :}
+                | StatementList SL Statement:s
+                  {: SL.add(s); RESULT = SL: ;};
 
 AssignStatement ::= Identifier:id BECOMES Expression:expr SEMICOLON
                     {: RESULT = new Assign(id, expr, idxleft); :};
@@ -99,5 +109,36 @@ Expression    ::= IDENTIFIER:name
             {: RESULT = new NewObject(id, idxleft); :}
         | NOT Expression:arg1
             {: RESULT = new Not(arg1, arg1xleft); :}
-        | LPAREN Expression:arg1 RPAREN
-            {: RESULT = arg1; :}
+        | TRUE:t
+            {: RESULT = new True(txleft); :}
+        | FALSE:f
+            {: RESULT = new False(fxleft); :}
+        | INTEGER_LITERAL:num
+            {: RESULT = new IntegerLiteral(num); :}
+        | Expression:arg1 PERIOD Identifier:id LPAREN RPAREN
+            {: RESULT = new CALL(arg1, id, new ExpList(new Location(0,0)), arg1xleft); :}
+        | Expression:arg1 PERIOD Identifier:id LPAREN ExpressionList:exprL RPAREN
+            {: RESULT = new Call(arg1, id, exprL, arg1xleft); :};
+
+
+Type ::= INT:i
+            {: RESULT = new IntType(ixleft); :}
+        | BOOLEAN:b
+            {: RESULT = new BooleanType(bxleft); :}
+        | INT:i LBRACKET RBRACKT
+            {: RESULT = new IntArrayType(ixleft); :}
+        | Identifier:i
+            {: RESULT = new IdentifierType(ixleft); :};
+
+ExpressionList ::= Expression:arg1
+                   {: ExpList exprL = new ExpList(new Location(0,0));
+                      exprL.add(arg1);
+                      RESULT = exprL; :}
+            | ExpressionList:exprL COMMA Expression:expr1
+              {: exprL.add(expr1); RESULT = exprL; :};
+
+VarDeclaration ::= Type:t Identifier:id SEMICOLON
+                {: RESULT = new VarDecl(t,id, txleft); :};
+
+MainClass  ::= CLASS Identifier:id1 LCURLY PUBLIC STATIC VOID MAIN LPAREN STRING LBRACKET RBRACKET Identifier:id2 RPAREN LCURLY Statement:s RCURLY RCURLY
+               {: RESULT = new MainClass(id1, id2, s, id1xleft); :};
