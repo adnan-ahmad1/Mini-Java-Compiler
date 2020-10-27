@@ -51,7 +51,7 @@ nonterminal MethodDeclList MethodDeclList;
 nonterminal MethodDecl MethodDecl;
 /* Precedence declarations: */
 
-precedence left PLUS, MINUS, MULTIPLY, AND, LESS;
+precedence left PLUS, MINUS, MULTIPLY, AND, LESS, NOT, BECOMES;
 
 
 /* Productions: */
@@ -75,11 +75,11 @@ ClassDeclExtends ::= CLASS Identifier:id1 EXTENDS Identifier:id2 RCURLY LCURLY
 ClassDeclSimple ::= CLASS Identifier:id LCURLY RCURLY
                     {: RESULT = new ClassDeclSimple(id, new VarDeclList(new Location(0,0)), new MethodDeclList(new Location(0,0)), idxleft); :}
                  |  CLASS Identifier:id LCURLY VarDeclList:VL RCURLY
-                    {: RESULT = new CLassDeclSimple(id, VL, new MethodDeclList(new Location(0,0)), idxleft); :}
+                    {: RESULT = new ClassDeclSimple(id, VL, new MethodDeclList(new Location(0,0)), idxleft); :}
                  |  CLASS Identifier:id LCURLY MethodDeclList:ML RCURLY
                     {: RESULT = new ClassDeclSimple(id, new VarDeclList(new Location(0,0)), ML, idxleft); :}
                  | CLASS Identifier:id LCURLY VarDeclList:VL MethodDeclList:ML RCURLY
-                    {: RESULT = new ClassDeclSimple(id, VL,MLL, idxleft); :};
+                    {: RESULT = new ClassDeclSimple(id, VL,ML, idxleft); :};
 
 Statement   ::= AssignStatement:s
                 {: RESULT = s; :}
@@ -91,10 +91,8 @@ Statement   ::= AssignStatement:s
                 {: RESULT = new While(arg1, arg2, arg1xleft); :}
             | PRINTLN LPAREN Expression:arg1 RPAREN SEMICOLON
                 {: RESULT = new Print(arg1, arg1xleft); :}
-            | Identifier:id BECOMES Expression:arg1 SEMICOLON
-                {: RESULT = new Assign(id, arg1, idxleft); :}
             | Identifier:id LBRACKET Expression:arg1 RBRACKET BECOMES Expression:arg2 SEMICOLON
-                {: RESULT = new ArrayAssign(id, arg1, ag2, idxleft); :}
+                {: RESULT = new ArrayAssign(id, arg1, arg2, idxleft); :}
             | LCURLY StatementList:SL RCURLY
                 {: RESULT = new Block(SL, SLxleft); :}
             | LCURLY RCURLY
@@ -106,7 +104,7 @@ StatementList ::= Statement:s
                      SL.add(s);
                      RESULT = SL; :}
                 | StatementList:SL Statement:s
-                  {: SL.add(s); RESULT = SL: ;};
+                  {: SL.add(s); RESULT = SL; :};
 
 AssignStatement ::= Identifier:id BECOMES Expression:expr SEMICOLON
                     {: RESULT = new Assign(id, expr, idxleft); :};
@@ -143,9 +141,9 @@ Expression    ::= IDENTIFIER:name
         | FALSE:f
             {: RESULT = new False(fxleft); :}
         | INTEGER_LITERAL:num
-            {: RESULT = new IntegerLiteral(num); :}
+            {: RESULT = new IntegerLiteral(num, numxleft); :}
         | Expression:arg1 PERIOD Identifier:id LPAREN RPAREN
-            {: RESULT = new CALL(arg1, id, new ExpList(new Location(0,0)), arg1xleft); :}
+            {: RESULT = new Call(arg1, id, new ExpList(new Location(0,0)), arg1xleft); :}
         | Expression:arg1 PERIOD Identifier:id LPAREN ExpressionList:exprL RPAREN
             {: RESULT = new Call(arg1, id, exprL, arg1xleft); :}
         | THIS:t
@@ -153,13 +151,13 @@ Expression    ::= IDENTIFIER:name
 
 
 Type ::= INT:i
-            {: RESULT = new IntType(ixleft); :}
+            {: RESULT = new IntegerType(ixleft); :}
         | BOOLEAN:b
             {: RESULT = new BooleanType(bxleft); :}
         | INT:i LBRACKET RBRACKET
             {: RESULT = new IntArrayType(ixleft); :}
         | Identifier:i
-            {: RESULT = new IdentifierType(ixleft); :};
+            {: RESULT = new IdentifierType(i.toString(), ixleft); :};
 
 ExpressionList ::= Expression:arg1
                    {: ExpList exprL = new ExpList(new Location(0,0));
@@ -175,9 +173,9 @@ VarDeclaration ::= Type:t Identifier:id SEMICOLON
 VarDeclList ::= VarDeclaration:v
                 {: VarDeclList vList = new VarDeclList(new Location(0,0));
                    vList.add(v);
-                   RETURN = vList; :}
+                   RESULT = vList; :}
               | VarDeclList:vList VarDeclaration:v
-                {: vList.add(v); RETURN = vList; :};
+                {: vList.add(v); RESULT = vList; :};
 
 Formal ::= Type:t Identifier:id
            {: RESULT = new Formal(t, id, idxleft); :};
@@ -185,9 +183,9 @@ Formal ::= Type:t Identifier:id
 FormalList ::=  Formal:f
                 {: FormalList fList = new FormalList(new Location(0,0));
                    fList.add(f);
-                   RETURN = fList; :}
+                   RESULT = fList; :}
              |  Formal:f COMMA FormalList:fList
-                {: fList.add(f); RETURN = fList; :};
+                {: fList.add(f); RESULT = fList; :};
 
 MainClass  ::= CLASS Identifier:id1 LCURLY PUBLIC STATIC VOID MAIN LPAREN STRING LBRACKET RBRACKET Identifier:id2 RPAREN LCURLY Statement:s RCURLY RCURLY
                {: RESULT = new MainClass(id1, id2, s, id1xleft); :};
@@ -203,13 +201,13 @@ MethodDecl ::= PUBLIC Type:t Identifier:id LPAREN FormalList:FL RPAREN LCURLY RE
              | PUBLIC Type:t Identifier:id LPAREN RPAREN LCURLY VarDeclList:VL RETURN Expression:arg1 SEMICOLON RCURLY
                {: RESULT = new MethodDecl(t, id, new FormalList(new Location(0,0)), VL, new StatementList(new Location(0,0)), arg1, txleft); :}
              | PUBLIC Type:t Identifier:id LPAREN RPAREN LCURLY  StatementList:SL RETURN Expression:arg1 SEMICOLON RCURLY
-               {: RESULT = new MethodDecl(t, id, new FormalList(new Location(0,0)), new VarDeclList(new Location(0,0)), SL, ag1, txleft); :}
+               {: RESULT = new MethodDecl(t, id, new FormalList(new Location(0,0)), new VarDeclList(new Location(0,0)), SL, arg1, txleft); :}
              | PUBLIC Type:t Identifier:id LPAREN RPAREN LCURLY VarDeclList:VL StatementList:SL RETURN Expression:arg1 SEMICOLON RCURLY
                {:RESULT = new MethodDecl(t, id, new FormalList(new Location(0,0)), VL, SL, arg1, txleft); :};
 
 MethodDeclList ::= MethodDecl:ML
                   {: MethodDeclList mlList = new MethodDeclList(new Location(0,0));
                      mlList.add(ML);
-                     RETURN = mlList; :}
+                     RESULT = mlList; :}
                 | MethodDeclList:mlList MethodDecl:ML
-                  {: mlList.add(ML); RETURN = mlList; :};
+                  {: mlList.add(ML); RESULT = mlList; :};
