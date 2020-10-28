@@ -155,6 +155,7 @@ white = {eol}|[ \t]
 /* data types */
 "int" { return symbol(sym.INT); }
 "boolean" { return symbol(sym.BOOLEAN); }
+"String" { return symbol(sym.STRING); }
 
 /* identifiers */
 {letter} ({letter}|{digit}|_)* {
