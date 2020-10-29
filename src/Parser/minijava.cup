@@ -54,12 +54,14 @@ nonterminal ClassDecl ClassDecl;
 
 /* Precedence declarations: */
 
-precedence right BECOMES;
+precedence left BECOMES;
 precedence left AND;
 precedence left NOT;
 precedence left LESS;
 precedence left PLUS, MINUS;
 precedence left MULTIPLY;
+precedence left PERIOD;
+precedence left LBRACKET, RBRACKET;
 
 /* Productions: */
 

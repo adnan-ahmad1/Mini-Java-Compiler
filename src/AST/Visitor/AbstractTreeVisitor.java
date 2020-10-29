@@ -33,7 +33,7 @@ public class AbstractTreeVisitor implements Visitor {
     public void visit(MainClass n) {
         System.out.print("MainClass ");
         n.i1.accept(this);
-        System.out.println(n.line_number);
+        System.out.println(" (line " + n.line_number + ")");
         indents.append("  ");
         System.out.print(indents.toString());
         n.s.accept(this);
@@ -112,7 +112,7 @@ public class AbstractTreeVisitor implements Visitor {
         System.out.print(indents.toString()+"returns ");
         n.t.accept(this);
         System.out.println();
-        System.out.print(indents.toString() + "paramaters:");
+        System.out.print(indents.toString() + "parameters:");
         indents.append("  ");
         for ( int i = 0; i < n.fl.size(); i++ ) {
             System.out.println();

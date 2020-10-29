@@ -1,0 +1,10 @@
+Grammar changes:
+We added some rules for lists e.g. formal lists, expression list, etc...
+For class declarations, we added a rule for extends and one without (ClassDeclSimple and ClassDeclExtends).
+Besides that, we followed the grammar for mini-java.
+
+Error-handling:
+For error-handling, we caught exceptions for parsing and exited with System.exit(1). Otherwise, it would exit with 0.
+
+Testing:
+We also wrote some test files in the test directory. We wrote them and just looked at what the AST visitor produced.
