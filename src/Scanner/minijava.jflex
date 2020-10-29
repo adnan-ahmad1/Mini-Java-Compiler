@@ -95,7 +95,7 @@ import Parser.sym;
      if (cs.sym == sym.IDENTIFIER) {
        return "ID(" + (String)cs.value + ")";
      } else if (cs.sym == sym.INTEGER_LITERAL) {
-        return "INTEGER(" + (String)cs.value + ")";
+        return "INTEGER(" + cs.value + ")";
      } else if (cs.sym == sym.error) {
        return "<UNEXPECTED(" + (String)cs.value + ")>";
      } else {
@@ -163,7 +163,7 @@ white = {eol}|[ \t]
 }
 
 "0"|([1-9]({digit})*) {
-  return symbol(sym.INTEGER_LITERAL, yytext());
+  return symbol(sym.INTEGER_LITERAL, Integer.parseInt(yytext()));
 }
 
 /* whitespace */
