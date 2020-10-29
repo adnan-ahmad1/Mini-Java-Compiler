@@ -31,7 +31,7 @@ terminal Integer INTEGER_LITERAL;
 
 /* Nonterminals (constructed by parser): */
 
-nonterminal Program Program;
+nonterminal Program Goal;
 nonterminal Statement Statement;
 nonterminal Assign AssignStatement;
 nonterminal Display DisplayStatement;
@@ -63,16 +63,7 @@ precedence left MULTIPLY;
 
 /* Productions: */
 
-/*
-Program ::= Statement:s
-            {: List<Statement> p = new LinkedList<Statement>();
-               p.add(s);
-               RESULT = p; :}
-        | Program:p Statement:s
-            {: p.add(s); RESULT = p; :};
-*/
-
-Program ::= MainClass:m
+Goal ::= MainClass:m
             {: RESULT = new Program(m, new ClassDeclList(new Location(0, 0)), mxleft); :}
         | MainClass:m ClassDeclList:d
             {: RESULT = new Program(m, d, mxleft); :};

@@ -171,7 +171,9 @@ white = {eol}|[ \t]
 
 /* comments */
 "/*"([^"*"]|("*"+[^"*/"]))*"*"+"/" { /* ignore comments */ }
-"//"[^({eol}|<<EOF>>)]*. { /* ignore comments */ }
+"//"[^{eol}]*{eol} { /* ignore comments */ }
+"//"[^{eol}]* { /* ignore comments */ }
+
 
 /* lexical errors (last so other matches take precedence) */
 . {

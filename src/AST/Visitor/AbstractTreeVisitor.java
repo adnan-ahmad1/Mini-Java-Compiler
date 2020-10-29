@@ -2,7 +2,10 @@ package AST.Visitor;
 
 import AST.*;
 
+
 public class AbstractTreeVisitor implements Visitor {
+    public static StringBuilder indentBuilder = new StringBuilder();
+
     // Display added for toy example language.  Not used in regular MiniJava
     public void visit(Display n) {
         System.out.print("display ");
@@ -13,40 +16,49 @@ public class AbstractTreeVisitor implements Visitor {
     // MainClass m;
     // ClassDeclList cl;
     public void visit(Program n) {
+        indentBuilder.append("  ");
         System.out.println("Program");
         n.m.accept(this);
         for ( int i = 0; i < n.cl.size(); i++ ) {
             System.out.println();
             n.cl.get(i).accept(this);
         }
+        indentBuilder.delete(indentBuilder.length() - 2, indentBuilder.length());
     }
 
     // Identifier i1,i2;
     // Statement s;
     public void visit(MainClass n) {
-        System.out.print("MainClass ");
+        System.out.print(indentBuilder.toString() + "MainClass ");
+        indentBuilder.append("  ");
         n.i1.accept(this);
+        System.out.print(" (line " + n.line_number + ")");
         System.out.println();
         n.s.accept(this);
+        indentBuilder.delete(indentBuilder.length() - 2, indentBuilder.length());
     }
 
     // Identifier i;
     // VarDeclList vl;
     // MethodDeclList ml;
     public void visit(ClassDeclSimple n) {
-        System.out.print("class ");
+        System.out.print(indentBuilder.toString() + "Class ");
+        indentBuilder.append("  ");
         n.i.accept(this);
-
-        for ( int i = 0; i < n.vl.size(); i++ ) {
-            System.out.print("  ");
-            n.vl.get(i).accept(this);
-            if ( i+1 < n.vl.size() ) { System.out.println(); }
-        }
-        for ( int i = 0; i < n.ml.size(); i++ ) {
-            System.out.println();
-            n.ml.get(i).accept(this);
-        }
         System.out.println();
+        // var declarations
+        for ( int i = 0; i < n.vl.size(); i++ ) {
+            n.vl.get(i).accept(this);
+            System.out.println("  ");
+        }
+
+        // method declarations
+        for ( int i = 0; i < n.ml.size(); i++ ) {
+            n.ml.get(i).accept(this);
+            System.out.println();
+        }
+
+        indentBuilder.delete(indentBuilder.length() - 2, indentBuilder.length());
     }
 
     // Identifier i;
@@ -54,26 +66,31 @@ public class AbstractTreeVisitor implements Visitor {
     // VarDeclList vl;
     // MethodDeclList ml;
     public void visit(ClassDeclExtends n) {
-        System.out.print("Class ");
+        System.out.print(indentBuilder.toString() + "Class ");
+        indentBuilder.append("  ");
         n.i.accept(this);
         System.out.print(" extends ");
         n.j.accept(this);
-        System.out.println(" { ");
+        System.out.println(" (line " + n.line_number + ")");
+
+        // var declarations
         for ( int i = 0; i < n.vl.size(); i++ ) {
-            System.out.print("  ");
             n.vl.get(i).accept(this);
-            if ( i+1 < n.vl.size() ) { System.out.println(); }
-        }
-        for ( int i = 0; i < n.ml.size(); i++ ) {
             System.out.println();
-            n.ml.get(i).accept(this);
         }
-        System.out.println();
+
+        // method declarations
+        for ( int i = 0; i < n.ml.size(); i++ ) {
+            n.ml.get(i).accept(this);
+            System.out.println();
+        }
+        indentBuilder.delete(indentBuilder.length() - 2, indentBuilder.length());
     }
 
     // Type t;
     // Identifier i;
     public void visit(VarDecl n) {
+        System.out.print(indentBuilder.toString());
         n.t.accept(this);
         System.out.print(" ");
         n.i.accept(this);
@@ -86,39 +103,43 @@ public class AbstractTreeVisitor implements Visitor {
     // StatementList sl;
     // Exp e;
     public void visit(MethodDecl n) {
-        System.out.print("MethodDecl ");
+        System.out.print(indentBuilder.toString() + "MethodDecl ");
+        indentBuilder.append("  ");
         n.i.accept(this);
+        System.out.println(" (line " + n.line_number + ")");
 
-        System.out.println();
-        System.out.print("returns ");
+        System.out.print(indentBuilder.toString() + "returns ");
         n.t.accept(this);
         System.out.println();
 
         // params
-        System.out.println("Parameters: ");
-        for ( int i = 0; i < n.fl.size(); i++ ) {
-            n.fl.get(i).accept(this);
-            System.out.println();
+        if (n.fl.size() != 0) {
+            System.out.println(indentBuilder.toString() + "parameters: ");
+            indentBuilder.append("  ");
+
+            for ( int i = 0; i < n.fl.size(); i++ ) {
+                System.out.print(indentBuilder.toString());
+                n.fl.get(i).accept(this);
+                System.out.println();
+            }
+            indentBuilder.delete(indentBuilder.length() - 2, indentBuilder.length());
         }
 
-
+        // variables
         for ( int i = 0; i < n.vl.size(); i++ ) {
-            System.out.print("    ");
             n.vl.get(i).accept(this);
             System.out.println("");
         }
 
         // statements
         for ( int i = 0; i < n.sl.size(); i++ ) {
-            System.out.print("    ");
             n.sl.get(i).accept(this);
-            if ( i < n.sl.size() ) { System.out.println(""); }
         }
 
         // return expression
-        System.out.print("Return ");
+        System.out.print(indentBuilder.toString() + "Return ");
         n.e.accept(this);
-
+        System.out.println(" (line " + n.e.line_number + ")");
     }
 
     // Type t;
@@ -149,7 +170,6 @@ public class AbstractTreeVisitor implements Visitor {
     // StatementList sl;
     public void visit(Block n) {
         for ( int i = 0; i < n.sl.size(); i++ ) {
-            System.out.print("      ");
             n.sl.get(i).accept(this);
             System.out.println();
         }
@@ -158,39 +178,59 @@ public class AbstractTreeVisitor implements Visitor {
     // Exp e;
     // Statement s1,s2;
     public void visit(If n) {
-        System.out.print("if ");
+        System.out.print(indentBuilder.toString() + "If ");
         n.e.accept(this);
-        System.out.print("    ");
+        System.out.println();
+        indentBuilder.append("  ");
         n.s1.accept(this);
-        System.out.print("    else ");
+        indentBuilder.delete(indentBuilder.length() - 2, indentBuilder.length());
+        System.out.println();
+        System.out.println(indentBuilder.toString() + "Else ");
+        indentBuilder.append("  ");
         n.s2.accept(this);
+        System.out.println();
+        indentBuilder.delete(indentBuilder.length() - 2, indentBuilder.length());
     }
 
     // Exp e;
     // Statement s;
     public void visit(While n) {
-        System.out.print("while ");
+        System.out.print(indentBuilder.toString() + "While (line " + n.line_number + ")");
+        indentBuilder.append("  ");
+        System.out.print(indentBuilder.toString());
+        indentBuilder.delete(indentBuilder.length() - 2, indentBuilder.length());
         n.e.accept(this);
         n.s.accept(this);
     }
 
     // Exp e;
     public void visit(Print n) {
-        System.out.print("Print ");
+        System.out.println(indentBuilder.toString() + "Print (line " + n.line_number + ")");
+        indentBuilder.append("  ");
+        System.out.print(indentBuilder.toString());
         n.e.accept(this);
+        indentBuilder.delete(indentBuilder.length() - 2, indentBuilder.length());
     }
 
     // Identifier i;
     // Exp e;
     public void visit(Assign n) {
+        System.out.println(indentBuilder.toString() + "Assign (line " + n.line_number + ")");
+        indentBuilder.append("  ");
+        System.out.print(indentBuilder.toString());
         n.i.accept(this);
         System.out.print(" = ");
         n.e.accept(this);
+        indentBuilder.delete(indentBuilder.length() - 2, indentBuilder.length());
     }
 
     // Identifier i;
     // Exp e1,e2;
     public void visit(ArrayAssign n) {
+        System.out.println(indentBuilder.toString() + "Array assign (line " + n.line_number + ")");
+        indentBuilder.append("  ");
+        System.out.print(indentBuilder.toString());
+        indentBuilder.delete(indentBuilder.length() - 2, indentBuilder.length());
         n.i.accept(this);
         System.out.print("[");
         n.e1.accept(this);
