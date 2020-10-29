@@ -93,9 +93,14 @@ public class AbstractTreeVisitor implements Visitor {
     // Type t;
     // Identifier i;
     public void visit(VarDecl n) {
+        System.out.print("VarDecl");
+        System.out.println(" (line "+n.line_number+")");
+        indents.append("  ");
+        System.out.print(indents.toString());
         n.t.accept(this);
         System.out.print(" ");
         n.i.accept(this);
+        indents.delete(indents.length()-2,indents.length());
     }
 
     // Type t;
@@ -220,19 +225,27 @@ public class AbstractTreeVisitor implements Visitor {
     // Identifier i;
     // Exp e;
     public void visit(Assign n) {
+        System.out.println("Assign (line "+n.line_number+")");
+        indents.append("  ");
+        System.out.print(indents.toString());
         n.i.accept(this);
         System.out.print(" = ");
         n.e.accept(this);
+        indents.delete(indents.length()-2, indents.length());
     }
 
     // Identifier i;
     // Exp e1,e2;
     public void visit(ArrayAssign n) {
+        System.out.println("Array Assign (line "+n.line_number+")");
+        indents.append("  ");
+        System.out.print(indents.toString());
         n.i.accept(this);
         System.out.print("[");
         n.e1.accept(this);
         System.out.print("] = ");
         n.e2.accept(this);
+        indents.delete(indents.length()-2, indents.length());
     }
 
     // Exp e1,e2;
