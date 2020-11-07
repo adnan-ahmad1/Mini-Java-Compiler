@@ -1,0 +1,5 @@
+CSE 401/M501 Project II - Parser/AST
+
+Field accesses should bind more tightly than boolean negation. (-1)
+
+Total: 59/60
