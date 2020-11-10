@@ -1,7 +1,11 @@
 package Semantics;
 
-public class VarSemanticTable<T> {
+public class VarSemanticTable {
     private String name;
-    private String type;
-    private
+    private Type type;
+
+    public VarSemanticTable(String name, Type type) {
+        this.name = name;
+        this.type = type;
+    }
 }

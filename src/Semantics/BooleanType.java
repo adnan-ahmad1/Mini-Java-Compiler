@@ -1,9 +1,11 @@
 package Semantics;
 
-public class BooleanType {
-    boolean value;
+public class BooleanType extends Type{
+    public static BooleanType bool = new BooleanType();
 
-    public BooleanType (boolean val) {
-        this.value  = val;
+    private BooleanType() { }
+
+    public static BooleanType getInstance() {
+        return bool;
     }
 }

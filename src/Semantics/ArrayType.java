@@ -1,6 +1,4 @@
 package Semantics;
 
-public class ArrayType {
-    int length;
-
+public class ArrayType extends Type{
 }

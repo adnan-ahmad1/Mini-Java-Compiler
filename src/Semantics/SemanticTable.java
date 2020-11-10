@@ -1,17 +1,48 @@
 package Semantics;
 
+import AST.Identifier;
+
 import java.util.*;
 
 public class SemanticTable {
-    private Map<String, List<String>> superToSubclass;
-    private Map<String, String> subclassToSuperClass;
+    private Set<Type> baseTypes;
+    private Map<String, IdentifierType> referenceTypes;
     private Map<String, ClassSemanticTable> classes;
     private ClassSemanticTable currClass;
 
-    void addClass(String className){}
-    void goIntoClass(String className){}
-    ClassSemanticTable getCurrClassTable() {return null;}
-    String getSuperClass(String className){return null;}
-    List<String> getSubClass(String className){return null;}
+    public SemanticTable() {
+        baseTypes = new HashSet<>();
+        referenceTypes = new HashMap<>();
+        classes = new HashMap<>();
+        baseTypes.add(BooleanType.getInstance());
+        baseTypes.add(IntegerType.getInstance());
+        baseTypes.add(StringType.getInstance());
+        baseTypes.add(Void.getInstance());
+        baseTypes.add(Unknown.getInstance());
+    }
+
+    void addClass(String className) {
+        classes.put(className, new ClassSemanticTable());
+        referenceTypes.put(className, new IdentifierType(className));
+    }
+
+    void goIntoClass(String className){
+        if (classes.containsKey(className)) {
+            currClass = classes.get(className);
+        } else {
+            currClass = null;
+        }
+    }
+
+    ClassSemanticTable getCurrClassTable() {
+        return currClass;
+    }
+
+    IdentifierType getSuperClass(String className){
+        if (referenceTypes.containsKey(className)) {
+            return referenceTypes.get(className).superclass;
+        }
+        return null;
+    }
     // Dog var = new Cat()
 }

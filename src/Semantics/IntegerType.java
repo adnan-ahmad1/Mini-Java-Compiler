@@ -1,9 +1,10 @@
 package Semantics;
 
-public class IntegerType {
-    int value;
+public class IntegerType extends Type{
+    private static IntegerType integer = new IntegerType();
+    private IntegerType() {}
 
-    public IntegerType(int val) {
-        this.value = val;
+    public static IntegerType getInstance() {
+        return integer;
     }
 }
