@@ -1,6 +1,7 @@
 package AST.Visitor;
 
 import AST.*;
+import Semantics.ClassSemanticTable;
 import Semantics.MethodSemanticTable;
 import Semantics.SemanticTable;
 
@@ -91,17 +92,22 @@ public class FillGlobalTablesVisitor implements Visitor {
     // Identifier i;
     public void visit(VarDecl n) {
 
+        boolean exists = false;
+
         if (n.t instanceof IntegerType) {
-
+            exists = semanticTable.getCurrClassTable().addPrimitiveVariable(n.i.toString(), Semantics.IntegerType.getInstance());
+        } else if (n.t instanceof IntArrayType) {
+            exists = semanticTable.getCurrClassTable().addPrimitiveVariable(n.i.toString(), Semantics.IntArrayType.getInstance());
+        } else if (n.t instanceof BooleanType ) {
+            exists = semanticTable.getCurrClassTable().addPrimitiveVariable(n.i.toString(), Semantics.BooleanType.getInstance());
+        } else if (n.t instanceof IdentifierType) {
+            exists = semanticTable.getCurrClassTable().addClassVariable(n.i.toString(), ((IdentifierType)n.t).s);
         }
-        /*
-        n.t.accept(this);
-        System.out.print(" ");
-        n.i.accept(this);
-        System.out.print(";");
 
-         */
-
+        // error handle
+        if (exists) {
+            System.out.println("Variable " + n.i.toString() + " already exists");
+        }
 
     }
 
@@ -112,55 +118,62 @@ public class FillGlobalTablesVisitor implements Visitor {
     // StatementList sl;
     // Exp e;
     public void visit(MethodDecl n) {
-        System.out.print("  public ");
-        n.t.accept(this);
-        System.out.print(" ");
-        n.i.accept(this);
-        System.out.print(" (");
+
+        ClassSemanticTable c = semanticTable.getCurrClassTable();
+
+        // add method to symbol table
+        c.addMethod(n.i.s, new MethodSemanticTable());
+        c.goIntoMethod(n.i.s);
+
+        // go through list to add parameters
         for ( int i = 0; i < n.fl.size(); i++ ) {
             n.fl.get(i).accept(this);
-            if (i+1 < n.fl.size()) { System.out.print(", "); }
         }
-        System.out.println(") { ");
+
+        // variable declarations in method
         for ( int i = 0; i < n.vl.size(); i++ ) {
-            System.out.print("    ");
             n.vl.get(i).accept(this);
-            System.out.println("");
         }
-        for ( int i = 0; i < n.sl.size(); i++ ) {
-            System.out.print("    ");
-            n.sl.get(i).accept(this);
-            if ( i < n.sl.size() ) { System.out.println(""); }
-        }
-        System.out.print("    return ");
-        n.e.accept(this);
-        System.out.println(";");
-        System.out.print("  }");
+
     }
 
     // Type t;
     // Identifier i;
     public void visit(Formal n) {
+
+        ClassSemanticTable c = semanticTable.getCurrClassTable();
+        MethodSemanticTable m = c.getCurrMethodTable();
+
+        boolean exists = false;
+        if (n.t instanceof IntegerType) {
+            exists = semanticTable.getCurrClassTable().addPrimitiveVariable(n.i.toString(), Semantics.IntegerType.getInstance());
+        } else if (n.t instanceof IntArrayType) {
+            exists = semanticTable.getCurrClassTable().addPrimitiveVariable(n.i.toString(), Semantics.IntArrayType.getInstance());
+        } else if (n.t instanceof BooleanType ) {
+            exists = semanticTable.getCurrClassTable().addPrimitiveVariable(n.i.toString(), Semantics.BooleanType.getInstance());
+        } else if (n.t instanceof IdentifierType) {
+            exists = semanticTable.getCurrClassTable().addClassVariable(n.i.toString(), ((IdentifierType)n.t).s);
+        }
+
+        /*
         n.t.accept(this);
         System.out.print(" ");
         n.i.accept(this);
+
+         */
     }
 
     public void visit(IntArrayType n) {
-        System.out.print("int []");
     }
 
     public void visit(BooleanType n) {
-        System.out.print("boolean");
     }
 
     public void visit(IntegerType n) {
-        System.out.print("int");
     }
 
     // String s;
     public void visit(IdentifierType n) {
-        System.out.print(n.s);
     }
 
     // StatementList sl;

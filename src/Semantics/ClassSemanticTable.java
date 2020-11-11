@@ -7,7 +7,6 @@ public class ClassSemanticTable {
     private Map<String, Type> primitiveVariables;
     private Map<String, String> classVariables;
     private Map<String, MethodSemanticTable> methods;
-
     private String className;
     private String superClass;
 
@@ -52,6 +51,6 @@ public class ClassSemanticTable {
         return false;
     }
 
-    public MethodSemanticTable getMethodInfo(String method){return null;}
     public String getName(){return className;}
+
 }

@@ -5,6 +5,7 @@ import java.util.*;
 public class SemanticTable {
     private Map<String, ClassSemanticTable> classes;
     private ClassSemanticTable currClass;
+    private MethodSemanticTable currMethod;
 
     public SemanticTable() {
         classes = new HashMap<>();
@@ -29,6 +30,18 @@ public class SemanticTable {
 
     public ClassSemanticTable getCurrClassTable() {
         return currClass;
+    }
+
+    public void goIntoMethod(String methodName){
+        if (currClass.containsKey(methodName)) {
+            currMethod = methods.get(methodName);
+        } else {
+            currMethod = null;
+        }
+    }
+
+    public MethodSemanticTable getCurrMethodTable() {
+        return currMethod;
     }
 
 }
