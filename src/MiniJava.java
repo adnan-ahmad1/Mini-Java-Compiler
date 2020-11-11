@@ -1,10 +1,12 @@
 import AST.Program;
 import AST.Statement;
 import AST.Visitor.AbstractTreeVisitor;
+import AST.Visitor.FillGlobalTablesVisitor;
 import AST.Visitor.PrettyPrintVisitor;
 import Parser.parser;
 import Parser.sym;
 import Scanner.scanner;
+import Semantics.SemanticTable;
 import java_cup.runtime.ComplexSymbolFactory;
 import java_cup.runtime.Symbol;
 
@@ -50,6 +52,14 @@ public class MiniJava {
                 root = p.parse();
                 Program program = (Program)root.value;
                 program.accept(new AbstractTreeVisitor());
+            } else if (args[0].equals("-T")) {
+                Symbol root;
+                root = p.parse();
+                Program program = (Program)root.value;
+                FillGlobalTablesVisitor visitor = new FillGlobalTablesVisitor(new SemanticTable());
+                program.accept(visitor);
+                // first task
+                SemanticTable st = visitor.getSemanticTable();
             }
         } catch (Exception e) {
             // yuck: some kind of error in the compiler implementation

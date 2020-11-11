@@ -26,22 +26,27 @@ public class SemanticTable {
         } else {
             currClass = null;
         }
+        currMethod = null;
     }
 
     public ClassSemanticTable getCurrClassTable() {
         return currClass;
     }
 
+    public MethodSemanticTable getCurrMethodTable() {return currMethod;}
+
     public void goIntoMethod(String methodName){
-        if (currClass.containsKey(methodName)) {
-            currMethod = methods.get(methodName);
-        } else {
-            currMethod = null;
+        if (currClass == null) {
+            return;
         }
+        currMethod = currClass.getMethod(methodName);
     }
 
-    public MethodSemanticTable getCurrMethodTable() {
-        return currMethod;
+    public Table getCurrTable() {
+        if (currMethod != null) {
+            return currMethod;
+        }
+        return currClass;
     }
 
 }

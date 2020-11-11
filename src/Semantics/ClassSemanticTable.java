@@ -3,17 +3,14 @@ package Semantics;
 import java.util.HashMap;
 import java.util.Map;
 
-public class ClassSemanticTable {
-    private Map<String, Type> primitiveVariables;
-    private Map<String, String> classVariables;
+public class ClassSemanticTable extends Table {
     private Map<String, MethodSemanticTable> methods;
     private String className;
     private String superClass;
 
     public ClassSemanticTable(String name) {
+        super();
         className = name;
-        primitiveVariables = new HashMap<>();
-        classVariables = new HashMap<>();
         methods = new HashMap<>();
     }
 
@@ -33,24 +30,12 @@ public class ClassSemanticTable {
         this.superClass = superClass;
     }
 
-    public boolean addPrimitiveVariable(String variable, Type type){
-        if (!primitiveVariables.containsKey(variable)) {
-            primitiveVariables.put(variable, type);
-            return true;
-        }
-
-        return false;
-    }
-
-    public boolean addClassVariable(String variable, String type){
-        if (!classVariables.containsKey(variable)) {
-            classVariables.put(variable, type);
-            return true;
-        }
-
-        return false;
-    }
-
     public String getName(){return className;}
 
+    public MethodSemanticTable getMethod(String method) {
+        if (methods.containsKey(method)) {
+            return methods.get(method);
+        }
+        return null;
+    }
 }

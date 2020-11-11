@@ -6,18 +6,21 @@ import Semantics.MethodSemanticTable;
 import Semantics.SemanticTable;
 
 public class FillGlobalTablesVisitor implements Visitor {
-    SemanticTable semanticTable = new SemanticTable();
+    SemanticTable semanticTable;
+
+    public FillGlobalTablesVisitor(SemanticTable semanticTable) {
+        this.semanticTable = semanticTable;
+    }
+
+    public SemanticTable getSemanticTable() {
+        return this.semanticTable;
+    }
 
     // Display added for toy example language.  Not used in regular MiniJava
     public void visit(Display n) {
         System.out.print("display ");
         n.e.accept(this);
         System.out.print(";");
-    }
-
-    public void visit(Program n, SemanticTable st){
-        semanticTable = st;
-        visit(n);
     }
 
     // MainClass m;
@@ -95,13 +98,13 @@ public class FillGlobalTablesVisitor implements Visitor {
         boolean exists = false;
 
         if (n.t instanceof IntegerType) {
-            exists = semanticTable.getCurrClassTable().addPrimitiveVariable(n.i.toString(), Semantics.IntegerType.getInstance());
+            exists = semanticTable.getCurrTable().addPrimitiveVariable(n.i.toString(), Semantics.IntegerType.getInstance());
         } else if (n.t instanceof IntArrayType) {
-            exists = semanticTable.getCurrClassTable().addPrimitiveVariable(n.i.toString(), Semantics.IntArrayType.getInstance());
+            exists = semanticTable.getCurrTable().addPrimitiveVariable(n.i.toString(), Semantics.IntArrayType.getInstance());
         } else if (n.t instanceof BooleanType ) {
-            exists = semanticTable.getCurrClassTable().addPrimitiveVariable(n.i.toString(), Semantics.BooleanType.getInstance());
+            exists = semanticTable.getCurrTable().addPrimitiveVariable(n.i.toString(), Semantics.BooleanType.getInstance());
         } else if (n.t instanceof IdentifierType) {
-            exists = semanticTable.getCurrClassTable().addClassVariable(n.i.toString(), ((IdentifierType)n.t).s);
+            exists = semanticTable.getCurrTable().addClassVariable(n.i.toString(), ((IdentifierType)n.t).s);
         }
 
         // error handle
@@ -119,11 +122,9 @@ public class FillGlobalTablesVisitor implements Visitor {
     // Exp e;
     public void visit(MethodDecl n) {
 
-        ClassSemanticTable c = semanticTable.getCurrClassTable();
-
         // add method to symbol table
-        c.addMethod(n.i.s, new MethodSemanticTable());
-        c.goIntoMethod(n.i.s);
+        semanticTable.getCurrClassTable().addMethod(n.i.s, new MethodSemanticTable());
+        semanticTable.goIntoMethod(n.i.s);
 
         // go through list to add parameters
         for ( int i = 0; i < n.fl.size(); i++ ) {
@@ -141,20 +142,19 @@ public class FillGlobalTablesVisitor implements Visitor {
     // Identifier i;
     public void visit(Formal n) {
 
-        ClassSemanticTable c = semanticTable.getCurrClassTable();
-        MethodSemanticTable m = c.getCurrMethodTable();
-
         boolean exists = false;
         if (n.t instanceof IntegerType) {
-            exists = semanticTable.getCurrClassTable().addPrimitiveVariable(n.i.toString(), Semantics.IntegerType.getInstance());
+            exists = semanticTable.getCurrMethodTable().addPrimParam(n.i.toString(), Semantics.IntegerType.getInstance());
         } else if (n.t instanceof IntArrayType) {
-            exists = semanticTable.getCurrClassTable().addPrimitiveVariable(n.i.toString(), Semantics.IntArrayType.getInstance());
+            exists = semanticTable.getCurrMethodTable().addPrimParam(n.i.toString(), Semantics.IntArrayType.getInstance());
         } else if (n.t instanceof BooleanType ) {
-            exists = semanticTable.getCurrClassTable().addPrimitiveVariable(n.i.toString(), Semantics.BooleanType.getInstance());
+            exists = semanticTable.getCurrMethodTable().addPrimParam(n.i.toString(), Semantics.BooleanType.getInstance());
         } else if (n.t instanceof IdentifierType) {
-            exists = semanticTable.getCurrClassTable().addClassVariable(n.i.toString(), ((IdentifierType)n.t).s);
+            exists = semanticTable.getCurrMethodTable().addClassParam(n.i.toString(), ((IdentifierType)n.t).s);
         }
-
+        if (exists) {
+            System.out.println("Parameter " + n.i.toString() + " already defined.");
+        }
         /*
         n.t.accept(this);
         System.out.print(" ");
@@ -178,182 +178,94 @@ public class FillGlobalTablesVisitor implements Visitor {
 
     // StatementList sl;
     public void visit(Block n) {
-        System.out.println("{ ");
-        for ( int i = 0; i < n.sl.size(); i++ ) {
-            System.out.print("      ");
-            n.sl.get(i).accept(this);
-            System.out.println();
-        }
-        System.out.print("    } ");
     }
 
     // Exp e;
     // Statement s1,s2;
     public void visit(If n) {
-        System.out.print("if (");
-        n.e.accept(this);
-        System.out.println(") ");
-        System.out.print("    ");
-        n.s1.accept(this);
-        System.out.println();
-        System.out.print("    else ");
-        n.s2.accept(this);
     }
 
     // Exp e;
     // Statement s;
     public void visit(While n) {
-        System.out.print("while (");
-        n.e.accept(this);
-        System.out.print(") ");
-        n.s.accept(this);
     }
 
     // Exp e;
     public void visit(Print n) {
-        System.out.print("System.out.println(");
-        n.e.accept(this);
-        System.out.print(");");
     }
 
     // Identifier i;
     // Exp e;
     public void visit(Assign n) {
-        n.i.accept(this);
-        System.out.print(" = ");
-        n.e.accept(this);
-        System.out.print(";");
     }
 
     // Identifier i;
     // Exp e1,e2;
     public void visit(ArrayAssign n) {
-        n.i.accept(this);
-        System.out.print("[");
-        n.e1.accept(this);
-        System.out.print("] = ");
-        n.e2.accept(this);
-        System.out.print(";");
     }
 
     // Exp e1,e2;
     public void visit(And n) {
-        System.out.print("(");
-        n.e1.accept(this);
-        System.out.print(" && ");
-        n.e2.accept(this);
-        System.out.print(")");
     }
 
     // Exp e1,e2;
     public void visit(LessThan n) {
-        System.out.print("(");
-        n.e1.accept(this);
-        System.out.print(" < ");
-        n.e2.accept(this);
-        System.out.print(")");
     }
 
     // Exp e1,e2;
     public void visit(Plus n) {
-        System.out.print("(");
-        n.e1.accept(this);
-        System.out.print(" + ");
-        n.e2.accept(this);
-        System.out.print(")");
     }
 
     // Exp e1,e2;
     public void visit(Minus n) {
-        System.out.print("(");
-        n.e1.accept(this);
-        System.out.print(" - ");
-        n.e2.accept(this);
-        System.out.print(")");
     }
 
     // Exp e1,e2;
     public void visit(Times n) {
-        System.out.print("(");
-        n.e1.accept(this);
-        System.out.print(" * ");
-        n.e2.accept(this);
-        System.out.print(")");
     }
 
     // Exp e1,e2;
     public void visit(ArrayLookup n) {
-        n.e1.accept(this);
-        System.out.print("[");
-        n.e2.accept(this);
-        System.out.print("]");
     }
 
     // Exp e;
     public void visit(ArrayLength n) {
-        n.e.accept(this);
-        System.out.print(".length");
     }
 
     // Exp e;
     // Identifier i;
     // ExpList el;
     public void visit(Call n) {
-        n.e.accept(this);
-        System.out.print(".");
-        n.i.accept(this);
-        System.out.print("(");
-        for ( int i = 0; i < n.el.size(); i++ ) {
-            n.el.get(i).accept(this);
-            if ( i+1 < n.el.size() ) { System.out.print(", "); }
-        }
-        System.out.print(")");
     }
 
     // int i;
     public void visit(IntegerLiteral n) {
-        System.out.print(n.i);
     }
 
     public void visit(True n) {
-        System.out.print("true");
+
     }
 
     public void visit(False n) {
-        System.out.print("false");
+
     }
 
     // String s;
-    public void visit(IdentifierExp n) {
-        System.out.print(n.s);
-    }
+    public void visit(IdentifierExp n) { }
 
-    public void visit(This n) {
-        System.out.print("this");
-    }
+    public void visit(This n) { }
 
     // Exp e;
     public void visit(NewArray n) {
-        System.out.print("new int [");
-        n.e.accept(this);
-        System.out.print("]");
     }
 
     // Identifier i;
     public void visit(NewObject n) {
-        System.out.print("new ");
-        System.out.print(n.i.s);
-        System.out.print("()");
     }
 
     // Exp e;
-    public void visit(Not n) {
-        System.out.print("!");
-        n.e.accept(this);
-    }
+    public void visit(Not n) { }
 
     // String s;
-    public void visit(Identifier n) {
-        System.out.print(n.s);
-    }
+    public void visit(Identifier n) { }
 }
