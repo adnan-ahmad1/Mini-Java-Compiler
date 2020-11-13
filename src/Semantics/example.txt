@@ -1,14 +1,33 @@
-class Dog {
+class Animal {
     String name;
-    int age;
+    int num;
 
-    public void fuckit() {
-        int a;
-        if () {
-            int b;
-            int c;
-
-        }
+    public void feed() {
+       Statement1;
     }
-
 }
+
+class dog {
+    String breed;
+    int collarNum;
+
+    public void feed() {
+        Statement2;
+    }
+}
+
+dog
+  [breed, collarNum]
+  [feed]
+
+Animal
+  [name, num]
+  [feed]
+
+dog
+ [ name, num, breed, collarNum]
+ [feed]
+
+organism [eye color] -> animal -> land_animals->dog->chihuahua->hairlessChihuahua
+
+haillessChihuahua.eyeColor

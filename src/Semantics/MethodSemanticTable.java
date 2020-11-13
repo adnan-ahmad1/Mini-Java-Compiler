@@ -9,9 +9,11 @@ public class MethodSemanticTable extends Table{
     private Map<String, Type> primitiveParamters;
     private Map<String, String> classParameters;
     private Stack<String> scopeVars;
+    private ClassSemanticTable classInside;
 
-    public MethodSemanticTable() {
+    public MethodSemanticTable(ClassSemanticTable classInside) {
         super();
+        this.classInside = classInside;
         parameters = new ArrayList<>();
         primitiveParamters = new HashMap<>();
         classParameters = new HashMap<>();
@@ -24,18 +26,54 @@ public class MethodSemanticTable extends Table{
         }
         parameters.add(name);
         primitiveParamters.put(name, type);
-        scopeVars.push(name);
         return true;
     }
-
+    // int a;
+    // a = 4;
     public boolean addClassParam(String name, String className) {
         if (classParameters.containsKey(name)) {
             return false;
         }
         parameters.add(name);
         classParameters.put(name, className);
-        scopeVars.push(name);
         return true;
+    }
+
+    @Override
+    public boolean addClassVariable(String variable, String type) {
+        if (!classInside.containsVariable(variable)) {
+            return false;
+        }
+        boolean successfully_add = super.addClassVariable(variable, type);
+        if (successfully_add) {
+            scopeVars.push(variable);
+        }
+        return successfully_add;
+    }
+
+    @Override
+    public boolean addPrimitiveVariable(String variable, Type type) {
+        if (!classInside.containsVariable(variable)) {
+            return false;
+        }
+        boolean successfully_add = super.addPrimitiveVariable(variable, type);
+        if (successfully_add) {
+            scopeVars.push(variable);
+        }
+        return successfully_add;
+    }
+
+    @Override
+    public boolean defineVariable(String variable) {
+        if (!super.defineVariable(variable)) {
+            return classInside.defineVariable(variable);
+        }
+        return true;
+    }
+
+    @Override
+    public boolean isDefined(String variable) {
+        return super.isDefined(variable) || classInside.isDefined(variable);
     }
 
     public boolean removeTop() {

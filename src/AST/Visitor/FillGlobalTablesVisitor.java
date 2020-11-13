@@ -31,6 +31,7 @@ public class FillGlobalTablesVisitor implements Visitor {
             System.out.println();
             n.cl.get(i).accept(this);
         }
+        semanticTable.setSuperClasses();
     }
 
     // Identifier i1,i2;
@@ -42,7 +43,8 @@ public class FillGlobalTablesVisitor implements Visitor {
         semanticTable.goIntoClass(n.i1.toString());
 
         // add main method
-        semanticTable.getCurrClassTable().addMethod("main", new MethodSemanticTable());
+        semanticTable.getCurrClassTable().addMethod("main",
+                      new MethodSemanticTable(semanticTable.getCurrClassTable()));
 
         // process statement
         n.s.accept(this);
@@ -123,7 +125,8 @@ public class FillGlobalTablesVisitor implements Visitor {
     public void visit(MethodDecl n) {
 
         // add method to symbol table
-        semanticTable.getCurrClassTable().addMethod(n.i.s, new MethodSemanticTable());
+        semanticTable.getCurrClassTable().addMethod(n.i.s,
+                      new MethodSemanticTable(semanticTable.getCurrClassTable()));
         semanticTable.goIntoMethod(n.i.s);
 
         // go through list to add parameters

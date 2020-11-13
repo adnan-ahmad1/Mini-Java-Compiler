@@ -49,4 +49,20 @@ public class SemanticTable {
         return currClass;
     }
 
+
+
+    public boolean setSuperClasses() {
+        for(String c: classes.keySet()) {
+            String currSuper = classes.get(c).getSuperClassName();
+            if (currSuper != null) {
+                if (classes.containsKey(currSuper)) {
+                    classes.get(c).setSuperClass(classes.get(currSuper));
+                } else {
+                    return false;
+                }
+            }
+        }
+        return true;
+    }
+
 }
