@@ -2,21 +2,20 @@ package Semantics;
 
 import AST.Identifier;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 public class MethodSemanticTable extends Table{
     private List<String> parameters;
     private Map<String, Type> primitiveParamters;
     private Map<String, String> classParameters;
+    private Stack<String> scopeVars;
 
     public MethodSemanticTable() {
         super();
         parameters = new ArrayList<>();
         primitiveParamters = new HashMap<>();
         classParameters = new HashMap<>();
+        scopeVars = new Stack<>();
     }
 
     public boolean addPrimParam(String name, Type type) {
@@ -25,6 +24,7 @@ public class MethodSemanticTable extends Table{
         }
         parameters.add(name);
         primitiveParamters.put(name, type);
+        scopeVars.push(name);
         return true;
     }
 
@@ -34,6 +34,21 @@ public class MethodSemanticTable extends Table{
         }
         parameters.add(name);
         classParameters.put(name, className);
+        scopeVars.push(name);
+        return true;
+    }
+
+    public boolean removeTop() {
+        String s = scopeVars.pop();
+
+        if (primitiveParamters.containsKey(s)) {
+            primitiveParamters.remove(s);
+        }
+
+        if (classParameters.containsKey(s)) {
+            classParameters.remove(s);
+        }
+
         return true;
     }
 

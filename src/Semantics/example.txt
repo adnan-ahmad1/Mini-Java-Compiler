@@ -1,0 +1,14 @@
+class Dog {
+    String name;
+    int age;
+
+    public void fuckit() {
+        int a;
+        if () {
+            int b;
+            int c;
+
+        }
+    }
+
+}
