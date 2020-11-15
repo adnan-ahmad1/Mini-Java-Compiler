@@ -4,6 +4,7 @@ import AST.Visitor.Visitor;
 import java_cup.runtime.ComplexSymbolFactory.Location;
 
 public abstract class ClassDecl extends ASTNode{
+  public Identifier i;
   public ClassDecl(Location pos) {
     super(pos);
   }

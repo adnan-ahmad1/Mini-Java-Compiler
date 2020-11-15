@@ -71,4 +71,14 @@ public class SemanticTable {
         }
     }
 
+    public boolean typeExists(String type) {
+        return classes.containsKey(type);
+    }
+
+    public Type getType(String className){
+        if (classes.containsKey(className)) {
+            return classes.get(className);
+        }
+        return null;
+    }
 }

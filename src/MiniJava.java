@@ -60,6 +60,7 @@ public class MiniJava {
                 program.accept(visitor);
                 // first task
                 SemanticTable st = visitor.getSemanticTable();
+                st.printTable();
             }
         } catch (Exception e) {
             // yuck: some kind of error in the compiler implementation

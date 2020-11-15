@@ -3,7 +3,7 @@ package Semantics;
 import java.util.HashMap;
 import java.util.Map;
 
-public class ClassSemanticTable extends Table {
+public class ClassSemanticTable extends Table implements Type{
     private Map<String, MethodSemanticTable> methods;
     private String className;
     private String superClassName;
@@ -112,7 +112,7 @@ public class ClassSemanticTable extends Table {
         }
         System.out.println("  fields:");
         for (String var : variables.keySet()) {
-            System.out.println("  "+ variables.get(var).type.toString() + " " + var);
+            System.out.println("    "+ variables.get(var).type.toString() + " " + var);
         }
         System.out.println("  methods:");
         for(String method : methods.keySet()) {
