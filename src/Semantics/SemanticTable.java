@@ -65,4 +65,10 @@ public class SemanticTable {
         return true;
     }
 
+    public void printTable() {
+        for(String c : classes.keySet()) {
+            classes.get(c).printTable();
+        }
+    }
+
 }

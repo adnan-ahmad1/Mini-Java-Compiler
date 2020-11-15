@@ -3,28 +3,37 @@ package Semantics;
 import java.util.*;
 
 public class Table {
-    Map<String, PrimVarInfo> primitiveVariables;
-    Map<String, ClassVarInfo> classVariables;
+    Map<String, VarInfo>  variables;
 
     public Table() {
-        primitiveVariables = new HashMap<>();
-        classVariables = new HashMap<>();
+        variables = new HashMap<>();
     }
 
-    public boolean addPrimitiveVariable(String variable, Type type){
-        if (!primitiveVariables.containsKey(variable)) {
-            primitiveVariables.put(variable, new PrimVarInfo(type, false));
+    public boolean addVariable(String variable, Type type){
+        if (variables.containsKey(variable)) {
+            return false;
+        }
+        variables.put(variable, new VarInfo(type, false));
+        return true;
+    }
+
+    public boolean containsVariable(String variable) {
+        if (variables.containsKey(variable)) {
             return true;
         }
-
         return false;
     }
 
+    public Type getVarType(String variable) {
+        if (variables.containsKey(variable)) {
+            return variables.get(variable).type;
+        }
+        return null;
+    }
+
     public boolean defineVariable(String variable) {
-        if (primitiveVariables.containsKey(variable)) {
-            primitiveVariables.get(variable).defined = true;
-        } else if (classVariables.containsKey(variable)) {
-            classVariables.get(variable).defined = true;
+        if (variables.containsKey(variable)) {
+            variables.get(variable).defined = true;
         } else {
             return false;
         }
@@ -32,41 +41,22 @@ public class Table {
     }
 
     public boolean isDefined(String variable) {
-        if (primitiveVariables.containsKey(variable)) {
-            return primitiveVariables.get(variable).defined;
-        } else if (classVariables.containsKey(variable)) {
-            return classVariables.containsKey(variable);
+        if (variables.containsKey(variable)) {
+            return variables.get(variable).defined;
         }
         return false;
     }
 
-    public boolean addClassVariable(String variable, String type){
-        if (!classVariables.containsKey(variable)) {
-            classVariables.put(variable, new ClassVarInfo(type, false));
-            return true;
-        }
+    public void printTable(){}
 
-        return false;
-    }
-
-    class PrimVarInfo {
+    class VarInfo {
         Type type;
         boolean defined;
 
-        public  PrimVarInfo(Type type, boolean defined) {
+        public  VarInfo(Type type, boolean defined) {
             this.type = type;
             this.defined = defined;
         }
 
-    }
-
-    class ClassVarInfo {
-        String classType;
-        boolean defined;
-
-        public ClassVarInfo(String type, boolean defined) {
-            this.classType = type;
-            this.defined = defined;
-        }
     }
 }

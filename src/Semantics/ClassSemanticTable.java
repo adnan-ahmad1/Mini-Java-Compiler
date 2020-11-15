@@ -15,6 +15,16 @@ public class ClassSemanticTable extends Table {
         methods = new HashMap<>();
     }
 
+    public boolean equals(Type type) {
+        if (type instanceof ClassSemanticTable) {
+            return this.className.equals(type.toString());
+        }
+        return false;
+    }
+
+    public String toString() {
+        return className;
+    }
     public boolean addMethod(String method, MethodSemanticTable type) {
         if (!methods.containsKey(method)) {
             methods.put(method, type);
@@ -24,9 +34,11 @@ public class ClassSemanticTable extends Table {
     }
 
     @Override
-    public boolean addPrimitiveVariable(String variable, Type type) {
-        if (superClass == null )
-        return super.addPrimitiveVariable(variable, type);
+    public boolean addVariable(String variable, Type type) {
+        if (superClass == null || !superClass.containsVariable(variable)) {
+            return super.addVariable(variable, type);
+        }
+        return false;
     }
 
     public ClassSemanticTable getSuperClass() {
@@ -60,15 +72,26 @@ public class ClassSemanticTable extends Table {
         return null;
     }
 
+    @Override
     public boolean containsVariable(String variable) {
+        if (super.containsVariable(variable)) {
+            return true;
+        }
         if (superClass != null && superClass.containsVariable(variable)) {
             return true;
         }
-        if (primitiveVariables.containsKey(variable) ||
-            classVariables.containsKey(variable)) {
-            return true;
-        }
         return false;
+    }
+
+    @Override
+    public Type getVarType(String variable) {
+        if (super.containsVariable(variable)) {
+            return super.getVarType(variable);
+        }
+        if (superClass != null && superClass.containsVariable(variable)) {
+            return superClass.getVarType(variable);
+        }
+        return null;
     }
 
     public boolean containsMethod(String method) {
@@ -80,4 +103,32 @@ public class ClassSemanticTable extends Table {
         }
         return false;
     }
+
+    public void printTable() {
+        if (superClassName == null) {
+            System.out.println("Class "+ className);
+        } else {
+            System.out.println("Class " + className + " extends " + superClassName);
+        }
+        System.out.println("  fields:");
+        for (String var : variables.keySet()) {
+            System.out.println("  "+ variables.get(var).type.toString() + " " + var);
+        }
+        System.out.println("  methods:");
+        for(String method : methods.keySet()) {
+            methods.get(method).printTable(method);
+        }
+    }
+
 }
+
+//classname extends classname
+//  fields:
+//    type var
+//  methods:
+//    name:
+//      return type: type
+//      parameters:
+//        type parametername
+//      variables:
+//        type var

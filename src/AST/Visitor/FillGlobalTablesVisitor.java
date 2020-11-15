@@ -4,6 +4,7 @@ import AST.*;
 import Semantics.ClassSemanticTable;
 import Semantics.MethodSemanticTable;
 import Semantics.SemanticTable;
+import Semantics.Void;
 
 public class FillGlobalTablesVisitor implements Visitor {
     SemanticTable semanticTable;
@@ -43,9 +44,9 @@ public class FillGlobalTablesVisitor implements Visitor {
         semanticTable.goIntoClass(n.i1.toString());
 
         // add main method
+        Semantics.Type retMethodType = Void.getInstance();
         semanticTable.getCurrClassTable().addMethod("main",
-                      new MethodSemanticTable(semanticTable.getCurrClassTable()));
-
+                      new MethodSemanticTable(semanticTable.getCurrClassTable(), retMethodType));
         // process statement
         n.s.accept(this);
     }
@@ -80,7 +81,7 @@ public class FillGlobalTablesVisitor implements Visitor {
         semanticTable.addClass(n.i.toString());
         semanticTable.goIntoClass(n.i.toString());
 
-        semanticTable.getCurrClassTable().setSuperClass(n.j.toString());
+        semanticTable.getCurrClassTable().setSuperClassName(n.j.toString());
 
         // process var declarations
         for ( int i = 0; i < n.vl.size(); i++ ) {
@@ -97,20 +98,18 @@ public class FillGlobalTablesVisitor implements Visitor {
     // Identifier i;
     public void visit(VarDecl n) {
 
-        boolean exists = false;
+        boolean noExist = false;
 
         if (n.t instanceof IntegerType) {
-            exists = semanticTable.getCurrTable().addPrimitiveVariable(n.i.toString(), Semantics.IntegerType.getInstance());
+            noExist = semanticTable.getCurrTable().addVariable(n.i.toString(), Semantics.IntegerType.getInstance());
         } else if (n.t instanceof IntArrayType) {
-            exists = semanticTable.getCurrTable().addPrimitiveVariable(n.i.toString(), Semantics.IntArrayType.getInstance());
+            noExist = semanticTable.getCurrTable().addVariable(n.i.toString(), Semantics.IntArrayType.getInstance());
         } else if (n.t instanceof BooleanType ) {
-            exists = semanticTable.getCurrTable().addPrimitiveVariable(n.i.toString(), Semantics.BooleanType.getInstance());
-        } else if (n.t instanceof IdentifierType) {
-            exists = semanticTable.getCurrTable().addClassVariable(n.i.toString(), ((IdentifierType)n.t).s);
+            noExist = semanticTable.getCurrTable().addVariable(n.i.toString(), Semantics.BooleanType.getInstance());
         }
 
         // error handle
-        if (exists) {
+        if (!noExist) {
             System.out.println("Variable " + n.i.toString() + " already exists");
         }
 
@@ -125,8 +124,24 @@ public class FillGlobalTablesVisitor implements Visitor {
     public void visit(MethodDecl n) {
 
         // add method to symbol table
+        if (semanticTable.getCurrClassTable().containsMethod(n.i.toString())) {
+            //error handle
+            return;
+        }
+        Semantics.Type returnType;
+        if (n.t instanceof IntegerType) {
+            returnType = Semantics.IntegerType.getInstance();
+        } else if (n.t instanceof IntArrayType) {
+            returnType = Semantics.IntArrayType.getInstance();
+        } else if (n.t instanceof BooleanType ) {
+            returnType = Semantics.BooleanType.getInstance();
+        } else {
+            return;
+        }
+
+
         semanticTable.getCurrClassTable().addMethod(n.i.s,
-                      new MethodSemanticTable(semanticTable.getCurrClassTable()));
+                      new MethodSemanticTable(semanticTable.getCurrClassTable(), returnType));
         semanticTable.goIntoMethod(n.i.s);
 
         // go through list to add parameters
@@ -145,18 +160,19 @@ public class FillGlobalTablesVisitor implements Visitor {
     // Identifier i;
     public void visit(Formal n) {
 
-        boolean exists = false;
+        boolean noExist = false;
+
         if (n.t instanceof IntegerType) {
-            exists = semanticTable.getCurrMethodTable().addPrimParam(n.i.toString(), Semantics.IntegerType.getInstance());
+            noExist = semanticTable.getCurrTable().addVariable(n.i.toString(), Semantics.IntegerType.getInstance());
         } else if (n.t instanceof IntArrayType) {
-            exists = semanticTable.getCurrMethodTable().addPrimParam(n.i.toString(), Semantics.IntArrayType.getInstance());
+            noExist = semanticTable.getCurrTable().addVariable(n.i.toString(), Semantics.IntArrayType.getInstance());
         } else if (n.t instanceof BooleanType ) {
-            exists = semanticTable.getCurrMethodTable().addPrimParam(n.i.toString(), Semantics.BooleanType.getInstance());
-        } else if (n.t instanceof IdentifierType) {
-            exists = semanticTable.getCurrMethodTable().addClassParam(n.i.toString(), ((IdentifierType)n.t).s);
+            noExist = semanticTable.getCurrTable().addVariable(n.i.toString(), Semantics.BooleanType.getInstance());
         }
-        if (exists) {
-            System.out.println("Parameter " + n.i.toString() + " already defined.");
+
+        // error handle
+        if (!noExist) {
+            System.out.println("Variable " + n.i.toString() + " already exists");
         }
         /*
         n.t.accept(this);

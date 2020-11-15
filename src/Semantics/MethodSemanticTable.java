@@ -5,62 +5,37 @@ import AST.Identifier;
 import java.util.*;
 
 public class MethodSemanticTable extends Table{
-    private List<String> parameters;
-    private Map<String, Type> primitiveParamters;
-    private Map<String, String> classParameters;
+    private List<String> paramOrder;
+    private Map<String, Type> parameters;
     private Stack<String> scopeVars;
     private ClassSemanticTable classInside;
+    private Type returnType;
 
-    public MethodSemanticTable(ClassSemanticTable classInside) {
+    public MethodSemanticTable(ClassSemanticTable classInside, Type returnType) {
         super();
         this.classInside = classInside;
-        parameters = new ArrayList<>();
-        primitiveParamters = new HashMap<>();
-        classParameters = new HashMap<>();
+        parameters = new HashMap<>();
+        paramOrder = new LinkedList<>();
         scopeVars = new Stack<>();
-    }
-
-    public boolean addPrimParam(String name, Type type) {
-        if (primitiveParamters.containsKey(name)) {
-            return false;
-        }
-        parameters.add(name);
-        primitiveParamters.put(name, type);
-        return true;
-    }
-    // int a;
-    // a = 4;
-    public boolean addClassParam(String name, String className) {
-        if (classParameters.containsKey(name)) {
-            return false;
-        }
-        parameters.add(name);
-        classParameters.put(name, className);
-        return true;
+        this.returnType = returnType;
     }
 
     @Override
-    public boolean addClassVariable(String variable, String type) {
-        if (!classInside.containsVariable(variable)) {
-            return false;
-        }
-        boolean successfully_add = super.addClassVariable(variable, type);
-        if (successfully_add) {
+    public boolean addVariable(String variable, Type type) {
+        boolean success = super.addVariable(variable, type);
+        if(success) {
             scopeVars.push(variable);
         }
-        return successfully_add;
+        return success;
     }
 
-    @Override
-    public boolean addPrimitiveVariable(String variable, Type type) {
-        if (!classInside.containsVariable(variable)) {
+    public boolean addParam(String name, Type type) {
+        if (parameters.containsKey(name)) {
             return false;
         }
-        boolean successfully_add = super.addPrimitiveVariable(variable, type);
-        if (successfully_add) {
-            scopeVars.push(variable);
-        }
-        return successfully_add;
+        parameters.put(name, type);
+        paramOrder.add(name);
+        return true;
     }
 
     @Override
@@ -78,30 +53,48 @@ public class MethodSemanticTable extends Table{
 
     public boolean removeTop() {
         String s = scopeVars.pop();
-
-        if (primitiveParamters.containsKey(s)) {
-            primitiveParamters.remove(s);
-        }
-
-        if (classParameters.containsKey(s)) {
-            classParameters.remove(s);
+        if (variables.containsKey(s)) {
+            variables.remove(s);
         }
 
         return true;
     }
 
-    public List<String> getParameters() {
+    public List<String> getParaOrder() {
+        return paramOrder;
+    }
+
+
+    public Map<String, Type> getParameters() {
         return parameters;
     }
 
-
-    public Map<String, Type> getPrimitiveParamters() {
-        return primitiveParamters;
+    public void printTable(String name) {
+        System.out.println("    " + name);
+        System.out.println("      return type: " + returnType.toString());
+        System.out.println("      parameters:");
+        for (String params : paramOrder) {
+            System.out.println("        " + parameters.get(params) + " " + params);
+        }
+        System.out.println("      variables:");
+        for (String var : variables.keySet()) {
+            System.out.println("        " + this.getVarType(var).toString() + " " +var);
+        }
     }
 
-
-    public Map<String, String> getClassParameters() {
-        return classParameters;
+    @Override
+    public boolean containsVariable(String variable) {
+        if (super.containsVariable(variable)) {
+            return true;
+        }
+        return classInside.containsVariable(variable);
     }
 
+    @Override
+    public Type getVarType(String variable) {
+        if (super.containsVariable(variable)) {
+            return super.getVarType(variable);
+        }
+        return classInside.getVarType(variable);
+    }
 }

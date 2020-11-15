@@ -1,4 +1,6 @@
 package Semantics;
 
-public abstract class Type {
+public interface Type {
+    public boolean equals(Type type);
+    public String toString();
 }
