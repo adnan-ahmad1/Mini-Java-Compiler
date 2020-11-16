@@ -81,4 +81,11 @@ public class SemanticTable {
         }
         return null;
     }
+
+    public boolean containsClass(String className) {
+        if (classes.keySet().contains(className)) {
+            return true;
+        }
+        return false;
+    }
 }

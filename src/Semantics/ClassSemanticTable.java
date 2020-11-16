@@ -25,6 +25,7 @@ public class ClassSemanticTable extends Table implements Type{
     public String toString() {
         return className;
     }
+
     public boolean addMethod(String method, MethodSemanticTable type) {
         if (!methods.containsKey(method)) {
             methods.put(method, type);

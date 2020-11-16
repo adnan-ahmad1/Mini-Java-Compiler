@@ -7,7 +7,7 @@ import Semantics.SemanticTable;
 import Semantics.Void;
 
 public class FillGlobalTablesVisitor implements Visitor {
-    SemanticTable semanticTable;
+    private SemanticTable semanticTable;
 
     public FillGlobalTablesVisitor(SemanticTable semanticTable) {
         this.semanticTable = semanticTable;
@@ -19,9 +19,6 @@ public class FillGlobalTablesVisitor implements Visitor {
 
     // Display added for toy example language.  Not used in regular MiniJava
     public void visit(Display n) {
-        System.out.print("display ");
-        n.e.accept(this);
-        System.out.print(";");
     }
 
     // MainClass m;
@@ -30,14 +27,25 @@ public class FillGlobalTablesVisitor implements Visitor {
         n.m.accept(this);
 
         for (int i = 0; i < n.cl.size(); i++) {
-            semanticTable.addClass(n.cl.get(i).i.toString());
+            String className = n.cl.get(i).i.toString();
+
+            // make sure redundant classes are not added
+            if (semanticTable.containsClass(className)) {
+                // error handle
+                System.out.println("duplicate class " + className);
+            }
+
+            semanticTable.addClass(className);
         }
 
         for ( int i = 0; i < n.cl.size(); i++ ) {
             System.out.println();
             n.cl.get(i).accept(this);
         }
-        semanticTable.setSuperClasses();
+
+        if (!semanticTable.setSuperClasses()) {
+            // error handle
+        }
     }
 
     // Identifier i1,i2;
@@ -61,7 +69,6 @@ public class FillGlobalTablesVisitor implements Visitor {
     // MethodDeclList ml;
     public void visit(ClassDeclSimple n) {
 
-        // add class to table
         semanticTable.goIntoClass(n.i.toString());
 
         // process var declarations
@@ -107,7 +114,7 @@ public class FillGlobalTablesVisitor implements Visitor {
             noExist = semanticTable.getCurrTable().addVariable(n.i.toString(), Semantics.IntegerType.getInstance());
         } else if (n.t instanceof IntArrayType) {
             noExist = semanticTable.getCurrTable().addVariable(n.i.toString(), Semantics.IntArrayType.getInstance());
-        } else if (n.t instanceof BooleanType ) {
+        } else if (n.t instanceof BooleanType) {
             noExist = semanticTable.getCurrTable().addVariable(n.i.toString(), Semantics.BooleanType.getInstance());
         } else {
             if (!semanticTable.typeExists(((IdentifierType)n.t).s)) {
@@ -124,7 +131,6 @@ public class FillGlobalTablesVisitor implements Visitor {
         if (!noExist) {
             System.out.println("Variable " + n.i.toString() + " already exists");
         }
-
     }
 
     // Type t;

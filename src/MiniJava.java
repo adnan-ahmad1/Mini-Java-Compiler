@@ -2,6 +2,7 @@ import AST.Program;
 import AST.Statement;
 import AST.Visitor.AbstractTreeVisitor;
 import AST.Visitor.FillGlobalTablesVisitor;
+import AST.Visitor.FillLocalTablesAndTypeCheckVisitor;
 import AST.Visitor.PrettyPrintVisitor;
 import Parser.parser;
 import Parser.sym;
@@ -56,10 +57,17 @@ public class MiniJava {
                 Symbol root;
                 root = p.parse();
                 Program program = (Program)root.value;
-                FillGlobalTablesVisitor visitor = new FillGlobalTablesVisitor(new SemanticTable());
-                program.accept(visitor);
-                // first task
-                SemanticTable st = visitor.getSemanticTable();
+                FillGlobalTablesVisitor gVisitor = new FillGlobalTablesVisitor(new SemanticTable());
+                program.accept(gVisitor);
+
+                // first pass
+                SemanticTable st = gVisitor.getSemanticTable();
+                //st.printTable();
+
+                // second pass
+                FillLocalTablesAndTypeCheckVisitor tVisitor = new FillLocalTablesAndTypeCheckVisitor(st);
+                program.accept(tVisitor);
+
                 st.printTable();
             }
         } catch (Exception e) {
