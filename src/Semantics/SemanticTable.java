@@ -52,14 +52,36 @@ public class SemanticTable {
 
 
     public boolean setSuperClasses() {
-        for(String c: classes.keySet()) {
-            String currSuper = classes.get(c).getSuperClassName();
-            if (currSuper != null) {
-                if (classes.containsKey(currSuper)) {
-                    classes.get(c).setSuperClass(classes.get(currSuper));
-                } else {
+        Set<String> superClassSet = new HashSet<>();
+        Stack<ClassSemanticTable> curr = new Stack<>();
+        for(String c : classes.keySet()) {
+            if (superClassSet.contains(c)) {
+                continue;
+            }
+            Set<String> seen  = new HashSet<>();
+            curr.push(classes.get(c));
+            seen.add(c);
+            while(curr.peek().getSuperClassName() != null) {
+                String superClassName = curr.peek().getSuperClassName();
+                if (!classes.containsKey(superClassName)) {
+                    // Super class does not exist
+                    // error handle
+                    break;
+                }
+                if (seen.contains(superClassName)) {
+                    // error handle
+                    // Cycle exists
                     return false;
                 }
+                curr.push(classes.get(superClassName));
+                seen.add(superClassName);
+            }
+            superClassSet.add(curr.pop().getName());
+            while (!curr.empty()) {
+                ClassSemanticTable currT = curr.pop();
+                superClassSet.add(currT.getName());
+                ClassSemanticTable supClass = classes.get(currT.getSuperClassName());
+                currT.setSuperClass(supClass);
             }
         }
         return true;
