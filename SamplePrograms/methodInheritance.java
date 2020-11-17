@@ -1,3 +1,9 @@
+class Empty {
+    public static void main(String[] args) {
+        System.out.println(1);
+    }
+}
+
 class Foo extends Baz {
     int a;
     int b;
@@ -16,7 +22,7 @@ class Baz {
     int d;
 
     public boolean Bar(int cheeze, boolean ham) {
-        return cheeze;
+        return ham;
     }
 
     public int[] jesus(int[] wine, boolean bread) {

@@ -3,9 +3,11 @@ package AST.Visitor;
 import AST.*;
 import Semantics.ClassSemanticTable;
 import Semantics.SemanticTable;
+import Semantics.Unknown;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 public class TypeCheckVisitor implements Visitor {
     private SemanticTable semanticTable;
@@ -83,6 +85,18 @@ public class TypeCheckVisitor implements Visitor {
     public void visit(MethodDecl n) {
 
         semanticTable.goIntoMethod(n.i.s);
+
+        // go through list of parameters and make sure types exist
+        Map<String, Semantics.Type> parameters = semanticTable.getCurrMethodTable().getParameters();
+        if (parameters != null) {
+            for (String key : parameters.keySet()) {
+                if (parameters.get(key) instanceof Semantics.Unknown) {
+                    //error handle
+                    System.out.print("ERROR! Line Number: " + n.line_number + ", ");
+                    System.out.println("Parameter " + key + " has class type that does not exist!");
+                }
+            }
+        }
 
         // type check statements!
         for ( int i = 0; i < n.sl.size(); i++ ) {
@@ -424,7 +438,9 @@ public class TypeCheckVisitor implements Visitor {
             typeList.add(n.el.get(i).type);
         }
 
-        if (!semanticTable.getCurrMethodTable().callParamsOrdered(typeList)) {
+        System.out.println(c.getMethod(n.i.s).getParameters());
+        System.out.println("TYPELIST: " + typeList);
+        if (!c.getMethod(n.i.s).callParamsOrdered(typeList)) {
             // error handle
             System.out.print("ERROR! Line Number: " + n.line_number + ", ");
             System.out.println("Call: Parameter order is incorrect");

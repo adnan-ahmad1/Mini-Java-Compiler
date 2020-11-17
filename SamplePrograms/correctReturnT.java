@@ -1,9 +1,19 @@
-class Baz {
+class Empty {
     public static void main(String[] args) {
+        System.out.println(1);
+    }
+}
+
+class Baz {
+    public boolean test() {
         int a;
         boolean b;
-        a = Adnand.laugh();
-        b = Adnand.laugh();
+        Adnand adnand;
+        adnand = new Adnand();
+        a = adnand.laugh();
+        b = adnand.laugh();
+
+        return true;
     }
 }
 

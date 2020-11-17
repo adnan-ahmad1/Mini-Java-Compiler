@@ -48,6 +48,7 @@ public class FillGlobalTablesVisitor implements Visitor {
             // error handle
             System.exit(1);
         }
+
         semanticTable.checkOverrides();
     }
 
@@ -161,7 +162,7 @@ public class FillGlobalTablesVisitor implements Visitor {
         } else if (n.t instanceof BooleanType ) {
             returnType = Semantics.BooleanType.getInstance();
         } else {
-            return;
+            returnType = semanticTable.getClass(((IdentifierType)(n.t)).s);
         }
 
         semanticTable.getCurrClassTable().addMethod(n.i.s,

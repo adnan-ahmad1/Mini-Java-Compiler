@@ -110,6 +110,7 @@ public class MethodSemanticTable extends Table{
         int i = 0;
         for (String s : paramOrder) {
             Type t = parameters.get(s);
+
             if (i >= paramOrder.size() || !callParams.get(i).equals(t)) {
                 return false;
             }

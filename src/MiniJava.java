@@ -59,12 +59,12 @@ public class MiniJava {
 
                 // first pass
                 SemanticTable st = gVisitor.getSemanticTable();
-                st.printTable();
 
                 // second pass
                 TypeCheckVisitor tVisitor = new TypeCheckVisitor(st);
                 program.accept(tVisitor);
 
+                //st.printTable();
                 //st = tVisitor.getSemanticTable();
                 //st.printTable();
             }

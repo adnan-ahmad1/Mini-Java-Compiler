@@ -1,3 +1,9 @@
+class Empty {
+    public static void main(String[] args) {
+        System.out.println(1);
+    }
+}
+
 class extendsItself extends extendsItself {
     int a;
     int b;

@@ -64,14 +64,14 @@ public class SemanticTable {
                 if (!classes.containsKey(superClassName)) {
                     // Super class does not exist
                     // error handle
-                    System.out.println("Class " + superClassName + " does not exist");
+                    System.out.println("ERROR! Class " + superClassName + " does not exist");
                     curr.peek().setSuperClassName(null);
                     break;
                 }
                 if (seen.contains(superClassName)) {
                     // error handle
                     // Cycle exists
-                    System.out.println(superClassName + " is its own superclass");
+                    System.out.println("ERROR! " + superClassName + " is its own superclass");
                     return false;
                 }
                 curr.push(classes.get(superClassName));
@@ -127,7 +127,7 @@ public class SemanticTable {
             for (String method : classes.get(c).getMethodNames()) {
                 MethodSemanticTable methodInfo = classes.get(c).getMethod(method);
                 ClassSemanticTable supClass = classes.get(c).getSuperClass();
-                while (supClass != null || !supClass.containsMethod(method)) {
+                while (supClass != null && !supClass.containsMethod(method)) {
                     supClass = supClass.getSuperClass();
                 }
                 if (supClass == null) {
@@ -141,22 +141,23 @@ public class SemanticTable {
     private boolean equalMethodInfo(MethodSemanticTable tab1, MethodSemanticTable tab2) {
         boolean equals = true;
         if (tab1.getParaOrder().size() != tab2.getParaOrder().size()) {
-            System.out.println("Override method does not have the same number of parameters as super class method.");
+            equals = false;
+            System.out.println("ERROR! Override method does not have the same number of parameters as super class method.");
         }
         for (int i = 0; i < tab1.getParaOrder().size(); i++) {
             if (tab1.getParaOrder().get(i).equals(tab2.getParaOrder().get(i))) {
                 if (!tab1.getVarType(tab1.getParaOrder().get(i)).equals(tab2.getVarType(tab2.getParaOrder().get(i)))) {
                     equals = false;
-                    System.out.println("Parameter "+ i + " is not of same type as super class method");
+                    System.out.println("ERROR! Parameter "+ i + " is not of same type as super class method");
                 }
             } else {
                 equals = false;
-                System.out.println("Parameter " + i + " does not have same name");
+                System.out.println("ERROR! Parameter " + i + " does not have same name");
             }
         }
         if (!tab1.getReturnType().equals(tab2.getReturnType())) {
             equals = false;
-            System.out.println("Override method does not have the same return type as super class method");
+            System.out.println("ERROR! Override method does not have the same return type as super class method");
         }
         return equals;
     }
