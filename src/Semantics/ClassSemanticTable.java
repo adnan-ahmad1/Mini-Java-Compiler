@@ -2,6 +2,7 @@ package Semantics;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Set;
 
 public class ClassSemanticTable extends Table implements Type{
     private Map<String, MethodSemanticTable> methods;
@@ -34,6 +35,10 @@ public class ClassSemanticTable extends Table implements Type{
         return false;
     }
 
+    public Set<String> getMethodNames() {
+        return methods.keySet();
+    }
+
     @Override
     public boolean addVariable(String variable, Type type) {
         if (superClass == null || !superClass.containsVariable(variable)) {
@@ -51,9 +56,6 @@ public class ClassSemanticTable extends Table implements Type{
     }
 
     public void setSuperClassName(String superClass) {
-        if (superClass.equals(className)) {
-            //error handling
-        }
         this.superClassName = superClass;
     }
 
@@ -122,14 +124,3 @@ public class ClassSemanticTable extends Table implements Type{
     }
 
 }
-
-//classname extends classname
-//  fields:
-//    type var
-//  methods:
-//    name:
-//      return type: type
-//      parameters:
-//        type parametername
-//      variables:
-//        type var

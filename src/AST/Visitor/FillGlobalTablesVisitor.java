@@ -32,6 +32,7 @@ public class FillGlobalTablesVisitor implements Visitor {
             // make sure redundant classes are not added
             if (semanticTable.containsClass(className)) {
                 // error handle
+                System.out.print("ERROR! Line Number: " + n.line_number + ", ");
                 System.out.println("duplicate class " + className);
             }
 
@@ -45,7 +46,9 @@ public class FillGlobalTablesVisitor implements Visitor {
 
         if (!semanticTable.setSuperClasses()) {
             // error handle
+            System.exit(1);
         }
+        semanticTable.checkOverrides();
     }
 
     // Identifier i1,i2;
@@ -121,6 +124,7 @@ public class FillGlobalTablesVisitor implements Visitor {
                 noExist = semanticTable.getCurrTable().addVariable(n.i.toString(), Semantics.Unknown.getInstance());
 
                 // error handle
+                System.out.print("ERROR! Line Number: " + n.line_number + ", ");
                 System.out.println("Type " + ((IdentifierType)n.t).s + " does NOT exist");
             } else {
                 noExist = semanticTable.getCurrTable().addVariable(n.i.toString(), semanticTable.getType(((IdentifierType)n.t).s));
@@ -129,6 +133,7 @@ public class FillGlobalTablesVisitor implements Visitor {
 
         // error handle
         if (!noExist) {
+            System.out.print("ERROR! Line Number: " + n.line_number + ", ");
             System.out.println("Variable " + n.i.toString() + " already exists");
         }
     }
@@ -144,6 +149,8 @@ public class FillGlobalTablesVisitor implements Visitor {
         // add method to symbol table
         if (semanticTable.getCurrClassTable().containsMethod(n.i.toString())) {
             //error handle
+            System.out.print("ERROR! Line Number: " + n.line_number + ", ");
+            System.out.println("Method " + n.i.toString() + " already exists in " + semanticTable.getCurrClassTable().getName());
             return;
         }
         Semantics.Type returnType;
@@ -188,8 +195,8 @@ public class FillGlobalTablesVisitor implements Visitor {
         } else {
             if (!semanticTable.typeExists(((IdentifierType)n.t).s)) {
                 noExist = semanticTable.getCurrMethodTable().addParam(n.i.toString(), Semantics.Unknown.getInstance());
-
                 // error handle
+                System.out.print("ERROR! Line Number: " + n.line_number + ", ");
                 System.out.println("Type " + ((IdentifierType)n.t).s + " does NOT exist");
             } else {
                 noExist = semanticTable.getCurrMethodTable().addParam(n.i.toString(), semanticTable.getType(((IdentifierType)n.t).s));
@@ -198,6 +205,7 @@ public class FillGlobalTablesVisitor implements Visitor {
 
         // error handle
         if (!noExist) {
+            System.out.print("ERROR! Line Number: " + n.line_number + ", ");
             System.out.println("Parameter " + n.i.toString() + " already exists");
         }
         /*

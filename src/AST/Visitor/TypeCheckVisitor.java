@@ -167,6 +167,10 @@ public class TypeCheckVisitor implements Visitor {
 
         // type check expression
         n.e.accept(this);
+        if (!n.e.type.equals(Semantics.IntegerType.getInstance())) {
+            System.out.print("ERROR! Line Number: " + n.line_number + ", ");
+            System.out.println("Only integer types can be printed");
+        }
     }
 
     // Identifier i;
