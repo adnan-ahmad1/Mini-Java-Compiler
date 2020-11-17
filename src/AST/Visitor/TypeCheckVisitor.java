@@ -191,6 +191,8 @@ public class TypeCheckVisitor implements Visitor {
             System.out.print("ERROR! Line Number: " + n.line_number + ", ");
             System.out.println("Assign: Variable type for " + n.i.s + " is not equal to " + n.e.type.toString());
         }
+
+        semanticTable.getCurrMethodTable().defineVariable(n.i.s);
     }
 
     // Identifier i;
@@ -249,6 +251,7 @@ public class TypeCheckVisitor implements Visitor {
             System.out.print("ERROR! Line Number: " + n.line_number + ", ");
             System.out.println("And: Expression2 is not BooleanType");
         }
+        n.type = Semantics.BooleanType.getInstance();
     }
 
     // Exp e1,e2;
@@ -271,6 +274,8 @@ public class TypeCheckVisitor implements Visitor {
             System.out.print("ERROR! Line Number: " + n.line_number + ", ");
             System.out.println("LessThan: Expression2 is not IntegerType");
         }
+
+        n.type = Semantics.BooleanType.getInstance();
     }
 
     // Exp e1,e2;
@@ -293,6 +298,8 @@ public class TypeCheckVisitor implements Visitor {
             System.out.print("ERROR! Line Number: " + n.line_number + ", ");
             System.out.println("Plus: Expression2 is not IntegerType");
         }
+
+        n.type = Semantics.IntegerType.getInstance();
     }
 
     // Exp e1,e2;
@@ -313,6 +320,8 @@ public class TypeCheckVisitor implements Visitor {
             System.out.print("ERROR! Line Number: " + n.line_number + ", ");
             System.out.println("Minus: Expression2 is not IntegerType");
         }
+
+        n.type = Semantics.IntegerType.getInstance();
     }
 
     // Exp e1,e2;
@@ -333,6 +342,8 @@ public class TypeCheckVisitor implements Visitor {
             System.out.print("ERROR! Line Number: " + n.line_number + ", ");
             System.out.println("Times: Expression2 is not IntegerType");
         }
+
+        n.type = Semantics.IntegerType.getInstance();
     }
 
     // Exp e1,e2;
@@ -356,6 +367,8 @@ public class TypeCheckVisitor implements Visitor {
             System.out.print("ERROR! Line Number: " + n.line_number + ", ");
             System.out.println("ArrayLookup: Expression2 is not IntegerType");
         }
+
+        n.type = Semantics.IntegerType.getInstance();
     }
 
     // Exp e;
@@ -386,6 +399,8 @@ public class TypeCheckVisitor implements Visitor {
             // error handle
             System.out.print("ERROR! Line Number: " + n.line_number + ", ");
             System.out.println("Call: Expression is not a ClassType");
+            n.type = Semantics.Unknown.getInstance();
+            return;
         }
 
         ClassSemanticTable c = (ClassSemanticTable)(n.e.type);
@@ -410,6 +425,8 @@ public class TypeCheckVisitor implements Visitor {
             System.out.print("ERROR! Line Number: " + n.line_number + ", ");
             System.out.println("Call: Parameter order is incorrect");
         }
+
+        n.type = c.getMethod(n.i.s).getReturnType();
     }
 
     // int i;
@@ -452,8 +469,6 @@ public class TypeCheckVisitor implements Visitor {
     }
 
     public void visit(This n) {
-        System.out.print("this");
-
         n.type = semanticTable.getCurrClassTable();
     }
 
@@ -468,6 +483,8 @@ public class TypeCheckVisitor implements Visitor {
             System.out.print("ERROR! Line Number: " + n.line_number + ", ");
             System.out.println("NewArray: Expression is not IntegerType!");
         }
+
+        n.type = Semantics.IntArrayType.getInstance();
     }
 
     // Identifier i;
@@ -479,7 +496,6 @@ public class TypeCheckVisitor implements Visitor {
         } else {
             n.type = semanticTable.getClass(n.i.s);
         }
-
     }
 
     // Exp e;
@@ -493,6 +509,8 @@ public class TypeCheckVisitor implements Visitor {
             System.out.print("ERROR! Line Number: " + n.line_number + ", ");
             System.out.println("Not: Expression is not BooleanType! ");
         }
+
+        n.type = Semantics.BooleanType.getInstance();
     }
 
     // String s;

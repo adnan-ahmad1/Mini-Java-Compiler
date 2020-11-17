@@ -48,7 +48,8 @@ public class MethodSemanticTable extends Table{
 
     @Override
     public boolean isDefined(String variable) {
-        return super.isDefined(variable) || classInside.isDefined(variable);
+
+        return paramOrder.contains(variable) || super.isDefined(variable) || classInside.isDefined(variable);
     }
 
     public boolean removeTop() {
@@ -84,7 +85,7 @@ public class MethodSemanticTable extends Table{
 
     @Override
     public boolean containsVariable(String variable) {
-        if (super.containsVariable(variable)) {
+        if (super.containsVariable(variable) || paramOrder.contains(variable)) {
             return true;
         }
         return classInside.containsVariable(variable);
@@ -92,6 +93,9 @@ public class MethodSemanticTable extends Table{
 
     @Override
     public Type getVarType(String variable) {
+        if (paramOrder.contains(variable)) {
+            return parameters.get(variable);
+        }
         if (super.containsVariable(variable)) {
             return super.getVarType(variable);
         }
@@ -113,4 +117,5 @@ public class MethodSemanticTable extends Table{
         }
         return true;
     }
+
 }
