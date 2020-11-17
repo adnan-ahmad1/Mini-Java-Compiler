@@ -97,4 +97,20 @@ public class MethodSemanticTable extends Table{
         }
         return classInside.getVarType(variable);
     }
+
+    public Type getReturnType() {
+        return returnType;
+    }
+
+    public boolean callParamsOrdered(List<Type> callParams) {
+        int i = 0;
+        for (String s : paramOrder) {
+            Type t = parameters.get(s);
+            if (i >= paramOrder.size() || !callParams.get(i).equals(t)) {
+                return false;
+            }
+            i++;
+        }
+        return true;
+    }
 }

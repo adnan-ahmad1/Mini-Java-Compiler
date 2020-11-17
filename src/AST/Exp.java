@@ -8,4 +8,5 @@ public abstract class Exp extends ASTNode {
         super(pos);
     }
     public abstract void accept(Visitor v);
+    public Semantics.Type type;
 }

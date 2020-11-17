@@ -1,8 +1,7 @@
 import AST.Program;
-import AST.Statement;
 import AST.Visitor.AbstractTreeVisitor;
 import AST.Visitor.FillGlobalTablesVisitor;
-import AST.Visitor.FillLocalTablesAndTypeCheckVisitor;
+import AST.Visitor.TypeCheckVisitor;
 import AST.Visitor.PrettyPrintVisitor;
 import Parser.parser;
 import Parser.sym;
@@ -14,8 +13,6 @@ import java_cup.runtime.Symbol;
 import java.io.BufferedReader;
 import java.io.FileReader;
 import java.io.Reader;
-import java.util.Arrays;
-import java.util.List;
 
 public class MiniJava {
     public static void main(String[] args) {
@@ -65,7 +62,7 @@ public class MiniJava {
                 //st.printTable();
 
                 // second pass
-                FillLocalTablesAndTypeCheckVisitor tVisitor = new FillLocalTablesAndTypeCheckVisitor(st);
+                TypeCheckVisitor tVisitor = new TypeCheckVisitor(st);
                 program.accept(tVisitor);
 
                 st.printTable();

@@ -110,4 +110,11 @@ public class SemanticTable {
         }
         return false;
     }
+
+    public ClassSemanticTable getClass(String className) {
+        if (containsClass(className)) {
+            return classes.get(className);
+        }
+        return null;
+    }
 }
