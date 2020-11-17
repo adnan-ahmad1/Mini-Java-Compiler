@@ -106,7 +106,16 @@ public class TypeCheckVisitor implements Visitor {
         // make sure return type is correct
         n.e.accept(this);
 
-        if (!n.e.type.equals(semanticTable.getCurrMethodTable().getReturnType())) {
+        Semantics.Type t = semanticTable.getCurrMethodTable().getReturnType();
+        if (t instanceof ClassSemanticTable) {
+            ClassSemanticTable c = ((ClassSemanticTable)t);
+            if (!n.e.type.equals(c) && !c.isSubtype(n.e.type)) {
+                //error handle
+                System.out.print("ERROR! Line Number: " + n.line_number + ", ");
+                System.out.println("Return type should be "
+                        + semanticTable.getCurrMethodTable().getReturnType().toString() + " but was " + n.e.type.toString());
+            }
+        } else if (!n.e.type.equals(t)) {
             //error handle
             System.out.print("ERROR! Line Number: " + n.line_number + ", ");
             System.out.println("Return type should be "
@@ -204,7 +213,15 @@ public class TypeCheckVisitor implements Visitor {
         // type is appropriate with the identifier type
         n.e.accept(this);
 
-        if (!semanticTable.getCurrMethodTable().getVarType(n.i.s).equals(n.e.type)) {
+        Semantics.Type t = semanticTable.getCurrMethodTable().getVarType(n.i.s);
+        if (t instanceof ClassSemanticTable) {
+            ClassSemanticTable c = ((ClassSemanticTable) t);
+            if (!c.equals(n.e.type) && !c.isSubtype(n.e.type)) {
+                // error handle
+                System.out.print("ERROR! Line Number: " + n.line_number + ", ");
+                System.out.println("Assign: Variable type for " + n.i.s + " is not equal to " + n.e.type.toString());
+            }
+        } else if (!t.equals(n.e.type)) {
             // error handle
             System.out.print("ERROR! Line Number: " + n.line_number + ", ");
             System.out.println("Assign: Variable type for " + n.i.s + " is not equal to " + n.e.type.toString());
@@ -438,8 +455,6 @@ public class TypeCheckVisitor implements Visitor {
             typeList.add(n.el.get(i).type);
         }
 
-        System.out.println(c.getMethod(n.i.s).getParameters());
-        System.out.println("TYPELIST: " + typeList);
         if (!c.getMethod(n.i.s).callParamsOrdered(typeList)) {
             // error handle
             System.out.print("ERROR! Line Number: " + n.line_number + ", ");

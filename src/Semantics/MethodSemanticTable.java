@@ -109,11 +109,22 @@ public class MethodSemanticTable extends Table{
     public boolean callParamsOrdered(List<Type> callParams) {
         int i = 0;
         for (String s : paramOrder) {
-            Type t = parameters.get(s);
-
-            if (i >= paramOrder.size() || !callParams.get(i).equals(t)) {
+            if (i >= paramOrder.size()) {
                 return false;
             }
+
+            Type t = parameters.get(s);
+            Type callParam = callParams.get(i);
+
+            if (t instanceof ClassSemanticTable) {
+                ClassSemanticTable c = ((ClassSemanticTable)t);
+                if (!callParam.equals(c) && !c.isSubtype(callParam)) {
+                    return false;
+                }
+            } else if (!callParam.equals(t)) {
+                return false;
+            }
+
             i++;
         }
         return true;

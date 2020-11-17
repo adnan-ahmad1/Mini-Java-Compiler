@@ -23,6 +23,18 @@ public class ClassSemanticTable extends Table implements Type{
         return false;
     }
 
+    public boolean isSubtype(Type type) {
+        ClassSemanticTable c = ((ClassSemanticTable)(type));
+
+        if (c.getSuperClass() != null && c.getSuperClass().equals(this)) {
+            return true;
+        } else if (c.getSuperClass() != null) {
+            return isSubtype(c.getSuperClass());
+        } else {
+            return false;
+        }
+    }
+
     public String toString() {
         return className;
     }

@@ -209,12 +209,6 @@ public class FillGlobalTablesVisitor implements Visitor {
             System.out.print("ERROR! Line Number: " + n.line_number + ", ");
             System.out.println("Parameter " + n.i.toString() + " already exists");
         }
-        /*
-        n.t.accept(this);
-        System.out.print(" ");
-        n.i.accept(this);
-
-         */
     }
 
     public void visit(IntArrayType n) {
