@@ -226,8 +226,6 @@ public class TypeCheckVisitor implements Visitor {
             System.out.print("ERROR! Line Number: " + n.line_number + ", ");
             System.out.println("Assign: Variable type for " + n.i.s + " is not equal to " + n.e.type.toString());
         }
-
-        semanticTable.getCurrMethodTable().defineVariable(n.i.s);
     }
 
     // Identifier i;
@@ -490,13 +488,6 @@ public class TypeCheckVisitor implements Visitor {
             System.out.println("IdentifierExp: Variable " + n.s + " does not exist!");
             n.type = Semantics.Unknown.getInstance();
             return;
-        }
-
-        // make sure variable is defined
-        if (!semanticTable.getCurrMethodTable().isDefined(n.s)) {
-            // error handle
-            System.out.print("ERROR! Line Number: " + n.line_number + ", ");
-            System.out.println("IdentifierExp: Variable " + n.s + " is not defined!");
         }
 
         // set expression node type to class semantic table

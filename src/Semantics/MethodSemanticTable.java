@@ -38,20 +38,6 @@ public class MethodSemanticTable extends Table{
         return true;
     }
 
-    @Override
-    public boolean defineVariable(String variable) {
-        if (!super.defineVariable(variable)) {
-            return classInside.defineVariable(variable);
-        }
-        return true;
-    }
-
-    @Override
-    public boolean isDefined(String variable) {
-
-        return paramOrder.contains(variable) || super.isDefined(variable) || classInside.isDefined(variable);
-    }
-
     public boolean removeTop() {
         String s = scopeVars.pop();
         if (variables.containsKey(s)) {

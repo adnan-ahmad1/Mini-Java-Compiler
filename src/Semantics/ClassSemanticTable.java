@@ -127,7 +127,7 @@ public class ClassSemanticTable extends Table implements Type{
         }
         System.out.println("  fields:");
         for (String var : variables.keySet()) {
-            System.out.println("    "+ variables.get(var).type.toString() + " " + var);
+            System.out.println("    "+ variables.get(var).toString() + " " + var);
         }
         System.out.println("  methods:");
         for(String method : methods.keySet()) {
