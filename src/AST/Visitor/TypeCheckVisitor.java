@@ -433,6 +433,7 @@ public class TypeCheckVisitor implements Visitor {
             System.out.print("ERROR! Line Number: " + n.line_number + ", ");
             System.out.println("Call: Expression is not a ClassType");
             n.type = Semantics.Unknown.getInstance();
+            semanticTable.setError();
             return;
         }
 
@@ -443,6 +444,7 @@ public class TypeCheckVisitor implements Visitor {
             // error handle
             System.out.print("ERROR! Line Number: " + n.line_number + ", ");
             System.out.println("Call: Method " + n.i.s + " does not exist!");
+            semanticTable.setError();
         }
 
         List<Semantics.Type> typeList = new ArrayList<>();
@@ -457,6 +459,7 @@ public class TypeCheckVisitor implements Visitor {
             // error handle
             System.out.print("ERROR! Line Number: " + n.line_number + ", ");
             System.out.println("Call: Parameter order is incorrect");
+            semanticTable.setError();
         }
 
         n.type = c.getMethod(n.i.s).getReturnType();
@@ -487,6 +490,7 @@ public class TypeCheckVisitor implements Visitor {
             System.out.print("ERROR! Line Number: " + n.line_number + ", ");
             System.out.println("IdentifierExp: Variable " + n.s + " does not exist!");
             n.type = Semantics.Unknown.getInstance();
+            semanticTable.setError();
             return;
         }
 
@@ -508,6 +512,7 @@ public class TypeCheckVisitor implements Visitor {
             // error handle
             System.out.print("ERROR! Line Number: " + n.line_number + ", ");
             System.out.println("NewArray: Expression is not IntegerType!");
+            semanticTable.setError();
         }
 
         n.type = Semantics.IntArrayType.getInstance();
@@ -534,6 +539,7 @@ public class TypeCheckVisitor implements Visitor {
             // error handle
             System.out.print("ERROR! Line Number: " + n.line_number + ", ");
             System.out.println("Not: Expression is not BooleanType! ");
+            semanticTable.setError();
         }
 
         n.type = Semantics.BooleanType.getInstance();

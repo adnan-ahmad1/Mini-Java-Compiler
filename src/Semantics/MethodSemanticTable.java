@@ -10,14 +10,20 @@ public class MethodSemanticTable extends Table{
     private Stack<String> scopeVars;
     private ClassSemanticTable classInside;
     private Type returnType;
+    private String name;
 
-    public MethodSemanticTable(ClassSemanticTable classInside, Type returnType) {
+    public MethodSemanticTable(String name, ClassSemanticTable classInside, Type returnType) {
         super();
         this.classInside = classInside;
         parameters = new HashMap<>();
         paramOrder = new LinkedList<>();
         scopeVars = new Stack<>();
         this.returnType = returnType;
+        this.name = name;
+    }
+
+    public String getName() {
+        return name;
     }
 
     @Override
@@ -116,4 +122,7 @@ public class MethodSemanticTable extends Table{
         return true;
     }
 
+    public ClassSemanticTable getClassInside() {
+        return classInside;
+    }
 }

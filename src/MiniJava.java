@@ -22,7 +22,6 @@ public class MiniJava {
         boolean crashed = false;
 
         try {
-
             // create a scanner on the input file
             ComplexSymbolFactory sf = new ComplexSymbolFactory();
             Reader in = new BufferedReader(new FileReader(filename));
@@ -63,7 +62,9 @@ public class MiniJava {
                 // second pass
                 TypeCheckVisitor tVisitor = new TypeCheckVisitor(st);
                 program.accept(tVisitor);
-
+                if (st.hasError()) {
+                    System.exit(1);
+                }
                 //st.printTable();
                 //st = tVisitor.getSemanticTable();
                 //st.printTable();
