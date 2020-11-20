@@ -92,6 +92,7 @@ public class TypeCheckVisitor implements Visitor {
                     //error handle
                     System.out.print("ERROR! Line Number: " + n.line_number + ", ");
                     System.out.println("Parameter " + key + " has class type that does not exist!");
+                    semanticTable.setError();
                 }
             }
         }
@@ -112,12 +113,14 @@ public class TypeCheckVisitor implements Visitor {
                 System.out.print("ERROR! Line Number: " + n.line_number + ", ");
                 System.out.println("Return type should be "
                         + semanticTable.getCurrMethodTable().getReturnType().toString() + " but was " + n.e.type.toString());
+                semanticTable.setError();
             }
         } else if (!n.e.type.equals(t)) {
             //error handle
             System.out.print("ERROR! Line Number: " + n.line_number + ", ");
             System.out.println("Return type should be "
                     + semanticTable.getCurrMethodTable().getReturnType().toString() + " but was " + n.e.type.toString());
+            semanticTable.setError();
         }
     }
 
@@ -158,6 +161,7 @@ public class TypeCheckVisitor implements Visitor {
             // error handle
             System.out.print("ERROR! Line Number: " + n.line_number + ", ");
             System.out.println("If: Type in parentheses was " + n.e.type.toString());
+            semanticTable.setError();
         }
 
         // type check statement
@@ -177,6 +181,7 @@ public class TypeCheckVisitor implements Visitor {
             // error handle
             System.out.print("ERROR! Line Number: " + n.line_number + ", ");
             System.out.println("While: Type in parentheses was " + n.e.type.toString());
+            semanticTable.setError();
         }
 
         // type check statement
@@ -191,6 +196,7 @@ public class TypeCheckVisitor implements Visitor {
         if (!n.e.type.equals(Semantics.IntegerType.getInstance())) {
             System.out.print("ERROR! Line Number: " + n.line_number + ", ");
             System.out.println("Only integer types can be printed");
+            semanticTable.setError();
         }
     }
 
@@ -205,6 +211,7 @@ public class TypeCheckVisitor implements Visitor {
             // error handle
             System.out.print("ERROR! Line Number: " + n.line_number + ", ");
             System.out.println("Assign: Variable " + n.i.s + " does not exist!");
+            semanticTable.setError();
         }
 
         // type check expression and make sure its
@@ -216,6 +223,7 @@ public class TypeCheckVisitor implements Visitor {
             // error handle
             System.out.print("ERROR! Line Number: " + n.line_number + ", ");
             System.out.println("Assign: You are assigning an unknown to an unknown!");
+            semanticTable.setError();
         } else if (t instanceof ClassSemanticTable) {
             ClassSemanticTable c = ((ClassSemanticTable) t);
             if (!c.equals(n.e.type) && !c.isSubtype(n.e.type)) {
@@ -223,12 +231,14 @@ public class TypeCheckVisitor implements Visitor {
                 System.out.print("ERROR! Line Number: " + n.line_number + ", ");
                 System.out.println("Assign: Variable type for " + n.i.s + " is "
                         + t.toString() + " but was assigned type " + n.e.type.toString());
+                semanticTable.setError();
             }
         } else if (!t.equals(n.e.type)) {
             // error handle
             System.out.print("ERROR! Line Number: " + n.line_number + ", ");
             System.out.println("Assign: Variable type for " + n.i.s + " is "
                     + t.toString() + " but was assigned type " + n.e.type.toString());
+            semanticTable.setError();
         }
     }
 
@@ -243,33 +253,39 @@ public class TypeCheckVisitor implements Visitor {
             // error handle
             System.out.print("ERROR! Line Number: " + n.line_number + ", ");
             System.out.println("ArrayAssign: Variable " + n.i.s + " does not exist!");
-
+            semanticTable.setError();
         }
 
         if (!semanticTable.getCurrMethodTable().getVarType(n.i.s).equals(Semantics.IntArrayType.getInstance())) {
             // error handle
             System.out.print("ERROR! Line Number: " + n.line_number + ", ");
             System.out.println("ArrayAssign: Variable " + n.i.s + " is not IntArrayType");
+            semanticTable.setError();
         }
 
         // type check expression and make sure its of type int
         n.e1.accept(this);
 
         if (!n.e1.type.equals(Semantics.IntegerType.getInstance())) {
+            System.out.print("ERROR! Line Number: " + n.line_number + ", ");
             System.out.println("ArrayAssign: Expression1 is not IntegerType");
+            semanticTable.setError();
         }
 
         // type check expression and make sure its of type int
         n.e2.accept(this);
 
         if (!n.e2.type.equals(Semantics.IntegerType.getInstance())) {
+            System.out.print("ERROR! Line Number: " + n.line_number + ", ");
             System.out.println("ArrayAssign: Expression2 is not IntegerType");
+            semanticTable.setError();
         }
     }
 
     // Exp e1,e2;
     public void visit(And n) {
 
+        boolean error = false;
         // type check expression and make sure its of type boolean
         n.e1.accept(this);
 
@@ -278,7 +294,8 @@ public class TypeCheckVisitor implements Visitor {
             System.out.print("ERROR! Line Number: " + n.line_number + ", ");
             System.out.println("And: Expression1 is not BooleanType");
             n.type = Semantics.Unknown.getInstance();
-            return;
+            semanticTable.setError();
+            error = true;
         }
 
         // type check expression and make sure its of type boolean
@@ -289,13 +306,18 @@ public class TypeCheckVisitor implements Visitor {
             System.out.print("ERROR! Line Number: " + n.line_number + ", ");
             System.out.println("And: Expression2 is not BooleanType");
             n.type = Semantics.Unknown.getInstance();
-            return;
+            semanticTable.setError();
+            error = true;
         }
-        n.type = Semantics.BooleanType.getInstance();
+
+        if (!error) {
+            n.type = Semantics.BooleanType.getInstance();
+        }
     }
 
     // Exp e1,e2;
     public void visit(LessThan n) {
+        boolean error = false;
 
         // type check expression and make sure its of type int
         n.e1.accept(this);
@@ -305,7 +327,8 @@ public class TypeCheckVisitor implements Visitor {
             System.out.print("ERROR! Line Number: " + n.line_number + ", ");
             System.out.println("LessThan: Expression1 is not IntegerType");
             n.type = Semantics.Unknown.getInstance();
-            return;
+            semanticTable.setError();
+            error = true;
         }
 
         // type check expression and make sure its of type int
@@ -316,14 +339,18 @@ public class TypeCheckVisitor implements Visitor {
             System.out.print("ERROR! Line Number: " + n.line_number + ", ");
             System.out.println("LessThan: Expression2 is not IntegerType");
             n.type = Semantics.Unknown.getInstance();
-            return;
+            semanticTable.setError();
+            error = true;
         }
 
-        n.type = Semantics.BooleanType.getInstance();
+        if (!error) {
+            n.type = Semantics.BooleanType.getInstance();
+        }
     }
 
     // Exp e1,e2;
     public void visit(Plus n) {
+        boolean error = false;
 
         // type check expression and make sure its of type int
         n.e1.accept(this);
@@ -333,7 +360,8 @@ public class TypeCheckVisitor implements Visitor {
             System.out.print("ERROR! Line Number: " + n.line_number + ", ");
             System.out.println("Plus: Expression1 is not IntegerType");
             n.type = Semantics.Unknown.getInstance();
-            return;
+            semanticTable.setError();
+            error = true;
         }
 
         // type check expression and make sure its of type int
@@ -344,14 +372,18 @@ public class TypeCheckVisitor implements Visitor {
             System.out.print("ERROR! Line Number: " + n.line_number + ", ");
             System.out.println("Plus: Expression2 is not IntegerType");
             n.type = Semantics.Unknown.getInstance();
-            return;
+            semanticTable.setError();
+            error = true;
         }
 
-        n.type = Semantics.IntegerType.getInstance();
+        if (!error) {
+            n.type = Semantics.IntegerType.getInstance();
+        }
     }
 
     // Exp e1,e2;
     public void visit(Minus n) {
+        boolean error = false;
 
         // type check expression and make sure its of type int
         n.e1.accept(this);
@@ -360,7 +392,8 @@ public class TypeCheckVisitor implements Visitor {
             System.out.print("ERROR! Line Number: " + n.line_number + ", ");
             System.out.println("Minus: Expression1 is not IntegerType");
             n.type = Semantics.Unknown.getInstance();
-            return;
+            semanticTable.setError();
+            error = true;
         }
 
         // type check expression and make sure its of type int
@@ -370,14 +403,18 @@ public class TypeCheckVisitor implements Visitor {
             System.out.print("ERROR! Line Number: " + n.line_number + ", ");
             System.out.println("Minus: Expression2 is not IntegerType");
             n.type = Semantics.Unknown.getInstance();
-            return;
+            semanticTable.setError();
+            error = true;
         }
 
-        n.type = Semantics.IntegerType.getInstance();
+        if (!error) {
+            n.type = Semantics.IntegerType.getInstance();
+        }
     }
 
     // Exp e1,e2;
     public void visit(Times n) {
+        boolean error = false;
 
         // type check expression and make sure its of type int
         n.e1.accept(this);
@@ -386,7 +423,8 @@ public class TypeCheckVisitor implements Visitor {
             System.out.print("ERROR! Line Number: " + n.line_number + ", ");
             System.out.println("Times: Expression1 is not IntegerType");
             n.type = Semantics.Unknown.getInstance();
-            return;
+            semanticTable.setError();
+            error = true;
         }
 
         // type check expression and make sure its of type int
@@ -396,14 +434,18 @@ public class TypeCheckVisitor implements Visitor {
             System.out.print("ERROR! Line Number: " + n.line_number + ", ");
             System.out.println("Times: Expression2 is not IntegerType");
             n.type = Semantics.Unknown.getInstance();
-            return;
+            semanticTable.setError();
+            error = true;
         }
 
-        n.type = Semantics.IntegerType.getInstance();
+        if (!error) {
+            n.type = Semantics.IntegerType.getInstance();
+        }
     }
 
     // Exp e1,e2;
     public void visit(ArrayLookup n) {
+        boolean error = false;
 
         // type check expression and make sure its a variable
         // that exists of type IntArray
@@ -414,7 +456,8 @@ public class TypeCheckVisitor implements Visitor {
             System.out.print("ERROR! Line Number: " + n.line_number + ", ");
             System.out.println("ArrayLookup: Expression1 is not IntArrayType");
             n.type = Semantics.Unknown.getInstance();
-            return;
+            semanticTable.setError();
+            error = true;
         }
 
         // type check expression and make sure its of type int
@@ -425,10 +468,13 @@ public class TypeCheckVisitor implements Visitor {
             System.out.print("ERROR! Line Number: " + n.line_number + ", ");
             System.out.println("ArrayLookup: Expression2 is not IntegerType");
             n.type = Semantics.Unknown.getInstance();
-            return;
+            semanticTable.setError();
+            error = true;
         }
 
-        n.type = Semantics.IntegerType.getInstance();
+        if (!error) {
+            n.type = Semantics.IntegerType.getInstance();
+        }
     }
 
     // Exp e;
@@ -441,6 +487,7 @@ public class TypeCheckVisitor implements Visitor {
             // error handle
             System.out.print("ERROR! Line Number: " + n.line_number + ", ");
             System.out.println("ArrayLength: Expression is not IntArrayType");
+            semanticTable.setError();
             n.type = Semantics.Unknown.getInstance();
         } else {
             n.type = Semantics.IntegerType.getInstance();
@@ -451,6 +498,7 @@ public class TypeCheckVisitor implements Visitor {
     // Identifier i;
     // ExpList el;
     public void visit(Call n) {
+        boolean error = false;
 
         // type check expression and make sure its a variable
         n.e.accept(this);
@@ -460,9 +508,10 @@ public class TypeCheckVisitor implements Visitor {
             // error handle
             System.out.print("ERROR! Line Number: " + n.line_number + ", ");
             System.out.println("Call: Expression is not a ClassType");
+            semanticTable.setError();
             n.type = Semantics.Unknown.getInstance();
             semanticTable.setError();
-            return;
+            error = true;
         }
 
         ClassSemanticTable c = (ClassSemanticTable)(n.e.type);
@@ -472,9 +521,9 @@ public class TypeCheckVisitor implements Visitor {
             // error handle
             System.out.print("ERROR! Line Number: " + n.line_number + ", ");
             System.out.println("Call: Method " + n.i.s + " does not exist for type " + c.toString());
-            n.type = Semantics.Unknown.getInstance();
             semanticTable.setError();
-            return;
+            n.type = Semantics.Unknown.getInstance();
+            error = true;
         }
 
         List<Semantics.Type> typeList = new ArrayList<>();
@@ -492,10 +541,12 @@ public class TypeCheckVisitor implements Visitor {
                     + n.i.s + " of class " + c.getName());
             n.type = Semantics.Unknown.getInstance();
             semanticTable.setError();
-            return;
+            error = true;
         }
 
-        n.type = c.getMethod(n.i.s).getReturnType();
+        if (!error) {
+            n.type = c.getMethod(n.i.s).getReturnType();
+        }
     }
 
     // int i;
@@ -522,8 +573,8 @@ public class TypeCheckVisitor implements Visitor {
             // error handle
             System.out.print("ERROR! Line Number: " + n.line_number + ", ");
             System.out.println("IdentifierExp: Variable " + n.s + " does not exist!");
-            n.type = Semantics.Unknown.getInstance();
             semanticTable.setError();
+            n.type = Semantics.Unknown.getInstance();
         } else {
             // set expression node type to class semantic table
             n.type = semanticTable.getCurrMethodTable().getVarType(n.s);
@@ -544,8 +595,8 @@ public class TypeCheckVisitor implements Visitor {
             // error handle
             System.out.print("ERROR! Line Number: " + n.line_number + ", ");
             System.out.println("NewArray: Expression is not IntegerType!");
-            n.type = Semantics.Unknown.getInstance();
             semanticTable.setError();
+            n.type = Semantics.Unknown.getInstance();
         } else {
             n.type = Semantics.IntArrayType.getInstance();
         }
@@ -559,8 +610,8 @@ public class TypeCheckVisitor implements Visitor {
             // error handle
             System.out.print("ERROR! Line Number: " + n.line_number + ", ");
             System.out.println("NewObject: Class " + n.i.s + " is unknown!");
-            n.type = Semantics.Unknown.getInstance();
             semanticTable.setError();
+            n.type = Semantics.Unknown.getInstance();
         } else {
             n.type = semanticTable.getClass(n.i.s);
         }
@@ -576,8 +627,8 @@ public class TypeCheckVisitor implements Visitor {
             // error handle
             System.out.print("ERROR! Line Number: " + n.line_number + ", ");
             System.out.println("Not: Expression is not BooleanType! ");
-            n.type = Semantics.Unknown.getInstance();
             semanticTable.setError();
+            n.type = Semantics.Unknown.getInstance();
         } else {
             n.type = Semantics.BooleanType.getInstance();
         }

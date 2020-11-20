@@ -1,0 +1,8 @@
+We didn't really change anything from the previous parts of the project except for the AST nodes. We added a type
+for the expression nodes and also moved identifier from classDeclSimple and classDeclExtends to classDecl.
+
+Our first pass fills global and local symbol tables. We also check super classes, any inheritance cycles, and then override
+issues in the first pass. In out second pass, we type check everything.
+
+When there is an inheritance cycle, we print out the symbol table and exit with 1. We skip type checking because
+of potential infinite recursion issues;
