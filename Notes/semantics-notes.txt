@@ -6,3 +6,6 @@ issues in the first pass. In out second pass, we type check everything.
 
 When there is an inheritance cycle, we print out the symbol table and exit with 1. We skip type checking because
 of potential infinite recursion issues;
+
+We also made a bunch of tests in a folder called SemanticsTests in SamplePrograms. It was hard to compare outputs, so we
+just checked everything over.
