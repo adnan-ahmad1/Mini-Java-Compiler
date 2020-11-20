@@ -131,7 +131,7 @@ public class ClassSemanticTable extends Table implements Type{
         }
         System.out.println("  methods:");
         for(String method : methods.keySet()) {
-            methods.get(method).printTable(method);
+            methods.get(method).printTable();
         }
     }
 

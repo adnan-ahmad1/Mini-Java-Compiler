@@ -1,7 +1,6 @@
 package AST.Visitor;
 
 import AST.*;
-import Semantics.ClassSemanticTable;
 import Semantics.MethodSemanticTable;
 import Semantics.SemanticTable;
 import Semantics.Void;
@@ -33,7 +32,8 @@ public class FillGlobalTablesVisitor implements Visitor {
                 // error handle
                 System.out.print("ERROR! Line Number: " + n.line_number + ", ");
                 System.out.println("duplicate class " + className);
-                semanticTable.setError();
+                semanticTable.printTable();
+                System.exit(1);
             }
 
             semanticTable.addClass(className);
@@ -45,6 +45,7 @@ public class FillGlobalTablesVisitor implements Visitor {
 
         if (!semanticTable.setSuperClasses()) {
             // error handle
+            semanticTable.printTable();
             System.exit(1);
         }
 
@@ -60,9 +61,8 @@ public class FillGlobalTablesVisitor implements Visitor {
         semanticTable.goIntoClass(n.i1.toString());
 
         // add main method
-        Semantics.Type retMethodType = Void.getInstance();
         semanticTable.getCurrClassTable().addMethod("main",
-                      new MethodSemanticTable("main", semanticTable.getCurrClassTable(), retMethodType));
+                      new MethodSemanticTable("main", semanticTable.getCurrClassTable(), Void.getInstance()));
         // process statement
         n.s.accept(this);
     }
@@ -295,11 +295,9 @@ public class FillGlobalTablesVisitor implements Visitor {
     }
 
     public void visit(True n) {
-
     }
 
     public void visit(False n) {
-
     }
 
     // String s;

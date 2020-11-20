@@ -62,12 +62,15 @@ public class MiniJava {
                 // second pass
                 TypeCheckVisitor tVisitor = new TypeCheckVisitor(st);
                 program.accept(tVisitor);
+
+                // print table
+                st = tVisitor.getSemanticTable();
+                st.printTable();
+
                 if (st.hasError()) {
                     System.exit(1);
                 }
-                //st.printTable();
-                //st = tVisitor.getSemanticTable();
-                //st.printTable();
+
             }
         } catch (Exception e) {
             // yuck: some kind of error in the compiler implementation

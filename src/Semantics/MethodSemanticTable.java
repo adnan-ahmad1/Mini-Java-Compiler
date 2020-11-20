@@ -1,13 +1,10 @@
 package Semantics;
 
-import AST.Identifier;
-
 import java.util.*;
 
 public class MethodSemanticTable extends Table{
     private List<String> paramOrder;
     private Map<String, Type> parameters;
-    private Stack<String> scopeVars;
     private ClassSemanticTable classInside;
     private Type returnType;
     private String name;
@@ -17,7 +14,6 @@ public class MethodSemanticTable extends Table{
         this.classInside = classInside;
         parameters = new HashMap<>();
         paramOrder = new LinkedList<>();
-        scopeVars = new Stack<>();
         this.returnType = returnType;
         this.name = name;
     }
@@ -28,11 +24,7 @@ public class MethodSemanticTable extends Table{
 
     @Override
     public boolean addVariable(String variable, Type type) {
-        boolean success = super.addVariable(variable, type);
-        if(success) {
-            scopeVars.push(variable);
-        }
-        return success;
+        return super.addVariable(variable, type);
     }
 
     public boolean addParam(String name, Type type) {
@@ -44,30 +36,20 @@ public class MethodSemanticTable extends Table{
         return true;
     }
 
-    public boolean removeTop() {
-        String s = scopeVars.pop();
-        if (variables.containsKey(s)) {
-            variables.remove(s);
-        }
-
-        return true;
-    }
-
     public List<String> getParaOrder() {
         return paramOrder;
     }
-
 
     public Map<String, Type> getParameters() {
         return parameters;
     }
 
-    public void printTable(String name) {
+    public void printTable() {
         System.out.println("    " + name);
         System.out.println("      return type: " + returnType.toString());
         System.out.println("      parameters:");
         for (String params : paramOrder) {
-            System.out.println("        " + parameters.get(params) + " " + params);
+            System.out.println("        " + parameters.get(params).toString() + " " + params);
         }
         System.out.println("      variables:");
         for (String var : variables.keySet()) {
@@ -101,7 +83,9 @@ public class MethodSemanticTable extends Table{
     public boolean callParamsOrdered(List<Type> callParams) {
         int i = 0;
         for (String s : paramOrder) {
-            if (i >= paramOrder.size()) {
+
+            // too few args passed in
+            if (i >= callParams.size()) {
                 return false;
             }
 
@@ -118,6 +102,11 @@ public class MethodSemanticTable extends Table{
             }
 
             i++;
+        }
+
+        // arg list is too long
+        if (i != callParams.size()) {
+            return false;
         }
         return true;
     }
