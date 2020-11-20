@@ -498,7 +498,6 @@ public class TypeCheckVisitor implements Visitor {
     // Identifier i;
     // ExpList el;
     public void visit(Call n) {
-        boolean error = false;
 
         // type check expression and make sure its a variable
         n.e.accept(this);
@@ -511,7 +510,7 @@ public class TypeCheckVisitor implements Visitor {
             semanticTable.setError();
             n.type = Semantics.Unknown.getInstance();
             semanticTable.setError();
-            error = true;
+            return;
         }
 
         ClassSemanticTable c = (ClassSemanticTable)(n.e.type);
@@ -523,7 +522,7 @@ public class TypeCheckVisitor implements Visitor {
             System.out.println("Call: Method " + n.i.s + " does not exist for type " + c.toString());
             semanticTable.setError();
             n.type = Semantics.Unknown.getInstance();
-            error = true;
+            return;
         }
 
         List<Semantics.Type> typeList = new ArrayList<>();
@@ -541,12 +540,10 @@ public class TypeCheckVisitor implements Visitor {
                     + n.i.s + " of class " + c.getName());
             n.type = Semantics.Unknown.getInstance();
             semanticTable.setError();
-            error = true;
+            return;
         }
 
-        if (!error) {
-            n.type = c.getMethod(n.i.s).getReturnType();
-        }
+        n.type = c.getMethod(n.i.s).getReturnType();
     }
 
     // int i;
