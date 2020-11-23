@@ -1,8 +1,5 @@
 import AST.Program;
-import AST.Visitor.AbstractTreeVisitor;
-import AST.Visitor.FillGlobalTablesVisitor;
-import AST.Visitor.TypeCheckVisitor;
-import AST.Visitor.PrettyPrintVisitor;
+import AST.Visitor.*;
 import Parser.parser;
 import Parser.sym;
 import Scanner.scanner;
@@ -16,8 +13,12 @@ import java.io.Reader;
 
 public class MiniJava {
     public static void main(String[] args) {
-        //System.out.println(Arrays.toString(args));
-        String filename = args[1];
+        String filename;
+        if (args.length == 1) {
+            filename = args[0];
+        } else {
+            filename = args[1];
+        }
 
         boolean crashed = false;
 
@@ -70,6 +71,16 @@ public class MiniJava {
                 if (st.hasError()) {
                     System.exit(1);
                 }
+
+            } else {
+
+                Symbol root;
+                root = p.parse();
+                Program program = (Program)root.value;
+                CodeGenVisitor visitor = new CodeGenVisitor();
+                program.accept(visitor);
+
+
 
             }
         } catch (Exception e) {
