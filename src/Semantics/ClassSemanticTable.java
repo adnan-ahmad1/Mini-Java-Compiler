@@ -24,6 +24,12 @@ public class ClassSemanticTable extends Table implements Type{
     }
 
     public boolean isSubtype(Type type) {
+
+        // return not subtype if type is unknown
+        if (type.equals(Semantics.Unknown.getInstance())) {
+            return false;
+        }
+
         ClassSemanticTable c = ((ClassSemanticTable)(type));
 
         if (c.getSuperClass() != null && c.getSuperClass().equals(this)) {

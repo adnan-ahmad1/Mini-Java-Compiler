@@ -11,8 +11,29 @@ class Bar {
     Foo f;
     Dog d;
 
-    public int m() {
+    Baz b;
+
+    public int m1() {
         d = f.method();
+        return 1;
+    }
+
+    public int m2() {
+        d = b;
+        return 1;
+    }
+
+    public int m3() {
+        Lion l;
+        Tiger t;
+
+        l = t;
+        return 1;
+    }
+
+    public int m4() {
+        Lion l;
+        l = b;
         return 1;
     }
 }
