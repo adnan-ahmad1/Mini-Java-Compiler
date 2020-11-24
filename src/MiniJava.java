@@ -79,7 +79,10 @@ public class MiniJava {
                 Symbol root;
                 root = p.parse();
                 Program program = (Program)root.value;
-                CodeGenVisitor visitor = new CodeGenVisitor();
+                FillGlobalTablesVisitor gVisitor = new FillGlobalTablesVisitor(new SemanticTable());
+                program.accept(gVisitor);
+                TypeCheckVisitor tc = new TypeCheckVisitor(gVisitor.getSemanticTable());
+                CodeGenVisitor visitor = new CodeGenVisitor(tc.getSemanticTable());
                 program.accept(visitor);
 
 

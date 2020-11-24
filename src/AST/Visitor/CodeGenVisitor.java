@@ -2,17 +2,58 @@ package AST.Visitor;
 
 import AST.*;
 import CodeGen.Gen;
-
+import Semantics.SemanticTable;
+import java.util.*;
 import java.io.IOException;
 
 public class CodeGenVisitor implements Visitor {
-
+    private static final int VTABLE_OFFSET = 8;
     private Gen gen;
     private int counter;
+    private SemanticTable sm;
+    private Map<String, List<String>> vTable;
 
-    public CodeGenVisitor() throws IOException {
+    // one -> two -> three (super class)
+    // one vtable.put(one, [plus, minus, times, divide])
+    // two vtabe.put(two, [three$$plus, three$$minus]  plus, times
+    // three vtable.put(three, [three$$plus, three$$minus])
+    public CodeGenVisitor(SemanticTable sm) throws IOException {
         counter = 0;
         gen = new Gen("src/runtime/asmOutput.s");
+        this.sm  = sm;
+        makeVTableInfo();
+    }
+
+    private void makeVTableInfo() {
+        for (String c : sm.getClasses().keySet()) {
+            if (vTable.containsKey(c)) {
+                continue;
+            }
+            helper(c);
+        }
+    }
+
+    private void helper(String c) {
+        if (sm.getClass(c).getSuperClassName() == null) {
+            vTable.put(c, new ArrayList<>());
+        } else if (vTable.containsKey(sm.getClass(c).getSuperClassName())) {
+            vTable.put(c, new ArrayList<>(vTable.get(sm.getClass(c).getSuperClassName())));
+        } else {
+            helper(sm.getClass(c).getSuperClassName());
+            vTable.put(c, new ArrayList<>(vTable.get(sm.getClass(c).getSuperClassName())));
+        }
+        for (String m : sm.getClass(c).getMethodNames()) {
+            boolean found = false;
+            for (String vName: vTable.get(c)) {
+                if (vName.split("$")[1].equals(m)) {
+                    found = true;
+                    break;
+                }
+            }
+            if (!found) {
+                vTable.get(c).add(c + "$" + m);
+            }
+        }
     }
 
     // Display added for toy example language.  Not used in regular MiniJava
@@ -23,12 +64,10 @@ public class CodeGenVisitor implements Visitor {
     // ClassDeclList cl;
     public void visit(Program n) {
         n.m.accept(this);
-        /*
+
         for ( int i = 0; i < n.cl.size(); i++ ) {
             n.cl.get(i).accept(this);
         }
-
-         */
         try {
             gen.finish();
         } catch(java.io.IOException e) {
@@ -58,20 +97,10 @@ public class CodeGenVisitor implements Visitor {
     // VarDeclList vl;
     // MethodDeclList ml;
     public void visit(ClassDeclSimple n) {
-        System.out.print("class ");
-        n.i.accept(this);
-        System.out.println(" { ");
-        for ( int i = 0; i < n.vl.size(); i++ ) {
-            System.out.print("  ");
-            n.vl.get(i).accept(this);
-            if ( i+1 < n.vl.size() ) { System.out.println(); }
-        }
-        for ( int i = 0; i < n.ml.size(); i++ ) {
-            System.out.println();
+        sm.goIntoClass(n.i.s);
+        for (int i = 0; i < n.ml.size(); i++) {
             n.ml.get(i).accept(this);
         }
-        System.out.println();
-        System.out.println("}");
     }
 
     // Identifier i;
@@ -113,30 +142,18 @@ public class CodeGenVisitor implements Visitor {
     // StatementList sl;
     // Exp e;
     public void visit(MethodDecl n) {
-        System.out.print("  public ");
-        n.t.accept(this);
-        System.out.print(" ");
-        n.i.accept(this);
-        System.out.print(" (");
-        for ( int i = 0; i < n.fl.size(); i++ ) {
-            n.fl.get(i).accept(this);
-            if (i+1 < n.fl.size()) { System.out.print(", "); }
+        try {
+            sm.goIntoMethod(n.i.s);
+            String methodH = sm.getCurrClassTable().getName() + "$" + n.i.s;
+            gen.gen(methodH + ":");
+            for (int i = 0; i < n.sl.size(); i++) {
+                n.sl.get(i).accept(this);
+            }
+            n.e.accept(this);
+        } catch (Exception e) {
+
         }
-        System.out.println(") { ");
-        for ( int i = 0; i < n.vl.size(); i++ ) {
-            System.out.print("    ");
-            n.vl.get(i).accept(this);
-            System.out.println("");
-        }
-        for ( int i = 0; i < n.sl.size(); i++ ) {
-            System.out.print("    ");
-            n.sl.get(i).accept(this);
-            if ( i < n.sl.size() ) { System.out.println(""); }
-        }
-        System.out.print("    return ");
-        n.e.accept(this);
-        System.out.println(";");
-        System.out.print("  }");
+
     }
 
     // Type t;
@@ -213,10 +230,7 @@ public class CodeGenVisitor implements Visitor {
     // Identifier i;
     // Exp e;
     public void visit(Assign n) {
-        n.i.accept(this);
-        System.out.print(" = ");
         n.e.accept(this);
-        System.out.print(";");
     }
 
     // Identifier i;
@@ -379,9 +393,17 @@ public class CodeGenVisitor implements Visitor {
 
     // Identifier i;
     public void visit(NewObject n) {
-        System.out.print("new ");
-        System.out.print(n.i.s);
-        System.out.print("()");
+        try {
+            String c = n.i.toString();
+            int offset = sm.getClass(c).getOffset();
+            gen.gen("movq $" + (offset+8) + ",%rdi");
+            gen.gen("call _mjcalloc");
+            gen.gen("leaq " + c + "$$(%rip),");
+            gen.gen("movq %rdx,0(%rax)");
+
+        } catch(Exception e) {
+
+        }
     }
 
     // Exp e;

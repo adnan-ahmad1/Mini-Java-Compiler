@@ -12,6 +12,10 @@ public class SemanticTable {
         hasError = false;
     }
 
+    public Map<String, ClassSemanticTable> getClasses() {
+        return classes;
+    }
+
     public void setError() {
         hasError = true;
     }
