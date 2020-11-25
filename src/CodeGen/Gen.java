@@ -15,8 +15,9 @@ public class Gen {
         asmFile = new File(pathname);
         asmFile.createNewFile();
         fileWriter = new FileWriter(asmFile);
-        fileWriter.write(".text\n");
-        fileWriter.write(".globl  _asm_main\n");
+        fileWriter.write("    .text\n");
+        fileWriter.write("    .globl  _asm_main\n");
+        gen("");
     }
 
     public void gen(String s) throws IOException {
@@ -37,13 +38,15 @@ public class Gen {
     }
 
     public void prologue() throws IOException {
-        gen("pushq %rbp");
-        genbin("movq", "%rsp", "%rbp");
+        gen("    pushq %rbp");
+        genbin("    movq", "%rsp", "%rbp");
+        gen("");
     }
 
     public void epilogue() throws IOException {
-        genbin("movq", "%rbp", "%rsp");
-        gen("popq %rbp");
-        gen("ret");
+        genbin("    movq", "%rbp", "%rsp");
+        gen("    popq %rbp");
+        gen("    ret");
+        gen("");
     }
 }

@@ -1,7 +1,6 @@
 class One {
     public static void main(String[] args) {
         System.out.println(new Two().seventeen());
-        //System.out.println(9 * (3 - 1) + 5);
     }
 }
 

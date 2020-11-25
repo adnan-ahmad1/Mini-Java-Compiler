@@ -6,6 +6,9 @@ import Semantics.SemanticTable;
 import java.util.*;
 import java.io.IOException;
 
+
+// java -cp build/classes:lib/java-cup-11b.jar MiniJava filename.java
+
 public class CodeGenVisitor implements Visitor {
     private static final int VTABLE_OFFSET = 8;
     private Gen gen;
@@ -21,6 +24,7 @@ public class CodeGenVisitor implements Visitor {
         counter = 0;
         gen = new Gen("src/runtime/asmOutput.s");
         this.sm  = sm;
+        vTable = new HashMap<>();
         makeVTableInfo();
     }
 
@@ -31,6 +35,7 @@ public class CodeGenVisitor implements Visitor {
             }
             helper(c);
         }
+
     }
 
     private void helper(String c) {
@@ -45,7 +50,8 @@ public class CodeGenVisitor implements Visitor {
         for (String m : sm.getClass(c).getMethodNames()) {
             boolean found = false;
             for (String vName: vTable.get(c)) {
-                if (vName.split("$")[1].equals(m)) {
+                //System.out.println(Arrays.toString(vName.split("\\$")));
+                if ((vName.split("\\$")[1]).equals(m)) {
                     found = true;
                     break;
                 }
@@ -53,6 +59,23 @@ public class CodeGenVisitor implements Visitor {
             if (!found) {
                 vTable.get(c).add(c + "$" + m);
             }
+        }
+    }
+
+    private void writeData() {
+        try {
+            gen.gen(".data");
+            for (String key : vTable.keySet()) {
+                gen.gen(key + "$$:");
+
+                gen.gen("    .quad 0");
+
+                List<String> methods = vTable.get(key);
+                for (String method : methods) {
+                    gen.gen("    .quad " + method);
+                }
+            }
+        } catch(java.io.IOException e) {
         }
     }
 
@@ -69,6 +92,7 @@ public class CodeGenVisitor implements Visitor {
             n.cl.get(i).accept(this);
         }
         try {
+            writeData();
             gen.finish();
         } catch(java.io.IOException e) {
         }
@@ -146,10 +170,14 @@ public class CodeGenVisitor implements Visitor {
             sm.goIntoMethod(n.i.s);
             String methodH = sm.getCurrClassTable().getName() + "$" + n.i.s;
             gen.gen(methodH + ":");
+
+            gen.prologue();
             for (int i = 0; i < n.sl.size(); i++) {
                 n.sl.get(i).accept(this);
+                gen.gen("");
             }
             n.e.accept(this);
+            gen.epilogue();
         } catch (Exception e) {
 
         }
@@ -173,7 +201,8 @@ public class CodeGenVisitor implements Visitor {
     }
 
     public void visit(IntegerType n) {
-        System.out.print("int");
+        //System.out.print("int");
+
     }
 
     // String s;
@@ -221,8 +250,9 @@ public class CodeGenVisitor implements Visitor {
         n.e.accept(this);
 
         try {
-            gen.genbin("movq", "%rax", "%rdi");
-            gen.gen("call _put");
+            gen.genbin("    movq", "%rax", "%rdi");
+            gen.gen("    call _put");
+            gen.gen("");
         } catch(java.io.IOException e) {
         }
     }
@@ -269,7 +299,7 @@ public class CodeGenVisitor implements Visitor {
 
         // push expression 1 onto stack
         try {
-            gen.gen("pushq %rax");
+            gen.gen("    pushq %rax");
         } catch(java.io.IOException e) {
         }
 
@@ -278,8 +308,9 @@ public class CodeGenVisitor implements Visitor {
 
         // pop expression 1 into %rdx and add both
         try {
-            gen.gen("popq %rdx");
-            gen.genbin("addq", "%rdx", "%rax");
+            gen.gen("    popq %rdx");
+            gen.genbin("    addq", "%rdx", "%rax");
+            gen.gen("");
         } catch(java.io.IOException e) {
         }
     }
@@ -291,7 +322,7 @@ public class CodeGenVisitor implements Visitor {
 
         // push expression 1 onto stack
         try {
-            gen.gen("pushq %rax");
+            gen.gen("    pushq %rax");
         } catch(java.io.IOException e) {
         }
 
@@ -300,9 +331,10 @@ public class CodeGenVisitor implements Visitor {
 
         // pop expression 1 into %rdx and subtract both
         try {
-            gen.gen("popq %rdx");
-            gen.genbin("subq", "%rax", "%rdx");
-            gen.genbin("movq", "%rdx", "%rax");
+            gen.gen("    popq %rdx");
+            gen.genbin("    subq", "%rax", "%rdx");
+            gen.genbin("    movq", "%rdx", "%rax");
+            gen.gen("");
         } catch(java.io.IOException e) {
         }
     }
@@ -314,7 +346,7 @@ public class CodeGenVisitor implements Visitor {
 
         // push expression 1 onto stack
         try {
-            gen.gen("pushq %rax");
+            gen.gen("    pushq %rax");
         } catch(java.io.IOException e) {
         }
 
@@ -323,8 +355,9 @@ public class CodeGenVisitor implements Visitor {
 
         // pop expression 1 into %rdx and multiply both
         try {
-            gen.gen("popq %rdx");
-            gen.genbin("imulq", "%rdx", "%rax");
+            gen.gen("    popq %rdx");
+            gen.genbin("    imulq", "%rdx", "%rax");
+            gen.gen("");
         } catch(java.io.IOException e) {
         }
     }
@@ -348,21 +381,24 @@ public class CodeGenVisitor implements Visitor {
     // ExpList el;
     public void visit(Call n) {
         n.e.accept(this);
-        System.out.print(".");
-        n.i.accept(this);
-        System.out.print("(");
-        for ( int i = 0; i < n.el.size(); i++ ) {
-            n.el.get(i).accept(this);
-            if ( i+1 < n.el.size() ) { System.out.print(", "); }
+        //System.out.println(n.e.type);
+        int methodOffset = (vTable.get(n.e.type.toString())
+                .indexOf(n.e.type.toString() + "$" + n.i.toString()) * 8) + 8;
+
+        try {
+            gen.genbin("    movq", "%rax", "%rdi");
+            gen.genbin("    movq", "0(%rdi)", "%rax");
+            gen.gen("    call *" + methodOffset + "(%rax)");
+            gen.gen("");
+        } catch(java.io.IOException e) {
         }
-        System.out.print(")");
     }
 
     // int i;
     public void visit(IntegerLiteral n) {
 
         try {
-            gen.genbin("movq", "$"+n.i, "%rax");
+            gen.genbin("    movq", "$"+n.i, "%rax");
         } catch(java.io.IOException e) {
         }
     }
@@ -377,7 +413,8 @@ public class CodeGenVisitor implements Visitor {
 
     // String s;
     public void visit(IdentifierExp n) {
-        System.out.print(n.s);
+        n.type = sm.getCurrMethodTable().getVarType(n.s);
+        //System.out.print(n.s);
     }
 
     public void visit(This n) {
@@ -395,15 +432,17 @@ public class CodeGenVisitor implements Visitor {
     public void visit(NewObject n) {
         try {
             String c = n.i.toString();
-            int offset = sm.getClass(c).getOffset();
-            gen.gen("movq $" + (offset+8) + ",%rdi");
-            gen.gen("call _mjcalloc");
-            gen.gen("leaq " + c + "$$(%rip),");
-            gen.gen("movq %rdx,0(%rax)");
-
+            int nBytesNeeded = sm.getClass(c).getOffset();
+            gen.gen("    movq $" + (nBytesNeeded + 8) + ",%rdi");
+            gen.gen("    call _mjcalloc");
+            gen.gen("    leaq " + c + "$$(%rip),%rdx");
+            gen.gen("    movq %rdx,0(%rax)");
+            gen.gen("");
         } catch(Exception e) {
 
         }
+
+        n.type = sm.getClass(n.i.toString());
     }
 
     // Exp e;
