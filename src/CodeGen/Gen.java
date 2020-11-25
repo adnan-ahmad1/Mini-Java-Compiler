@@ -49,4 +49,12 @@ public class Gen {
         gen("    ret");
         gen("");
     }
+
+    public void pushDummy() throws IOException{
+        gen("pushq 0xBADBADBADBADBADB");
+    }
+
+    public void popDummy() throws IOException {
+        gen("addq 8,%rsp");
+    }
 }

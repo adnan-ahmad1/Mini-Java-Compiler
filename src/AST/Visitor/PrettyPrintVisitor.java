@@ -37,6 +37,7 @@ public class PrettyPrintVisitor implements Visitor {
     n.s.accept(this);
     System.out.println("  }");
     System.out.println("}");
+
   }
 
   // Identifier i;

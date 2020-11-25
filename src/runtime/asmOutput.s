@@ -61,6 +61,7 @@ Two$seventeen:
     movq %rax,%rdi
     call _put
 
+
     movq $9,%rax
     pushq %rax
     movq $3,%rax
@@ -88,8 +89,6 @@ Two$seventeen:
     ret
 
 .data
-One$$:
-    .quad 0
 Two$$:
     .quad 0
     .quad Two$add

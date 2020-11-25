@@ -11,11 +11,12 @@ import java.io.IOException;
 
 public class CodeGenVisitor implements Visitor {
     private static final int VTABLE_OFFSET = 8;
+    private static final String[] registers = {"%rdi", "%rsi", "%rdx", "%rcx", "%r8", "%r9"};
     private Gen gen;
     private int counter;
     private SemanticTable sm;
     private Map<String, List<String>> vTable;
-
+    Map<String, Integer> localVarOffset;
     // one -> two -> three (super class)
     // one vtable.put(one, [plus, minus, times, divide])
     // two vtabe.put(two, [three$$plus, three$$minus]  plus, times
@@ -26,6 +27,8 @@ public class CodeGenVisitor implements Visitor {
         this.sm  = sm;
         vTable = new HashMap<>();
         makeVTableInfo();
+        localVarOffset = new HashMap<>();
+
     }
 
     private void makeVTableInfo() {
@@ -106,6 +109,7 @@ public class CodeGenVisitor implements Visitor {
         try {
             gen.genLabel("_asm_main");
             gen.prologue();
+            vTable.remove(n.i1.s);
         } catch(java.io.IOException e) {
         }
 
@@ -172,16 +176,42 @@ public class CodeGenVisitor implements Visitor {
             gen.gen(methodH + ":");
 
             gen.prologue();
+            for (int i = 0; i < n.fl.size();i++) {
+                localVarOffset.put(n.fl.get(i).i.s, i);
+            }
+            for (int i = 0; i < n.vl.size(); i++) {
+                localVarOffset.put(n.vl.get(i).i.s, i+n.fl.size());
+            }
+            if (localVarOffset.size()%2 == 1) {
+                gen.gen("subq 8,%rsp");
+                counter += 1;
+            }
+            gen.gen("subq " + (localVarOffset.size()*8) + ",%rsp");
+            counter += localVarOffset.size();
+            int j = 0;
+            if (localVarOffset.size()%2 == 1) {
+                gen.genbin("movq", "0xBADBADBADBADBADB", (localVarOffset.size()*(-8))+"(%rbp)");
+                j = 1;
+            }
+            for(; j < n.fl.size();j++) {
+                String assemblyCommand = "movq ";
+                assemblyCommand += registers[j+1] + ",";
+                assemblyCommand += ((j+1)*(-8));
+                assemblyCommand += "(%rbp)";
+                gen.gen(assemblyCommand);
+            }
             for (int i = 0; i < n.sl.size(); i++) {
                 n.sl.get(i).accept(this);
                 gen.gen("");
             }
             n.e.accept(this);
             gen.epilogue();
+            counter -= localVarOffset.size();
+            localVarOffset.clear();
         } catch (Exception e) {
 
         }
-
+        // higheraddress ->
     }
 
     // Type t;
@@ -380,12 +410,36 @@ public class CodeGenVisitor implements Visitor {
     // Identifier i;
     // ExpList el;
     public void visit(Call n) {
-        n.e.accept(this);
-        //System.out.println(n.e.type);
-        int methodOffset = (vTable.get(n.e.type.toString())
-                .indexOf(n.e.type.toString() + "$" + n.i.toString()) * 8) + 8;
-
         try {
+            for (int i = 0; i < n.el.size(); i++) {
+                if (counter%2 == 1) {
+                    gen.pushDummy();
+                }
+                n.el.get(i).accept(this);
+                if (counter%2 == 1) {
+                    gen.popDummy();
+                    counter--;
+                }
+                gen.gen("pushq %rax");
+                counter++;
+            }
+            for (int i = n.el.size()-1; i >= 0; i--) {
+                gen.gen("popq " + registers[i+1]);
+            }
+            // obj.call(exp1, obj.call2(1), exp3)
+            // finds vtable and calls function
+            /*
+                fun(int n, int m, int g, int q) {
+                    new Two().fun(1, 2, fun, fun(1,2,3, 4))
+                }
+                n -> m -> g -> q -> 1 -> 2- > vakfhaal
+                visitor(Call n)
+                    rax = exp2
+                    ex1 -> exp2 - >
+            */
+            n.e.accept(this);
+            int methodOffset = (vTable.get(n.e.type.toString())
+                    .indexOf(n.e.type.toString() + "$" + n.i.toString()) * 8) + 8;
             gen.genbin("    movq", "%rax", "%rdi");
             gen.genbin("    movq", "0(%rdi)", "%rax");
             gen.gen("    call *" + methodOffset + "(%rax)");
