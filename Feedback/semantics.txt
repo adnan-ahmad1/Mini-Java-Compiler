@@ -6,6 +6,4 @@ The semantics checker crashed with a NullPointerException when trying to check a
 
 False positive: when a subclass overrides a method from the superclass, the subclass method’s return type can be a subclass of the superclass method’s return type. (-2)
 
-False positive: The compiler errors when integer-typed expressions (e.g., method calls that return an int) are passed to System.out.println. (-2)
-
-Total: 72/80
+Total: 74/80
