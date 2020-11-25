@@ -73,7 +73,7 @@
   <!-- targets for running demo programs -->
 
   <!-- run scanner and parser test programs on initial demo input
-       located in SamplePrograms/Example.java. -->
+       located in SamplePrograms/OverrideCanHaveSubtypeReturn.java. -->
 
   <target name="demo-scanner" depends="compile">
     <java classname="DemoScanner" classpath="build/classes;lib/java-cup-11b.jar"

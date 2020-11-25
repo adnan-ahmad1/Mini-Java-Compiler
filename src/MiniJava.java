@@ -1,8 +1,5 @@
 import AST.Program;
-import AST.Visitor.AbstractTreeVisitor;
-import AST.Visitor.FillGlobalTablesVisitor;
-import AST.Visitor.TypeCheckVisitor;
-import AST.Visitor.PrettyPrintVisitor;
+import AST.Visitor.*;
 import Parser.parser;
 import Parser.sym;
 import Scanner.scanner;
@@ -16,8 +13,12 @@ import java.io.Reader;
 
 public class MiniJava {
     public static void main(String[] args) {
-        //System.out.println(Arrays.toString(args));
-        String filename = args[1];
+        String filename;
+        if (args.length == 1) {
+            filename = args[0];
+        } else {
+            filename = args[1];
+        }
 
         boolean crashed = false;
 
@@ -66,10 +67,25 @@ public class MiniJava {
                 // print table
                 st = tVisitor.getSemanticTable();
                 st.printTable();
+                System.out.println();
 
                 if (st.hasError()) {
+                    System.out.println("SYSTEM EXIT 1");
                     System.exit(1);
                 }
+
+            } else {
+
+                Symbol root;
+                root = p.parse();
+                Program program = (Program)root.value;
+                FillGlobalTablesVisitor gVisitor = new FillGlobalTablesVisitor(new SemanticTable());
+                program.accept(gVisitor);
+                TypeCheckVisitor tc = new TypeCheckVisitor(gVisitor.getSemanticTable());
+                CodeGenVisitor visitor = new CodeGenVisitor(tc.getSemanticTable());
+                program.accept(visitor);
+
+
 
             }
         } catch (Exception e) {
@@ -79,14 +95,17 @@ public class MiniJava {
                     e.toString());
             // print out a stack dump
             e.printStackTrace();
+            System.out.println("SYSTEM EXIT 1");
             System.exit(1);
         }
 
         // if error was encountered, exit with 1
         if (crashed) {
+            System.out.println("SYSTEM EXIT 1");
             System.exit(1);
         }
 
+        System.out.println("SYSTEM EXIT 0");
         System.exit(0);
     }
 }

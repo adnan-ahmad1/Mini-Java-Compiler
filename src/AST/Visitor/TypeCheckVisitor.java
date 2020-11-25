@@ -106,6 +106,15 @@ public class TypeCheckVisitor implements Visitor {
         n.e.accept(this);
 
         Semantics.Type t = semanticTable.getCurrMethodTable().getReturnType();
+
+        if (t.equals(Semantics.Unknown.getInstance())) {
+            //error handle
+            System.out.print("ERROR! Line Number: " + n.line_number + ", ");
+            System.out.println("Return type for method definiton is unknown!");
+            semanticTable.setError();
+            return;
+        }
+
         if (t instanceof ClassSemanticTable) {
             ClassSemanticTable c = ((ClassSemanticTable)t);
             if (!n.e.type.equals(c) && !c.isSubtype(n.e.type)) {

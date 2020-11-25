@@ -46,7 +46,7 @@ public class MethodSemanticTable extends Table{
 
     public void printTable() {
         System.out.println("    " + name);
-        System.out.println("      return type: " + returnType.toString());
+        System.out.println("      return type: " + getReturnType().toString());
         System.out.println("      parameters:");
         for (String params : paramOrder) {
             System.out.println("        " + parameters.get(params).toString() + " " + params);
@@ -77,6 +77,9 @@ public class MethodSemanticTable extends Table{
     }
 
     public Type getReturnType() {
+        if (returnType == null) {
+            return Semantics.Unknown.getInstance();
+        }
         return returnType;
     }
 

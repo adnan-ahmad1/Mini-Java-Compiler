@@ -12,6 +12,10 @@ public class SemanticTable {
         hasError = false;
     }
 
+    public Map<String, ClassSemanticTable> getClasses() {
+        return classes;
+    }
+
     public void setError() {
         hasError = true;
     }
@@ -181,7 +185,23 @@ public class SemanticTable {
                 setError();
             }
         }
-        if (!tab1.getReturnType().equals(tab2.getReturnType())) {
+
+        Type retOne = tab1.getReturnType();
+        Type retTwo = tab2.getReturnType();
+
+        if ((retOne instanceof ClassSemanticTable) && (retTwo instanceof ClassSemanticTable)) {
+            ClassSemanticTable cOne = (ClassSemanticTable) retOne;
+            ClassSemanticTable cTwo = (ClassSemanticTable) retTwo;
+
+            if (!cOne.equals(cTwo) && !cOne.isSubtype(cTwo)) {
+                equals = false;
+                System.out.print("ERROR! method " + tab2.getName());
+                System.out.print(" in class " + tab2.getClassInside().getName());
+                System.out.println(" does not have same return type or is not a subtype as in super class.");
+                setError();
+            }
+
+        } else if (!retOne.equals(retTwo)) {
             equals = false;
             System.out.print("ERROR! method " + tab2.getName());
             System.out.print(" in class " + tab2.getClassInside().getName());

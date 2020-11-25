@@ -9,11 +9,17 @@ public class ClassSemanticTable extends Table implements Type{
     private String className;
     private String superClassName;
     private ClassSemanticTable superClass;
+    private int offset;
 
     public ClassSemanticTable(String name) {
         super();
         className = name;
         methods = new HashMap<>();
+        offset = 0;  // For vtable pointer
+    }
+
+    public int getOffset() {
+        return offset;
     }
 
     public boolean equals(Type type) {
@@ -24,6 +30,12 @@ public class ClassSemanticTable extends Table implements Type{
     }
 
     public boolean isSubtype(Type type) {
+
+        // return not subtype if type is unknown
+        if (type.equals(Semantics.Unknown.getInstance())) {
+            return false;
+        }
+
         ClassSemanticTable c = ((ClassSemanticTable)(type));
 
         if (c.getSuperClass() != null && c.getSuperClass().equals(this)) {
@@ -54,7 +66,11 @@ public class ClassSemanticTable extends Table implements Type{
     @Override
     public boolean addVariable(String variable, Type type) {
         if (superClass == null || !superClass.containsVariable(variable)) {
-            return super.addVariable(variable, type);
+            if (super.addVariable(variable, type)) {
+                offset += 8;
+                return true;
+            }
+            return false;
         }
         return false;
     }
