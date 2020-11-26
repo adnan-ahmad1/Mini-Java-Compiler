@@ -1,5 +1,7 @@
 class One {
-    public static void main(String[] args){System.out.println(new Two().first(3))}
+    public static void main(String[] args){
+        System.out.println(new Two().first(3));
+    }
 }
 
 class Two {

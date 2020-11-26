@@ -38,23 +38,25 @@ public class Gen {
     }
 
     public void prologue() throws IOException {
-        gen("    pushq %rbp");
+        gen("    pushq %rbp \t\t # Prologue");
         genbin("    movq", "%rsp", "%rbp");
         gen("");
     }
 
     public void epilogue() throws IOException {
-        genbin("    movq", "%rbp", "%rsp");
+        genbin("    movq", "%rbp", "%rsp \t\t # Epilogue");
         gen("    popq %rbp");
         gen("    ret");
         gen("");
     }
 
     public void pushDummy() throws IOException{
-        gen("pushq 0xBADBADBADBADBADB");
+        gen("    pushq %rax \t\t # Push Dummy");
+        gen("");
     }
 
     public void popDummy() throws IOException {
-        gen("addq 8,%rsp");
+        gen("    addq 8,%rsp \t\t # Pop Dummy");
+        gen("");
     }
 }
