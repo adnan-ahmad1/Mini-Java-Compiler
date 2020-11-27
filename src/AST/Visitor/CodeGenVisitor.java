@@ -196,7 +196,6 @@ public class CodeGenVisitor implements Visitor {
                 localVarOffset.put(n.vl.get(i).i.s, i+n.fl.size());
             }
 
-            // TODO: Discuss with josh about stack alignment in method.
             if (localVarOffset.size()%2 == 1) {
                 gen.gen("    subq 8,%rsp");
                 counter += 1;
@@ -206,7 +205,6 @@ public class CodeGenVisitor implements Visitor {
             gen.gen("    subq " + (localVarOffset.size()*8) + ",%rsp \t\t # Subtract space for variables to push on stack");
             counter += localVarOffset.size();
 
-            // TODO: Discuss with josh about stack alignment in method.
             int j = 0;
             if (localVarOffset.size()%2 == 1) {
                 gen.genbin("    movq", "%rax", (localVarOffset.size()*(-8))+"(%rbp)");
