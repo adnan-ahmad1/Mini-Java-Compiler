@@ -123,6 +123,8 @@ public class CodeGenVisitor implements Visitor {
     }
 
     public void visit(MainClass n) {
+        sm.goIntoClass(n.i1.s);
+        sm.goIntoMethod("main");
 
         // visit main class and generate label
         try {
@@ -276,16 +278,15 @@ public class CodeGenVisitor implements Visitor {
         try {
             ifCounter++;
             n.e.accept(this);
-            gen.gen("cmpq %rax, 0");
+            gen.gen("cmpq $0,%rax");
             gen.gen("je " + sm.getCurrMethodTable().getName() + "_else_" + ifCounter);
             n.s1.accept(this);
             gen.gen("jmp " + sm.getCurrMethodTable().getName() + "_done_" + ifCounter);
             gen.genLabel(sm.getCurrMethodTable().getName() + "_else_" + ifCounter);
             n.s2.accept(this);
             gen.genLabel(sm.getCurrMethodTable().getName() + "_done_" + ifCounter);
-            ifCounter--;
         } catch (Exception e) {
-
+            System.out.println("ERROR");
         }
 
     }
@@ -301,10 +302,43 @@ public class CodeGenVisitor implements Visitor {
     // done:
 
     public void visit(While n) {
+
+        /*
         System.out.print("while (");
         n.e.accept(this);
         System.out.print(") ");
         n.s.accept(this);
+
+         */
+
+
+
+        try {
+            ifCounter++;
+            // jmp to condition initially
+            gen.gen("jmp " + sm.getCurrMethodTable().getName() + "_while_" + ifCounter);
+
+            // generate label for statement in while
+            gen.genLabel(sm.getCurrMethodTable().getName() + "_while_" + ifCounter);
+            n.e.accept(this);
+            gen.gen("cmpq $0,%rax");
+
+            // if condition is false go to done
+            gen.gen("je " + sm.getCurrMethodTable().getName() + "_while_done_" + ifCounter);
+
+            // process statement inside
+            n.s.accept(this);
+
+            // jmp back to condition
+            gen.gen("jmp " + sm.getCurrMethodTable().getName() + "_while_" + ifCounter);
+
+            // done label
+            gen.genLabel(sm.getCurrMethodTable().getName() + "_while_done_" + ifCounter);
+
+        } catch(java.io.IOException e) {
+            System.out.println("ERROR");
+
+        }
     }
 
     public void visit(Print n) {
@@ -347,6 +381,27 @@ public class CodeGenVisitor implements Visitor {
     }
 
     public void visit(And n) {
+
+        // visit first expression and put result in %rax
+        n.e1.accept(this);
+
+        // push expression 1 onto stack
+        try {
+            gen.gen("pushq %rax \t\t # Plus");
+        } catch(java.io.IOException e) {
+        }
+
+        // visit second expression and put result in %rax
+        n.e2.accept(this);
+
+        // pop expression 1 into %rdx and add both
+        try {
+            gen.gen("popq %rdx");
+            gen.genbin("and", "%rdx", "%rax");
+            gen.gen("");
+        } catch(java.io.IOException e) {
+        }
+
     }
 
     public void visit(LessThan n) {
@@ -355,9 +410,9 @@ public class CodeGenVisitor implements Visitor {
             gen.gen("pushq %rax");
             n.e2.accept(this);
             gen.gen("popq %rdx");
-            gen.gen("cmpq %rax, %rdx");
+            gen.gen("cmpq %rdx, %rax");
             gen.gen("setg %al");
-            gen.gen("movzbl %al,%rax");
+            gen.gen("movzbl %al,%eax");
         } catch(Exception e) {
         }
 
@@ -525,11 +580,19 @@ public class CodeGenVisitor implements Visitor {
     }
 
     public void visit(True n) {
-        System.out.print("true");
+        try {
+            // move true into %rax
+            gen.genbin("movq", "$1", "%rax \t\t # Boolean true");
+        } catch(java.io.IOException e) {
+        }
     }
 
     public void visit(False n) {
-        System.out.print("false");
+        try {
+            // move false into %rax
+            gen.genbin("movq", "$0", "%rax \t\t # Boolean false");
+        } catch(java.io.IOException e) {
+        }
     }
 
     public void visit(IdentifierExp n) {

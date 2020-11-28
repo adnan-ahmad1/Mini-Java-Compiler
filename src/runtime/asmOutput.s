@@ -5,31 +5,11 @@ _asm_main:
     pushq %rbp 		 # Prologue
     movq %rsp,%rbp
     
-    movq $10,%rax 		 # Integer Literal
-    pushq %rax 		 # Evaluate args and push on stack
-    pushq %rax 		 # Push Dummy
-    
-    movq $20,%rax 		 # Integer Literal
-    addq $8,%rsp 		 # Pop Dummy
-    
-    pushq %rax 		 # Evaluate args and push on stack
-    movq $30,%rax 		 # Integer Literal
-    pushq %rax 		 # Evaluate args and push on stack
-    pushq %rax 		 # Push Dummy
-    
-    movq $40,%rax 		 # Integer Literal
-    addq $8,%rsp 		 # Pop Dummy
-    
-    pushq %rax 		 # Evaluate args and push on stack
     movq $8,%rdi 		 # New object declaration
     call _mjcalloc 		 # Allocate space and return pointer in %rax
-    leaq Two$$(%rip),%rdx 		 # Load class vtable into %rdx
+    leaq Test$$(%rip),%rdx 		 # Load class vtable into %rdx
     movq %rdx,0(%rax) 		 # Load vtable at the beginning of %rax
     
-    popq %r8 		 # Pop from stack into arg registers
-    popq %rcx 		 # Pop from stack into arg registers
-    popq %rdx 		 # Pop from stack into arg registers
-    popq %rsi 		 # Pop from stack into arg registers
     movq %rax,%rdi 		 # Load pointer of object making call in first arg register
     movq 0(%rdi),%rax
     call *8(%rax) 		 # Call variable's method
@@ -41,227 +21,105 @@ _asm_main:
     popq %rbp
     ret
     
-    Two$first:
+    Test$test:
     pushq %rbp 		 # Prologue
     movq %rsp,%rbp
     
     subq $8,%rsp
-    subq $88,%rsp 		 # Subtract space for variables to push on stack
+    subq $8,%rsp 		 # Subtract space for variables to push on stack
     movq %rdi,-8(%rbp) 		 # Move variable onto stack
-    movq %rsi,-16(%rbp) 		 # Move variable onto stack
-    movq %rdx,-24(%rbp) 		 # Move variable onto stack
-    movq %rcx,-32(%rbp) 		 # Move variable onto stack
-    movq %r8,-40(%rbp) 		 # Move variable onto stack
-    movq $16,%rdi 		 # New object declaration
-    call _mjcalloc 		 # Allocate space and return pointer in %rax
-    leaq Three$$(%rip),%rdx 		 # Load class vtable into %rdx
-    movq %rdx,0(%rax) 		 # Load vtable at the beginning of %rax
-    
-    movq %rax,-72(%rbp)
-    movq -16(%rbp),%rax
-    movq %rax,-48(%rbp)
-    movq -24(%rbp),%rax
-    movq %rax,-56(%rbp)
-    movq -32(%rbp),%rax
-    movq %rax,-64(%rbp)
-    movq -48(%rbp),%rax
-    pushq %rax 		 # Evaluate args and push on stack
-    pushq %rax 		 # Push Dummy
-    
-    movq -56(%rbp),%rax
-    addq $8,%rsp 		 # Pop Dummy
-    
-    pushq %rax 		 # Evaluate args and push on stack
-    movq -64(%rbp),%rax
-    pushq %rax 		 # Evaluate args and push on stack
-    pushq %rax 		 # Push Dummy
-    
-    movq -40(%rbp),%rax
-    addq $8,%rsp 		 # Pop Dummy
-    
-    pushq %rax 		 # Evaluate args and push on stack
-    movq -72(%rbp),%rax
-    popq %r8 		 # Pop from stack into arg registers
-    popq %rcx 		 # Pop from stack into arg registers
-    popq %rdx 		 # Pop from stack into arg registers
-    popq %rsi 		 # Pop from stack into arg registers
-    movq %rax,%rdi 		 # Load pointer of object making call in first arg register
-    movq 0(%rdi),%rax
-    call *8(%rax) 		 # Call variable's method
-    
-    pushq %rax 		 # Evaluate args and push on stack
-    pushq %rax 		 # Push Dummy
-    
-    movq $20,%rax 		 # Integer Literal
-    addq $8,%rsp 		 # Pop Dummy
-    
-    pushq %rax 		 # Evaluate args and push on stack
-    movq $8,%rdi 		 # New object declaration
-    call _mjcalloc 		 # Allocate space and return pointer in %rax
-    leaq Five$$(%rip),%rdx 		 # Load class vtable into %rdx
-    movq %rdx,0(%rax) 		 # Load vtable at the beginning of %rax
-    
-    movq %rax,%rdi 		 # Load pointer of object making call in first arg register
-    movq 0(%rdi),%rax
-    call *8(%rax) 		 # Call variable's method
-    
-    movq %rax,%rdi 		 # Load pointer of object making call in first arg register
-    movq 0(%rdi),%rax
-    call *8(%rax) 		 # Call variable's method
-    
-    pushq %rax 		 # Evaluate args and push on stack
-    pushq %rax 		 # Push Dummy
-    
-    movq $32,%rdi 		 # New object declaration
-    call _mjcalloc 		 # Allocate space and return pointer in %rax
-    leaq Four$$(%rip),%rdx 		 # Load class vtable into %rdx
-    movq %rdx,0(%rax) 		 # Load vtable at the beginning of %rax
-    
-    addq $8,%rsp 		 # Pop Dummy
-    
-    popq %rcx 		 # Pop from stack into arg registers
-    popq %rdx 		 # Pop from stack into arg registers
-    popq %rsi 		 # Pop from stack into arg registers
-    movq %rax,%rdi 		 # Load pointer of object making call in first arg register
-    movq 0(%rdi),%rax
-    call *16(%rax) 		 # Call variable's method
-    
-    movq %rax,%rdi 		 # Print
-    call _put
-    
-    movq $1,%rax 		 # Integer Literal
-    
-    movq %rbp,%rsp 		 # Epilogue
-    popq %rbp
-    ret
-    
-    Three$t:
-    pushq %rbp 		 # Prologue
-    movq %rsp,%rbp
-    
-    subq $8,%rsp
-    subq $40,%rsp 		 # Subtract space for variables to push on stack
-    movq %rdi,-8(%rbp) 		 # Move variable onto stack
-    movq %rsi,-16(%rbp) 		 # Move variable onto stack
-    movq %rdx,-24(%rbp) 		 # Move variable onto stack
-    movq %rcx,-32(%rbp) 		 # Move variable onto stack
-    movq %r8,-40(%rbp) 		 # Move variable onto stack
-    movq -16(%rbp),%rax
-    pushq %rax 		 # Minus
-    movq -24(%rbp),%rax
-    popq %rdx
-    subq %rax,%rdx
-    movq %rdx,%rax
-    
-    pushq %rax 		 # Minus
-    movq -32(%rbp),%rax
-    popq %rdx
-    subq %rax,%rdx
-    movq %rdx,%rax
-    
-    pushq %rax 		 # Minus
-    movq -40(%rbp),%rax
-    popq %rdx
-    subq %rax,%rdx
-    movq %rdx,%rax
-    
-    movq %rax,%rdi 		 # Print
-    call _put
-    
-    movq -16(%rbp),%rax
-    pushq %rax 		 # Minus
-    movq -24(%rbp),%rax
-    popq %rdx
-    subq %rax,%rdx
-    movq %rdx,%rax
-    
-    pushq %rax 		 # Minus
-    movq -32(%rbp),%rax
-    popq %rdx
-    subq %rax,%rdx
-    movq %rdx,%rax
-    
-    pushq %rax 		 # Minus
-    movq -40(%rbp),%rax
-    popq %rdx
-    subq %rax,%rdx
-    movq %rdx,%rax
-    
-    
-    movq %rbp,%rsp 		 # Epilogue
-    popq %rbp
-    ret
-    
-    Four$mix:
-    pushq %rbp 		 # Prologue
-    movq %rsp,%rbp
-    
-    subq $32,%rsp 		 # Subtract space for variables to push on stack
-    movq %rdi,-8(%rbp) 		 # Move variable onto stack
-    movq %rsi,-16(%rbp) 		 # Move variable onto stack
-    movq %rdx,-24(%rbp) 		 # Move variable onto stack
-    movq %rcx,-32(%rbp) 		 # Move variable onto stack
-    movq -16(%rbp),%rax
+    movq $1,%rax 		 # Boolean true
     pushq %rax 		 # Plus
-    movq -24(%rbp),%rax
+    movq $1,%rax 		 # Boolean true
     popq %rdx
-    addq %rdx,%rax
+    and %rdx,%rax
     
-    pushq %rax 		 # Times
-    movq -32(%rbp),%rax
-    popq %rdx
-    imulq %rdx,%rax
-    
+    cmpq $0,%rax
+    je test_else_1
+    movq $1,%rax 		 # Integer Literal
     movq %rax,%rdi 		 # Print
     call _put
     
+    jmp test_done_1
+test_else_1:
     movq $0,%rax 		 # Integer Literal
+    movq %rax,%rdi 		 # Print
+    call _put
     
-    movq %rbp,%rsp 		 # Epilogue
-    popq %rbp
-    ret
+test_done_1:
+    movq $1,%rax 		 # Boolean true
+    pushq %rax 		 # Plus
+    movq $0,%rax 		 # Boolean false
+    popq %rdx
+    and %rdx,%rax
     
-    Four$getNum:
-    pushq %rbp 		 # Prologue
-    movq %rsp,%rbp
+    cmpq $0,%rax
+    je test_else_2
+    movq $2,%rax 		 # Integer Literal
+    movq %rax,%rdi 		 # Print
+    call _put
     
-    subq $8,%rsp
-    subq $8,%rsp 		 # Subtract space for variables to push on stack
-    movq %rdi,-8(%rbp) 		 # Move variable onto stack
-    movq $10,%rax 		 # Integer Literal
+    jmp test_done_2
+test_else_2:
+    movq $3,%rax 		 # Integer Literal
+    movq %rax,%rdi 		 # Print
+    call _put
     
-    movq %rbp,%rsp 		 # Epilogue
-    popq %rbp
-    ret
+test_done_2:
+    movq $0,%rax 		 # Boolean false
+    pushq %rax 		 # Plus
+    movq $0,%rax 		 # Boolean false
+    popq %rdx
+    and %rdx,%rax
     
-    Five$getFour:
-    pushq %rbp 		 # Prologue
-    movq %rsp,%rbp
+    cmpq $0,%rax
+    je test_else_3
+    movq $4,%rax 		 # Integer Literal
+    movq %rax,%rdi 		 # Print
+    call _put
     
-    subq $8,%rsp
-    subq $8,%rsp 		 # Subtract space for variables to push on stack
-    movq %rdi,-8(%rbp) 		 # Move variable onto stack
-    movq $32,%rdi 		 # New object declaration
-    call _mjcalloc 		 # Allocate space and return pointer in %rax
-    leaq Four$$(%rip),%rdx 		 # Load class vtable into %rdx
-    movq %rdx,0(%rax) 		 # Load vtable at the beginning of %rax
+    jmp test_done_3
+test_else_3:
+    movq $5,%rax 		 # Integer Literal
+    movq %rax,%rdi 		 # Print
+    call _put
     
+test_done_3:
+    movq $1,%rax 		 # Boolean true
+    cmpq $0,%rax
+    je test_else_4
+    movq $6,%rax 		 # Integer Literal
+    movq %rax,%rdi 		 # Print
+    call _put
+    
+    jmp test_done_4
+test_else_4:
+    movq $7,%rax 		 # Integer Literal
+    movq %rax,%rdi 		 # Print
+    call _put
+    
+test_done_4:
+    movq $0,%rax 		 # Boolean false
+    cmpq $0,%rax
+    je test_else_5
+    movq $8,%rax 		 # Integer Literal
+    movq %rax,%rdi 		 # Print
+    call _put
+    
+    jmp test_done_5
+test_else_5:
+    movq $9,%rax 		 # Integer Literal
+    movq %rax,%rdi 		 # Print
+    call _put
+    
+test_done_5:
+    movq $100,%rax 		 # Integer Literal
     
     movq %rbp,%rsp 		 # Epilogue
     popq %rbp
     ret
     
     .data
-    Five$$:
+    Test$$:
     .quad 0
-    .quad Five$getFour
-    Four$$:
-    .quad 0
-    .quad Four$getNum
-    .quad Four$mix
-    Two$$:
-    .quad 0
-    .quad Two$first
-    Three$$:
-    .quad 0
-    .quad Three$t
+    .quad Test$test
