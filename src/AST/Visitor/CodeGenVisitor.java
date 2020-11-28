@@ -10,7 +10,6 @@ import java.io.IOException;
 // java -cp build/classes:lib/java-cup-11b.jar MiniJava filename.java
 
 public class CodeGenVisitor implements Visitor {
-    private static final int VTABLE_OFFSET = 8;
     private static final String[] registers = {"%rdi", "%rsi", "%rdx", "%rcx", "%r8", "%r9"};
     private Gen gen;
 
@@ -24,10 +23,6 @@ public class CodeGenVisitor implements Visitor {
     // mapping from variable name to offset in stack
     Map<String, Integer> localVarOffset;
 
-    // one -> two -> three (super class)
-    // one vtable.put(one, [plus, minus, times, divide])
-    // two vtabe.put(two, [three$$plus, three$$minus]  plus, times
-    // three vtable.put(three, [three$$plus, three$$minus])
     public CodeGenVisitor(SemanticTable sm) throws IOException {
         counter = 0;
         gen = new Gen("src/runtime/asmOutput.s");
@@ -90,11 +85,11 @@ public class CodeGenVisitor implements Visitor {
             for (String key : vTable.keySet()) {
                 gen.gen(key + "$$:");
 
-                gen.gen("    .quad 0");
+                gen.gen(".quad 0");
 
                 List<String> methods = vTable.get(key);
                 for (String method : methods) {
-                    gen.gen("    .quad " + method);
+                    gen.gen(".quad " + method);
                 }
             }
         } catch(java.io.IOException e) {
@@ -201,17 +196,17 @@ public class CodeGenVisitor implements Visitor {
 
             // if we have an even number of variables, then we push dummy variable ('this' is passed but not counted)
             if (localVarOffset.size()%2 == 0) {
-                gen.gen("    subq $8,%rsp");
+                gen.gen("subq $8,%rsp");
                 counter += 1;
             }
 
             // subtract space from stack for variables and add to counter
-            gen.gen("    subq " + "$" + ((localVarOffset.size() + 1) * 8) + ",%rsp \t\t # Subtract space for variables to push on stack");
+            gen.gen("subq " + "$" + ((localVarOffset.size() + 1) * 8) + ",%rsp \t\t # Subtract space for variables to push on stack");
             counter += (localVarOffset.size() + 1);
 
             // go through parameters and move register arg values to stack
             for(int j = 0; j <= n.fl.size();j++) {
-                String assemblyCommand = "    movq ";
+                String assemblyCommand = "movq ";
                 assemblyCommand += registers[j] + ",";
                 assemblyCommand += ((j + 1) * (-8));
                 assemblyCommand += "(%rbp) \t\t # Move variable onto stack";
@@ -262,7 +257,7 @@ public class CodeGenVisitor implements Visitor {
     }
 
     public void visit(IdentifierType n) {
-        System.out.print(n.s);
+        //System.out.print(n.s);
     }
 
     public void visit(Block n) {
@@ -301,8 +296,8 @@ public class CodeGenVisitor implements Visitor {
         try {
 
             // move %rax into %rdi since put call uses %rdi
-            gen.genbin("    movq", "%rax", "%rdi \t\t # Print");
-            gen.gen("    call _put");
+            gen.genbin("movq", "%rax", "%rdi \t\t # Print");
+            gen.gen("call _put");
             gen.gen("");
         } catch(java.io.IOException e) {
         }
@@ -354,7 +349,7 @@ public class CodeGenVisitor implements Visitor {
 
         // push expression 1 onto stack
         try {
-            gen.gen("    pushq %rax \t\t # Plus");
+            gen.gen("pushq %rax \t\t # Plus");
         } catch(java.io.IOException e) {
         }
 
@@ -363,8 +358,8 @@ public class CodeGenVisitor implements Visitor {
 
         // pop expression 1 into %rdx and add both
         try {
-            gen.gen("    popq %rdx");
-            gen.genbin("    addq", "%rdx", "%rax");
+            gen.gen("popq %rdx");
+            gen.genbin("addq", "%rdx", "%rax");
             gen.gen("");
         } catch(java.io.IOException e) {
         }
@@ -376,7 +371,7 @@ public class CodeGenVisitor implements Visitor {
 
         // push expression 1 onto stack
         try {
-            gen.gen("    pushq %rax \t\t # Minus");
+            gen.gen("pushq %rax \t\t # Minus");
         } catch(java.io.IOException e) {
         }
 
@@ -385,9 +380,9 @@ public class CodeGenVisitor implements Visitor {
 
         // pop expression 1 into %rdx and subtract both
         try {
-            gen.gen("    popq %rdx");
-            gen.genbin("    subq", "%rax", "%rdx");
-            gen.genbin("    movq", "%rdx", "%rax");
+            gen.gen("popq %rdx");
+            gen.genbin("subq", "%rax", "%rdx");
+            gen.genbin("movq", "%rdx", "%rax");
             gen.gen("");
         } catch(java.io.IOException e) {
         }
@@ -399,7 +394,7 @@ public class CodeGenVisitor implements Visitor {
 
         // push expression 1 onto stack
         try {
-            gen.gen("    pushq %rax \t\t # Times");
+            gen.gen("pushq %rax \t\t # Times");
         } catch(java.io.IOException e) {
         }
 
@@ -408,8 +403,8 @@ public class CodeGenVisitor implements Visitor {
 
         // pop expression 1 into %rdx and multiply both
         try {
-            gen.gen("    popq %rdx");
-            gen.genbin("    imulq", "%rdx", "%rax");
+            gen.gen("popq %rdx");
+            gen.genbin("imulq", "%rdx", "%rax");
             gen.gen("");
         } catch(java.io.IOException e) {
         }
@@ -453,7 +448,7 @@ public class CodeGenVisitor implements Visitor {
                 }
 
                 // push processed expression of arg onto stack so registers do not get clobbered
-                gen.gen("    pushq %rax \t\t # Evaluate args and push on stack");
+                gen.gen("pushq %rax \t\t # Evaluate args and push on stack");
                 counter++;
             }
 
@@ -477,19 +472,22 @@ public class CodeGenVisitor implements Visitor {
 
             // pop args off of stack and store in registers for method call
             for (int i = n.el.size()-1; i >= 0; i--) {
-                gen.gen("    popq " + registers[i+1] + " \t\t # Pop from stack into arg registers");
+                gen.gen("popq " + registers[i+1] + " \t\t # Pop from stack into arg registers");
             }
 
             // calculate offset from class vtable
+            System.out.println(vTable);
+            System.out.println(n.e.type);
+            System.out.println(n.e.type.toString());
             int methodOffset = (vTable.get(n.e.type.toString())
                     .indexOf(n.e.type.toString() + "$" + n.i.toString()) * 8) + 8;
 
             // load variable's vtable
-            gen.genbin("    movq", "%rax", "%rdi \t\t # Load pointer of object making call in first arg register");
-            gen.genbin("    movq", "0(%rdi)", "%rax");
+            gen.genbin("movq", "%rax", "%rdi \t\t # Load pointer of object making call in first arg register");
+            gen.genbin("movq", "0(%rdi)", "%rax");
 
             // execute call from certain offset in vtable
-            gen.gen("    call *" + methodOffset + "(%rax) \t\t # Call variable's method");
+            gen.gen("call *" + methodOffset + "(%rax) \t\t # Call variable's method");
 
             gen.gen("");
         } catch(java.io.IOException e) {
@@ -500,7 +498,7 @@ public class CodeGenVisitor implements Visitor {
 
         try {
             // move number into %rax
-            gen.genbin("    movq", "$"+n.i, "%rax \t\t # Integer Literal");
+            gen.genbin("movq", "$"+n.i, "%rax \t\t # Integer Literal");
         } catch(java.io.IOException e) {
         }
     }
@@ -527,12 +525,12 @@ public class CodeGenVisitor implements Visitor {
         }
         try {
 
-            gen.genbin("    movq", -offsetFromRbp + "(%rbp)", "%rax");
+            gen.genbin("movq", -offsetFromRbp + "(%rbp)", "%rax");
         } catch(Exception e) {
 
         }
 
-        n.type = sm.getCurrMethodTable().getVarType(n.s);
+        //n.type = sm.getCurrMethodTable().getVarType(n.s);
         //System.out.print(n.s);
     }
 
@@ -554,16 +552,16 @@ public class CodeGenVisitor implements Visitor {
             int nBytesNeeded = sm.getClass(c).getOffset();
 
             // load vtable at 0 offset of malloced bytes
-            gen.gen("    movq $" + (nBytesNeeded + 8) + ",%rdi \t\t # New object declaration");
-            gen.gen("    call _mjcalloc \t\t # Allocate space and return pointer in %rax");
-            gen.gen("    leaq " + c + "$$(%rip),%rdx \t\t # Load class vtable into %rdx");
-            gen.gen("    movq %rdx,0(%rax) \t\t # Load vtable at the beginning of %rax");
+            gen.gen("movq $" + (nBytesNeeded + 8) + ",%rdi \t\t # New object declaration");
+            gen.gen("call _mjcalloc \t\t # Allocate space and return pointer in %rax");
+            gen.gen("leaq " + c + "$$(%rip),%rdx \t\t # Load class vtable into %rdx");
+            gen.gen("movq %rdx,0(%rax) \t\t # Load vtable at the beginning of %rax");
             gen.gen("");
         } catch(Exception e) {
 
         }
 
-        n.type = sm.getClass(n.i.toString());
+        //n.type = sm.getClass(n.i.toString());
     }
 
     public void visit(Not n) {

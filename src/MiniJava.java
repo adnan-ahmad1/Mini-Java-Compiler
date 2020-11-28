@@ -81,11 +81,24 @@ public class MiniJava {
                 Program program = (Program)root.value;
                 FillGlobalTablesVisitor gVisitor = new FillGlobalTablesVisitor(new SemanticTable());
                 program.accept(gVisitor);
+
+                if (gVisitor.getSemanticTable().hasError()) {
+                    // error handle
+                    System.out.println("SYSTEM EXIT 1");
+                    System.exit(1);
+                }
+
                 TypeCheckVisitor tc = new TypeCheckVisitor(gVisitor.getSemanticTable());
+                program.accept(tc);
+
+                if (tc.getSemanticTable().hasError()) {
+                    // error handle
+                    System.out.println("SYSTEM EXIT 1");
+                    System.exit(1);
+                }
+
                 CodeGenVisitor visitor = new CodeGenVisitor(tc.getSemanticTable());
                 program.accept(visitor);
-
-
 
             }
         } catch (Exception e) {

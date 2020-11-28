@@ -30,6 +30,7 @@ class Two {
 
         // apparently you cant do CHECK WITH JOSH
         System.out.println(new Four().mix(three.t(e, f, g, d), 20, (new Five()).getFour().getNum()));
+
         return 1;
     }
 }

@@ -21,11 +21,11 @@ public class Gen {
     }
 
     public void gen(String s) throws IOException {
-        fileWriter.write(s + "\n");
+        fileWriter.write("    " + s + "\n");
     }
 
     public void genbin(String op, String src, String dst) throws IOException {
-        fileWriter.write(op + " " + src + "," + dst + "\n");
+        fileWriter.write("    " + op + " " + src + "," + dst + "\n");
     }
 
     public void genLabel(String L) throws IOException {
@@ -38,25 +38,25 @@ public class Gen {
     }
 
     public void prologue() throws IOException {
-        gen("    pushq %rbp \t\t # Prologue");
-        genbin("    movq", "%rsp", "%rbp");
+        gen("pushq %rbp \t\t # Prologue");
+        genbin("movq", "%rsp", "%rbp");
         gen("");
     }
 
     public void epilogue() throws IOException {
-        genbin("    movq", "%rbp", "%rsp \t\t # Epilogue");
-        gen("    popq %rbp");
-        gen("    ret");
+        genbin("movq", "%rbp", "%rsp \t\t # Epilogue");
+        gen("popq %rbp");
+        gen("ret");
         gen("");
     }
 
     public void pushDummy() throws IOException{
-        gen("    pushq %rax \t\t # Push Dummy");
+        gen("pushq %rax \t\t # Push Dummy");
         gen("");
     }
 
     public void popDummy() throws IOException {
-        gen("    addq $8,%rsp \t\t # Pop Dummy");
+        gen("addq $8,%rsp \t\t # Pop Dummy");
         gen("");
     }
 }
