@@ -171,10 +171,13 @@ public class CodeGenVisitor implements Visitor {
     }
 
     public void visit(VarDecl n) {
+        /*
         n.t.accept(this);
         System.out.print(" ");
         n.i.accept(this);
         System.out.print(";");
+
+         */
     }
 
     public void visit(MethodDecl n) {
@@ -188,34 +191,29 @@ public class CodeGenVisitor implements Visitor {
 
             // go through parameters and input offsets
             for (int i = 0; i < n.fl.size();i++) {
-                localVarOffset.put(n.fl.get(i).i.s, i);
+                localVarOffset.put(n.fl.get(i).i.s, i + 2);
             }
 
             // go through local variables and input offsets
             for (int i = 0; i < n.vl.size(); i++) {
-                localVarOffset.put(n.vl.get(i).i.s, i+n.fl.size());
+                localVarOffset.put(n.vl.get(i).i.s, ((i + 2) + n.fl.size()));
             }
 
-            if (localVarOffset.size()%2 == 1) {
-                gen.gen("    subq 8,%rsp");
+            // if we have an even number of variables, then we push dummy variable ('this' is passed but not counted)
+            if (localVarOffset.size()%2 == 0) {
+                gen.gen("    subq $8,%rsp");
                 counter += 1;
             }
 
             // subtract space from stack for variables and add to counter
-            gen.gen("    subq " + (localVarOffset.size()*8) + ",%rsp \t\t # Subtract space for variables to push on stack");
-            counter += localVarOffset.size();
+            gen.gen("    subq " + "$" + ((localVarOffset.size() + 1) * 8) + ",%rsp \t\t # Subtract space for variables to push on stack");
+            counter += (localVarOffset.size() + 1);
 
-            int j = 0;
-            if (localVarOffset.size()%2 == 1) {
-                gen.genbin("    movq", "%rax", (localVarOffset.size()*(-8))+"(%rbp)");
-                j = 1;
-            }
-
-            // go through parameters and nove register arg values to stack
-            for(; j < n.fl.size();j++) {
+            // go through parameters and move register arg values to stack
+            for(int j = 0; j <= n.fl.size();j++) {
                 String assemblyCommand = "    movq ";
-                assemblyCommand += registers[j+1] + ",";
-                assemblyCommand += ((j+1)*(-8));
+                assemblyCommand += registers[j] + ",";
+                assemblyCommand += ((j + 1) * (-8));
                 assemblyCommand += "(%rbp) \t\t # Move variable onto stack";
                 gen.gen(assemblyCommand);
             }
@@ -229,19 +227,15 @@ public class CodeGenVisitor implements Visitor {
             // process return expression which is stored in %rax
             n.e.accept(this);
 
-            // remove space from stack
-            if (localVarOffset.size()%2 == 1) {
-                gen.gen("    addq " + (localVarOffset.size()+1)*8 + ",%rsp \t\t # Remove space from top of stack frame");
+            // remove space for dummy val from counter
+            if (localVarOffset.size() % 2 == 0) {
                 counter--;
-            } else {
-                gen.gen("    addq " + (localVarOffset.size())*8 + ",%rsp \t\t # Remove space from top of stack frame");
             }
+            counter -= (localVarOffset.size() + 1);
 
             gen.gen("");
             gen.epilogue();
-            counter -= localVarOffset.size();
 
-            // TODO: Still needed?
             localVarOffset.clear();
         } catch (Exception e) {
 
@@ -315,7 +309,18 @@ public class CodeGenVisitor implements Visitor {
     }
 
     public void visit(Assign n) {
+
+        // process expression which will be stored in %rax
         n.e.accept(this);
+
+        // calculate offset of identifier and move into offset from %rbp
+        int offsetFromRbp = localVarOffset.get(n.i.s) * 8;
+
+        try {
+            gen.genbin("movq", "%rax", -offsetFromRbp + "(%rbp)");
+        } catch(java.io.IOException e) {
+        }
+
     }
 
     public void visit(ArrayAssign n) {
@@ -431,7 +436,7 @@ public class CodeGenVisitor implements Visitor {
             for (int i = 0; i < n.el.size(); i++) {
 
                 // if the stack is misaligned, then align by adding dummy variable (in case of nested call)
-                if (counter%2 == 1) {
+                if (counter % 2 == 1) {
                     gen.pushDummy();
                     counter++;
                     flag = true;
@@ -452,31 +457,35 @@ public class CodeGenVisitor implements Visitor {
                 counter++;
             }
 
+            // before evaluating expression which could make another method call,
+            // push %rax if stack is not aligned
+            if (counter % 2 == 1) {
+                gen.pushDummy();
+                counter++;
+                flag = true;
+            }
+
+            // process variable making the call which will be stored in %rax
+            n.e.accept(this);
+
+            // check if dummy value was pushed
+            if (flag) {
+                gen.popDummy();
+                counter--;
+                flag = false;
+            }
+
             // pop args off of stack and store in registers for method call
             for (int i = n.el.size()-1; i >= 0; i--) {
                 gen.gen("    popq " + registers[i+1] + " \t\t # Pop from stack into arg registers");
             }
-            // obj.call(exp1, obj.call2(1), exp3)
-            // finds vtable and calls function
-            /*
-                fun(int n, int m, int g, int q) {
-                    new Two().fun(1, 2, fun, fun(1,2,3, 4))
-                }
-                n -> m -> g -> q -> 1 -> 2- > vakfhaal
-                visitor(Call n)
-                    rax = exp2
-                    ex1 -> exp2 - >
-            */
-
-            // process variable making the call which will be stored in %rax
-            n.e.accept(this);
 
             // calculate offset from class vtable
             int methodOffset = (vTable.get(n.e.type.toString())
                     .indexOf(n.e.type.toString() + "$" + n.i.toString()) * 8) + 8;
 
             // load variable's vtable
-            gen.genbin("    movq", "%rax", "%rdi \t\t # Load variable's vtable");
+            gen.genbin("    movq", "%rax", "%rdi \t\t # Load pointer of object making call in first arg register");
             gen.genbin("    movq", "0(%rdi)", "%rax");
 
             // execute call from certain offset in vtable
@@ -505,6 +514,24 @@ public class CodeGenVisitor implements Visitor {
     }
 
     public void visit(IdentifierExp n) {
+
+        // check if its in the local var offset table of method.
+        // If it isn't, then it must be an instance variable of the class
+        int offsetFromRbp;
+
+        if (localVarOffset.containsKey(n.s)) {
+            offsetFromRbp = localVarOffset.get(n.s) * 8;
+        } else {
+            // TODO: figure out how to find offset of instance variable in class from first arg %rdi
+            offsetFromRbp = 0;
+        }
+        try {
+
+            gen.genbin("    movq", -offsetFromRbp + "(%rbp)", "%rax");
+        } catch(Exception e) {
+
+        }
+
         n.type = sm.getCurrMethodTable().getVarType(n.s);
         //System.out.print(n.s);
     }

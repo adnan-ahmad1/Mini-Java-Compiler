@@ -56,7 +56,7 @@ public class Gen {
     }
 
     public void popDummy() throws IOException {
-        gen("    addq 8,%rsp \t\t # Pop Dummy");
+        gen("    addq $8,%rsp \t\t # Pop Dummy");
         gen("");
     }
 }
