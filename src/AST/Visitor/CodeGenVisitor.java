@@ -16,6 +16,7 @@ public class CodeGenVisitor implements Visitor {
     // indicates how much has been pushed onto the stack
     private int counter;
     private SemanticTable sm;
+    private int ifCounter;
 
     // mapping from class name to list of unique methods
     private Map<String, List<String>> vTable;
@@ -25,6 +26,7 @@ public class CodeGenVisitor implements Visitor {
 
     public CodeGenVisitor(SemanticTable sm) throws IOException {
         counter = 0;
+        ifCounter = 0;
         gen = new Gen("src/runtime/asmOutput.s");
         this.sm  = sm;
         vTable = new HashMap<>();
@@ -271,15 +273,32 @@ public class CodeGenVisitor implements Visitor {
     }
 
     public void visit(If n) {
-        System.out.print("if (");
-        n.e.accept(this);
-        System.out.println(") ");
-        System.out.print("    ");
-        n.s1.accept(this);
-        System.out.println();
-        System.out.print("    else ");
-        n.s2.accept(this);
+        try {
+            ifCounter++;
+            n.e.accept(this);
+            gen.gen("cmpq %rax, 0");
+            gen.gen("je " + sm.getCurrMethodTable().getName() + "_else_" + ifCounter);
+            n.s1.accept(this);
+            gen.gen("jmp " + sm.getCurrMethodTable().getName() + "_done_" + ifCounter);
+            gen.genLabel(sm.getCurrMethodTable().getName() + "_else_" + ifCounter);
+            n.s2.accept(this);
+            gen.genLabel(sm.getCurrMethodTable().getName() + "_done_" + ifCounter);
+            ifCounter--;
+        } catch (Exception e) {
+
+        }
+
     }
+
+    //if (0 < 1) statement one else: statement 2
+
+    // cmp
+    // je else
+    // statement1
+    // jmp done
+    // else:
+    //    statement1
+    // done:
 
     public void visit(While n) {
         System.out.print("while (");
@@ -328,19 +347,21 @@ public class CodeGenVisitor implements Visitor {
     }
 
     public void visit(And n) {
-        System.out.print("(");
-        n.e1.accept(this);
-        System.out.print(" && ");
-        n.e2.accept(this);
-        System.out.print(")");
     }
 
     public void visit(LessThan n) {
-        System.out.print("(");
-        n.e1.accept(this);
-        System.out.print(" < ");
-        n.e2.accept(this);
-        System.out.print(")");
+        try {
+            n.e1.accept(this);
+            gen.gen("pushq %rax");
+            n.e2.accept(this);
+            gen.gen("popq %rdx");
+            gen.gen("cmpq %rax, %rdx");
+            gen.gen("setg %al");
+            gen.gen("movzbl %al,%rax");
+        } catch(Exception e) {
+        }
+
+
     }
 
     public void visit(Plus n) {
