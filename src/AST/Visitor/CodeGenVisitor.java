@@ -284,28 +284,8 @@ public class CodeGenVisitor implements Visitor {
 
     }
 
-    //if (0 < 1) statement one else: statement 2
-
-    // cmp
-    // je else
-    // statement1
-    // jmp done
-    // else:
-    //    statement1
-    // done:
 
     public void visit(While n) {
-
-        /*
-        System.out.print("while (");
-        n.e.accept(this);
-        System.out.print(") ");
-        n.s.accept(this);
-
-         */
-
-
-
         try {
             ifCounter++;
             // jmp to condition initially
@@ -629,7 +609,11 @@ public class CodeGenVisitor implements Visitor {
     }
 
     public void visit(This n) {
-        System.out.print("this");
+        try {
+            gen.genbin("movq", "-8(%rbp)", "%rax");
+        } catch(java.io.IOException e) {
+            System.out.println("ERROR FROM THIS");
+        }
     }
 
     public void visit(NewArray n) {
