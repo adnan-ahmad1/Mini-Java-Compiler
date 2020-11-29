@@ -31,6 +31,14 @@ public class Table {
         return null;
     }
 
+    public List<String> getVariableNames() {
+        List<String> variablesList = new ArrayList<>();
+        for (String s : variables.keySet()) {
+            variablesList.add(s);
+        }
+        return variablesList;
+    }
+
     public void printTable(){}
 
 }

@@ -242,26 +242,19 @@ public class CodeGenVisitor implements Visitor {
     }
 
     public void visit(Formal n) {
-        n.t.accept(this);
-        System.out.print(" ");
-        n.i.accept(this);
     }
 
     public void visit(IntArrayType n) {
-        System.out.print("int []");
     }
 
     public void visit(BooleanType n) {
-        System.out.print("boolean");
     }
 
     public void visit(IntegerType n) {
-        //System.out.print("int");
 
     }
 
     public void visit(IdentifierType n) {
-        //System.out.print(n.s);
     }
 
     public void visit(Block n) {
@@ -362,13 +355,27 @@ public class CodeGenVisitor implements Visitor {
         n.e.accept(this);
 
         // calculate offset of identifier and move into offset from %rbp
-        int offsetFromRbp = localVarOffset.get(n.i.s) * 8;
+        int offsetFromRbp;
+        if (localVarOffset.containsKey(n.i.s)) {
 
-        try {
-            gen.genbin("movq", "%rax", -offsetFromRbp + "(%rbp)");
-        } catch(java.io.IOException e) {
+            offsetFromRbp = localVarOffset.get(n.i.s) * 8;
+
+            try {
+                gen.genbin("movq", "%rax", -offsetFromRbp + "(%rbp)");
+            } catch(java.io.IOException e) {
+                System.out.println("ERROR FROM ASSIGN");
+            }
+        } else {
+            offsetFromRbp = (sm.getCurrClassTable().getVariableNames().indexOf(n.i.s) * 8) + 8;
+            try {
+                gen.gen("pushq %rax");
+                gen.genbin("movq", "-8(%rbp)", "%rax");
+                gen.gen("popq %rdx");
+                gen.genbin("movq", "%rdx", -offsetFromRbp + "(%rax)");
+            } catch(java.io.IOException e) {
+                System.out.println("ERROR FROM ASSIGN");
+            }
         }
-
     }
 
     public void visit(ArrayAssign n) {
@@ -552,9 +559,6 @@ public class CodeGenVisitor implements Visitor {
             }
 
             // calculate offset from class vtable
-            System.out.println(vTable);
-            System.out.println(n.e.type);
-            System.out.println(n.e.type.toString());
             int methodOffset = (vTable.get(n.e.type.toString())
                     .indexOf(n.e.type.toString() + "$" + n.i.toString()) * 8) + 8;
 
@@ -603,19 +607,25 @@ public class CodeGenVisitor implements Visitor {
 
         if (localVarOffset.containsKey(n.s)) {
             offsetFromRbp = localVarOffset.get(n.s) * 8;
+
+            try {
+
+                gen.genbin("movq", -offsetFromRbp + "(%rbp)", "%rax");
+            } catch(Exception e) {
+                System.out.println("ERROR FROM IDEXP");
+            }
         } else {
-            // TODO: figure out how to find offset of instance variable in class from first arg %rdi
-            offsetFromRbp = 0;
+
+            offsetFromRbp = (sm.getCurrClassTable().getVariableNames().indexOf(n.s) * 8) + 8;
+
+            try {
+                gen.genbin("movq", "-8(%rbp)", "%rax");
+                gen.genbin("movq", -offsetFromRbp + "(%rax)", "%rax");
+            } catch(java.io.IOException e) {
+                System.out.println("ERROR FROM IDEXP");
+            }
         }
-        try {
 
-            gen.genbin("movq", -offsetFromRbp + "(%rbp)", "%rax");
-        } catch(Exception e) {
-
-        }
-
-        //n.type = sm.getCurrMethodTable().getVarType(n.s);
-        //System.out.print(n.s);
     }
 
     public void visit(This n) {
@@ -645,7 +655,6 @@ public class CodeGenVisitor implements Visitor {
 
         }
 
-        //n.type = sm.getClass(n.i.toString());
     }
 
     public void visit(Not n) {
