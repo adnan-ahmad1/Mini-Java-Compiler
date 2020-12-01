@@ -6,7 +6,6 @@ import Semantics.SemanticTable;
 import java.util.*;
 import java.io.IOException;
 
-
 // java -cp build/classes:lib/java-cup-11b.jar MiniJava filename.java
 
 public class CodeGenVisitor implements Visitor {
@@ -20,6 +19,8 @@ public class CodeGenVisitor implements Visitor {
 
     // mapping from class name to list of unique methods
     private Map<String, List<String>> vTable;
+
+    // mapping from class name to list of variable names
 
     // mapping from variable name to offset in stack
     Map<String, Integer> localVarOffset;
@@ -67,16 +68,30 @@ public class CodeGenVisitor implements Visitor {
 
         //go through class and add methods
         for (String m : sm.getClass(c).getMethodNames()) {
-            boolean found = false;
+            for (int i = 0; i < vTable.get(c).size(); i++) {
+                String vName = vTable.get(c).get(i);
+                if ((vName.split("\\$")[1]).equals(m)) {
+
+                    vTable.get(c).remove(i);
+                    vTable.get(c).add(c + "$" + m);
+                    break;
+                }
+
+            }
+
+            /*
             for (String vName: vTable.get(c)) {
                 if ((vName.split("\\$")[1]).equals(m)) {
                     found = true;
                     break;
                 }
             }
-            if (!found) {
+            if (found) {
+
                 vTable.get(c).add(c + "$" + m);
             }
+
+             */
         }
     }
 
@@ -349,7 +364,7 @@ public class CodeGenVisitor implements Visitor {
             offsetFromRbp = (sm.getCurrClassTable().getVariableNames().indexOf(n.i.s) * 8) + 8;
             try {
                 gen.gen("pushq %rax");
-                gen.genbin("movq", "-8(%rbp)", "%rax");
+                gen.genbin("movq" , "-8(%rbp)", "%rax");
                 gen.gen("popq %rdx");
                 gen.genbin("movq", "%rdx", -offsetFromRbp + "(%rax)");
             } catch(java.io.IOException e) {
@@ -539,8 +554,20 @@ public class CodeGenVisitor implements Visitor {
             }
 
             // calculate offset from class vtable
+            int methodOffset = -1;
+            List<String> methods = vTable.get(n.e.type.toString());
+            for (int i = 0; i < methods.size(); i++) {
+                int dollarSign = methods.get(i).indexOf("$");
+                if (methods.get(i).substring(dollarSign + 1).equals(n.i.toString())) {
+                    methodOffset = (i * 8) + 8;
+                    break;
+                }
+            }
+
+            /*
             int methodOffset = (vTable.get(n.e.type.toString())
                     .indexOf(n.e.type.toString() + "$" + n.i.toString()) * 8) + 8;
+             */
 
             // load variable's vtable
             gen.genbin("movq", "%rax", "%rdi \t\t # Load pointer of object making call in first arg register");
@@ -553,6 +580,14 @@ public class CodeGenVisitor implements Visitor {
         } catch(java.io.IOException e) {
         }
     }
+
+    // Two two;
+    // two = new Two();
+    // One one;
+    // one = two;
+    // one.setIt();
+    //
+
 
     public void visit(IntegerLiteral n) {
 

@@ -15,7 +15,6 @@ public class ClassSemanticTable extends Table implements Type{
         super();
         className = name;
         methods = new HashMap<>();
-        offset = 0;  // For vtable pointer
     }
 
     public int getOffset() {
@@ -61,18 +60,6 @@ public class ClassSemanticTable extends Table implements Type{
 
     public Set<String> getMethodNames() {
         return methods.keySet();
-    }
-
-    @Override
-    public boolean addVariable(String variable, Type type) {
-        if (superClass == null || !superClass.containsVariable(variable)) {
-            if (super.addVariable(variable, type)) {
-                offset += 8;
-                return true;
-            }
-            return false;
-        }
-        return false;
     }
 
     public ClassSemanticTable getSuperClass() {
