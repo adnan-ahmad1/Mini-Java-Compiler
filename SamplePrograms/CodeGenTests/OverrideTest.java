@@ -12,20 +12,25 @@ class T {
         a = new A();
         b = new B();
 
-        System.out.println(a.m());
-
-        if (b.m()) {
-            System.out.println(500);
+        if (a.m().bark()) {
+            System.out.println(1);
         } else {
-            System.out.println(9999);
+            System.out.println(2);
+        }
+
+
+        if (b.m().bark()) {
+            System.out.println(3);
+        } else {
+            System.out.println(4);
         }
 
         a = b;
 
-        if (a.m()) {
-            System.out.println(900);
+        if (a.m().bark()) {
+            System.out.println(5);
         } else {
-            System.out.println(9999);
+            System.out.println(6);
         }
 
         return 0;
@@ -51,13 +56,13 @@ class Animal {
 
 }
 
-class Dog {
+class Dog extends Animal{
     public boolean bark() {
         return true;
     }
 }
 
-// 1
-// 500
-// 900
+// 2
+// 3
+// 5
 // 0

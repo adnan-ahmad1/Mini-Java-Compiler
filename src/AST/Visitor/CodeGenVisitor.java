@@ -741,8 +741,14 @@ public class CodeGenVisitor implements Visitor {
     }
 
     public void visit(Not n) {
-        System.out.print("!");
         n.e.accept(this);
+
+        try {
+            gen.genbin("xor", "$1", "%rax");
+            gen.gen("");
+        } catch(Exception e) {
+
+        }
     }
 
     public void visit(Identifier n) {
