@@ -12,11 +12,17 @@ class Two {
         e = 5;
         f = 6;
 
-        System.out.println(e + f); // 11
-        System.out.println(a + b + c + d); // 10
-        System.out.println(a + b + c + d + e + f); // 21
-        System.out.println(e + 1 + a + 1); // 8
+        System.out.println(e + f);
+        System.out.println(a + b + c + d);
+        System.out.println(a + b + c + d + e + f);
+        System.out.println(e + 1 + a + 1);
 
-        return f; // 6
+        return f;
     }
 }
+
+// 11
+// 10
+// 21
+// 8
+// 6

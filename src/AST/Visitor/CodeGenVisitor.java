@@ -2,6 +2,7 @@ package AST.Visitor;
 
 import AST.*;
 import CodeGen.Gen;
+import Semantics.ClassSemanticTable;
 import Semantics.SemanticTable;
 import java.util.*;
 import java.io.IOException;
@@ -15,25 +16,50 @@ public class CodeGenVisitor implements Visitor {
     // indicates how much has been pushed onto the stack
     private int counter;
     private SemanticTable sm;
-    private int ifCounter;
+    private int controlFlowCounter;
 
     // mapping from class name to list of unique methods
     private Map<String, List<String>> vTable;
 
     // mapping from class name to list of variable names
+    private Map<String, List<String>> fieldOffsets;
 
     // mapping from variable name to offset in stack
     Map<String, Integer> localVarOffset;
 
     public CodeGenVisitor(SemanticTable sm) throws IOException {
         counter = 0;
-        ifCounter = 0;
+        controlFlowCounter = 0;
         gen = new Gen("src/runtime/asmOutput.s");
         this.sm  = sm;
         vTable = new HashMap<>();
         makeVTableInfo();
+        fieldOffsets = new HashMap<>();
+        calculateFieldOffsets();
+
         localVarOffset = new HashMap<>();
 
+    }
+
+    public void calculateFieldOffsets() {
+        for (String c : sm.getClasses().keySet()) {
+            List<String> variables = new ArrayList<>();
+            ClassSemanticTable cst = sm.getClass(c);
+
+            calculateFieldOffsetsHelper(cst, variables);
+
+            fieldOffsets.put(c, variables);
+        }
+    }
+
+    public void calculateFieldOffsetsHelper(ClassSemanticTable cst, List<String> variables) {
+        if (cst.getSuperClass() != null) {
+            calculateFieldOffsetsHelper(cst.getSuperClass(), variables);
+        }
+
+        for (String varName : cst.getVariableNames()) {
+            variables.add(varName);
+        }
     }
 
     private void makeVTableInfo() {
@@ -43,12 +69,11 @@ public class CodeGenVisitor implements Visitor {
             if (vTable.containsKey(c)) {
                 continue;
             }
-            helper(c);
+            makeVTableInfoHelper(c);
         }
-
     }
 
-    private void helper(String c) {
+    private void makeVTableInfoHelper(String c) {
 
         // first case: this is either a stand alone class or a superclass, so add methods to vtable
         // second case: class has a super class and vtable contains methods of super class
@@ -60,7 +85,7 @@ public class CodeGenVisitor implements Visitor {
         } else {
 
             // add super class methods to vtable
-            helper(sm.getClass(c).getSuperClassName());
+            makeVTableInfoHelper(sm.getClass(c).getSuperClassName());
 
             // insert super classes methods
             vTable.put(c, new ArrayList<>(vTable.get(sm.getClass(c).getSuperClassName())));
@@ -68,15 +93,19 @@ public class CodeGenVisitor implements Visitor {
 
         //go through class and add methods
         for (String m : sm.getClass(c).getMethodNames()) {
+            boolean found = false;
             for (int i = 0; i < vTable.get(c).size(); i++) {
                 String vName = vTable.get(c).get(i);
                 if ((vName.split("\\$")[1]).equals(m)) {
-
                     vTable.get(c).remove(i);
-                    vTable.get(c).add(c + "$" + m);
+                    vTable.get(c).add(i, c + "$" + m);
+                    found = true;
                     break;
                 }
 
+            }
+            if (!found) {
+                vTable.get(c).add(c + "$" + m);
             }
 
             /*
@@ -102,7 +131,11 @@ public class CodeGenVisitor implements Visitor {
             for (String key : vTable.keySet()) {
                 gen.gen(key + "$$:");
 
-                gen.gen(".quad 0");
+                if (sm.getClass(key).getSuperClass() != null) {
+                    gen.gen(".quad " + sm.getClass(key).getSuperClassName() + "$$");
+                } else {
+                    gen.gen(".quad 0");
+                }
 
                 List<String> methods = vTable.get(key);
                 for (String method : methods) {
@@ -166,6 +199,11 @@ public class CodeGenVisitor implements Visitor {
     }
 
     public void visit(ClassDeclExtends n) {
+        sm.goIntoClass(n.i.s);
+        for ( int i = 0; i < n.ml.size(); i++ ) {
+            n.ml.get(i).accept(this);
+        }
+        /*
         System.out.print("class ");
         n.i.accept(this);
         System.out.println(" extends ");
@@ -182,6 +220,8 @@ public class CodeGenVisitor implements Visitor {
         }
         System.out.println();
         System.out.println("}");
+
+         */
     }
 
     public void visit(VarDecl n) {
@@ -198,9 +238,22 @@ public class CodeGenVisitor implements Visitor {
         try {
             sm.goIntoMethod(n.i.s);
 
+            // find method name
+            String methodH = "";
+            //System.out.println(vTable);
+            List<String> methods = vTable.get(sm.getCurrClassTable().getName());
+            //System.out.println(methods);
+            for (int i = 0; i < methods.size(); i++) {
+                int dollarSign = methods.get(i).indexOf("$");
+                if (methods.get(i).substring(dollarSign + 1).equals(n.i.s)) {
+                    methodH = methods.get(i);
+                    break;
+                }
+            }
+
             // generate label for method and create prologue
-            String methodH = sm.getCurrClassTable().getName() + "$" + n.i.s;
-            gen.gen(methodH + ":");
+            //methodH = sm.getCurrClassTable().getName() + "$" + n.i.s;
+            gen.genLabel(methodH);
             gen.prologue();
 
             // go through parameters and input offsets
@@ -273,26 +326,27 @@ public class CodeGenVisitor implements Visitor {
     }
 
     public void visit(Block n) {
-        System.out.println("{ ");
+
+        // process list of statements
         for ( int i = 0; i < n.sl.size(); i++ ) {
-            System.out.print("      ");
             n.sl.get(i).accept(this);
-            System.out.println();
         }
-        System.out.print("    } ");
     }
 
     public void visit(If n) {
         try {
-            ifCounter++;
+            controlFlowCounter++;
+            int labelID = controlFlowCounter;
+
             n.e.accept(this);
             gen.gen("cmpq $0,%rax");
-            gen.gen("je " + sm.getCurrMethodTable().getName() + "_else_" + ifCounter);
+            gen.gen("je " + sm.getCurrMethodTable().getName() + "_else_" + labelID);
+
             n.s1.accept(this);
-            gen.gen("jmp " + sm.getCurrMethodTable().getName() + "_done_" + ifCounter);
-            gen.genLabel(sm.getCurrMethodTable().getName() + "_else_" + ifCounter);
+            gen.gen("jmp " + sm.getCurrMethodTable().getName() + "_done_" + labelID);
+            gen.genLabel(sm.getCurrMethodTable().getName() + "_else_" + labelID);
             n.s2.accept(this);
-            gen.genLabel(sm.getCurrMethodTable().getName() + "_done_" + ifCounter);
+            gen.genLabel(sm.getCurrMethodTable().getName() + "_done_" + labelID);
         } catch (Exception e) {
             System.out.println("ERROR");
         }
@@ -302,26 +356,28 @@ public class CodeGenVisitor implements Visitor {
 
     public void visit(While n) {
         try {
-            ifCounter++;
+            controlFlowCounter++;
+            int labelID = controlFlowCounter;
+
             // jmp to condition initially
-            gen.gen("jmp " + sm.getCurrMethodTable().getName() + "_while_" + ifCounter);
+            gen.gen("jmp " + sm.getCurrMethodTable().getName() + "_while_" + labelID);
 
             // generate label for statement in while
-            gen.genLabel(sm.getCurrMethodTable().getName() + "_while_" + ifCounter);
+            gen.genLabel(sm.getCurrMethodTable().getName() + "_while_" + labelID);
             n.e.accept(this);
             gen.gen("cmpq $0,%rax");
 
             // if condition is false go to done
-            gen.gen("je " + sm.getCurrMethodTable().getName() + "_while_done_" + ifCounter);
+            gen.gen("je " + sm.getCurrMethodTable().getName() + "_while_done_" + labelID);
 
             // process statement inside
             n.s.accept(this);
 
             // jmp back to condition
-            gen.gen("jmp " + sm.getCurrMethodTable().getName() + "_while_" + ifCounter);
+            gen.gen("jmp " + sm.getCurrMethodTable().getName() + "_while_" + labelID);
 
             // done label
-            gen.genLabel(sm.getCurrMethodTable().getName() + "_while_done_" + ifCounter);
+            gen.genLabel(sm.getCurrMethodTable().getName() + "_while_done_" + labelID);
 
         } catch(java.io.IOException e) {
             System.out.println("ERROR");
@@ -361,7 +417,16 @@ public class CodeGenVisitor implements Visitor {
                 System.out.println("ERROR FROM ASSIGN");
             }
         } else {
-            offsetFromRbp = (sm.getCurrClassTable().getVariableNames().indexOf(n.i.s) * 8) + 8;
+            //offsetFromRbp = (sm.getCurrClassTable().getVariableNames().indexOf(n.i.s) * 8) + 8;
+            offsetFromRbp = -1;
+            List<String> fields = fieldOffsets.get(sm.getCurrClassTable().getName());
+            for (int i = fields.size() - 1; i >= 0; i--) {
+                if (fields.get(i).equals(n.i.s)) {
+                    offsetFromRbp = (i * 8) + 8;
+                    break;
+                }
+            }
+
             try {
                 gen.gen("pushq %rax");
                 gen.genbin("movq" , "-8(%rbp)", "%rax");
@@ -417,7 +482,6 @@ public class CodeGenVisitor implements Visitor {
             gen.gen("movzbl %al,%eax");
         } catch(Exception e) {
         }
-
 
     }
 
@@ -581,14 +645,6 @@ public class CodeGenVisitor implements Visitor {
         }
     }
 
-    // Two two;
-    // two = new Two();
-    // One one;
-    // one = two;
-    // one.setIt();
-    //
-
-
     public void visit(IntegerLiteral n) {
 
         try {
@@ -630,8 +686,15 @@ public class CodeGenVisitor implements Visitor {
                 System.out.println("ERROR FROM IDEXP");
             }
         } else {
-
-            offsetFromRbp = (sm.getCurrClassTable().getVariableNames().indexOf(n.s) * 8) + 8;
+            //offsetFromRbp = (sm.getCurrClassTable().getVariableNames().indexOf(n.s) * 8) + 8;
+            offsetFromRbp = -1;
+            List<String> fields = fieldOffsets.get(sm.getCurrClassTable().getName());
+            for (int i = fields.size() - 1; i >= 0; i--) {
+                if (fields.get(i).equals(n.s)) {
+                    offsetFromRbp = (i * 8) + 8;
+                    break;
+                }
+            }
 
             try {
                 gen.genbin("movq", "-8(%rbp)", "%rax");
@@ -662,10 +725,11 @@ public class CodeGenVisitor implements Visitor {
             String c = n.i.toString();
 
             // calculate bytes needed for class
-            int nBytesNeeded = sm.getClass(c).getOffset();
+            //int nBytesNeeded = sm.getClass(c).getOffset();
+            int nBytesNeeded = (fieldOffsets.get(c).size() * 8) + 8;
 
             // load vtable at 0 offset of malloced bytes
-            gen.gen("movq $" + (nBytesNeeded + 8) + ",%rdi \t\t # New object declaration");
+            gen.gen("movq $" + nBytesNeeded + ",%rdi \t\t # New object declaration");
             gen.gen("call _mjcalloc \t\t # Allocate space and return pointer in %rax");
             gen.gen("leaq " + c + "$$(%rip),%rdx \t\t # Load class vtable into %rdx");
             gen.gen("movq %rdx,0(%rax) \t\t # Load vtable at the beginning of %rax");
