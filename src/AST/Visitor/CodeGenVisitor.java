@@ -429,9 +429,14 @@ public class CodeGenVisitor implements Visitor {
 
             try {
                 gen.gen("pushq %rax");
+                // a.m();
+
+                // m() {
+                // n = 2;
+
                 gen.genbin("movq" , "-8(%rbp)", "%rax");
                 gen.gen("popq %rdx");
-                gen.genbin("movq", "%rdx", -offsetFromRbp + "(%rax)");
+                gen.genbin("movq", "%rdx", offsetFromRbp + "(%rax)");
             } catch(java.io.IOException e) {
                 System.out.println("ERROR FROM ASSIGN");
             }
@@ -439,12 +444,56 @@ public class CodeGenVisitor implements Visitor {
     }
 
     public void visit(ArrayAssign n) {
-        n.i.accept(this);
-        System.out.print("[");
         n.e1.accept(this);
-        System.out.print("] = ");
+
+        try {
+            gen.gen("pushq %rax");
+        } catch(java.io.IOException e) {
+        }
+
         n.e2.accept(this);
-        System.out.print(";");
+
+        // calculate offset of identifier and move into offset from %rbp
+        int offsetFromRbp;
+        if (localVarOffset.containsKey(n.i.s)) {
+
+            offsetFromRbp = localVarOffset.get(n.i.s) * 8;
+
+            try {
+                gen.gen("popq %rdx");
+                gen.genbin("movq", -offsetFromRbp + "(%rbp)", "%rcx");
+                gen.genbin("imulq", "$8", "%rdx");
+                gen.genbin("addq", "%rdx", "%rcx");
+                gen.genbin("addq", "$8", "%rcx");
+                gen.genbin("movq", "%rax", "(%rcx)");
+            } catch(java.io.IOException e) {
+            }
+        } else {
+            offsetFromRbp = -1;
+            List<String> fields = fieldOffsets.get(sm.getCurrClassTable().getName());
+            for (int i = fields.size() - 1; i >= 0; i--) {
+                if (fields.get(i).equals(n.i.s)) {
+                    offsetFromRbp = (i * 8) + 8;
+                    break;
+                }
+            }
+
+            try {
+                gen.gen("pushq %rax");
+                gen.genbin("movq" , "-8(%rbp)", "%rax");
+                gen.genbin("movq",offsetFromRbp + "(%rax)", "%rax");
+
+                gen.gen("popq %rdx"); // exp 2
+                gen.gen("popq %rcx"); // exp 1
+
+                gen.genbin("imulq", "$8", "%rcx");
+                gen.genbin("addq", "%rcx", "%rax");
+                gen.genbin("addq", "$8", "%rax");
+
+                gen.genbin("movq", "%rdx", "(%rax)");
+            } catch(java.io.IOException e) {
+            }
+        }
     }
 
     public void visit(And n) {
@@ -554,14 +603,33 @@ public class CodeGenVisitor implements Visitor {
 
     public void visit(ArrayLookup n) {
         n.e1.accept(this);
-        System.out.print("[");
+        try {
+            gen.gen("pushq %rax");
+
+        } catch(java.io.IOException e) {
+        }
+
         n.e2.accept(this);
-        System.out.print("]");
+
+        try {
+            gen.gen("popq %rdx");
+            gen.genbin("imulq", "$8", "%rax");
+            gen.genbin("addq", "%rax", "%rdx");
+            gen.genbin("addq", "$8", "%rdx");
+            gen.genbin("movq", "(%rdx)", "%rax");
+            gen.gen("");
+        } catch(java.io.IOException e) {
+        }
     }
 
     public void visit(ArrayLength n) {
         n.e.accept(this);
-        System.out.print(".length");
+
+        try {
+        gen.genbin("movq", "0(%rax)", "%rax");
+        gen.gen("");
+        } catch(java.io.IOException e) {
+        }
     }
 
     public void visit(Call n) {
@@ -698,7 +766,7 @@ public class CodeGenVisitor implements Visitor {
 
             try {
                 gen.genbin("movq", "-8(%rbp)", "%rax");
-                gen.genbin("movq", -offsetFromRbp + "(%rax)", "%rax");
+                gen.genbin("movq", offsetFromRbp + "(%rax)", "%rax");
             } catch(java.io.IOException e) {
                 System.out.println("ERROR FROM IDEXP");
             }
@@ -715,9 +783,24 @@ public class CodeGenVisitor implements Visitor {
     }
 
     public void visit(NewArray n) {
-        System.out.print("new int [");
         n.e.accept(this);
-        System.out.print("]");
+
+        try {
+            gen.genbin("addq", "$1", "%rax");
+            gen.genbin("imulq", "$8", "%rax");
+            gen.genbin("movq", "%rax", "%rdi \t\t # New array declaration");
+            gen.gen("call _mjcalloc \t\t # Allocate space and return pointer in %rax");
+            gen.gen("pushq %rax");
+            counter++;
+            n.e.accept(this);
+            gen.gen("popq %rdx");
+            counter--;
+            gen.genbin("movq", "%rax", "0(%rdx)");
+            gen.genbin("movq", "%rdx", "%rax");
+            gen.gen("");
+        } catch(java.io.IOException e) {
+            System.out.println("ERROR FROM NEW ARRAY");
+        }
     }
 
     public void visit(NewObject n) {
@@ -752,7 +835,6 @@ public class CodeGenVisitor implements Visitor {
     }
 
     public void visit(Identifier n) {
-        System.out.print(n.s);
     }
 
 }
