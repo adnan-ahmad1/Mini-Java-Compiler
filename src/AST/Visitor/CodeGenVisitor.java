@@ -36,9 +36,7 @@ public class CodeGenVisitor implements Visitor {
         makeVTableInfo();
         fieldOffsets = new HashMap<>();
         calculateFieldOffsets();
-
         localVarOffset = new HashMap<>();
-
     }
 
     public void calculateFieldOffsets() {
@@ -107,20 +105,6 @@ public class CodeGenVisitor implements Visitor {
             if (!found) {
                 vTable.get(c).add(c + "$" + m);
             }
-
-            /*
-            for (String vName: vTable.get(c)) {
-                if ((vName.split("\\$")[1]).equals(m)) {
-                    found = true;
-                    break;
-                }
-            }
-            if (found) {
-
-                vTable.get(c).add(c + "$" + m);
-            }
-
-             */
         }
     }
 
@@ -143,6 +127,8 @@ public class CodeGenVisitor implements Visitor {
                 }
             }
         } catch(java.io.IOException e) {
+            System.err.println("Unexpected IO exception error: " + e.toString());
+            System.exit(1);
         }
     }
 
@@ -166,6 +152,8 @@ public class CodeGenVisitor implements Visitor {
             writeData();
             gen.finish();
         } catch(java.io.IOException e) {
+            System.err.println("Unexpected IO exception error: " + e.toString());
+            System.exit(1);
         }
 
     }
@@ -180,6 +168,8 @@ public class CodeGenVisitor implements Visitor {
             gen.prologue();
             vTable.remove(n.i1.s);
         } catch(java.io.IOException e) {
+            System.err.println("Unexpected IO exception error: " + e.toString());
+            System.exit(1);
         }
 
         // execute statements in main class
@@ -188,6 +178,8 @@ public class CodeGenVisitor implements Visitor {
         try {
             gen.epilogue();
         } catch(java.io.IOException e) {
+            System.err.println("Unexpected IO exception error: " + e.toString());
+            System.exit(1);
         }
     }
 
@@ -203,35 +195,9 @@ public class CodeGenVisitor implements Visitor {
         for ( int i = 0; i < n.ml.size(); i++ ) {
             n.ml.get(i).accept(this);
         }
-        /*
-        System.out.print("class ");
-        n.i.accept(this);
-        System.out.println(" extends ");
-        n.j.accept(this);
-        System.out.println(" { ");
-        for ( int i = 0; i < n.vl.size(); i++ ) {
-            System.out.print("  ");
-            n.vl.get(i).accept(this);
-            if ( i+1 < n.vl.size() ) { System.out.println(); }
-        }
-        for ( int i = 0; i < n.ml.size(); i++ ) {
-            System.out.println();
-            n.ml.get(i).accept(this);
-        }
-        System.out.println();
-        System.out.println("}");
-
-         */
     }
 
     public void visit(VarDecl n) {
-        /*
-        n.t.accept(this);
-        System.out.print(" ");
-        n.i.accept(this);
-        System.out.print(";");
-
-         */
     }
 
     public void visit(MethodDecl n) {
@@ -240,9 +206,7 @@ public class CodeGenVisitor implements Visitor {
 
             // find method name
             String methodH = "";
-            //System.out.println(vTable);
             List<String> methods = vTable.get(sm.getCurrClassTable().getName());
-            //System.out.println(methods);
             for (int i = 0; i < methods.size(); i++) {
                 int dollarSign = methods.get(i).indexOf("$");
                 if (methods.get(i).substring(dollarSign + 1).equals(n.i.s)) {
@@ -252,7 +216,6 @@ public class CodeGenVisitor implements Visitor {
             }
 
             // generate label for method and create prologue
-            //methodH = sm.getCurrClassTable().getName() + "$" + n.i.s;
             gen.genLabel(methodH);
             gen.prologue();
 
@@ -305,7 +268,8 @@ public class CodeGenVisitor implements Visitor {
 
             localVarOffset.clear();
         } catch (Exception e) {
-
+            System.err.println("Unexpected IO exception error: " + e.toString());
+            System.exit(1);
         }
     }
 
@@ -348,11 +312,11 @@ public class CodeGenVisitor implements Visitor {
             n.s2.accept(this);
             gen.genLabel(sm.getCurrMethodTable().getName() + "_done_" + labelID);
         } catch (Exception e) {
-            System.out.println("ERROR");
+            System.err.println("Unexpected IO exception error: " + e.toString());
+            System.exit(1);
         }
 
     }
-
 
     public void visit(While n) {
         try {
@@ -380,8 +344,8 @@ public class CodeGenVisitor implements Visitor {
             gen.genLabel(sm.getCurrMethodTable().getName() + "_while_done_" + labelID);
 
         } catch(java.io.IOException e) {
-            System.out.println("ERROR");
-
+            System.err.println("Unexpected IO exception error: " + e.toString());
+            System.exit(1);
         }
     }
 
@@ -397,6 +361,8 @@ public class CodeGenVisitor implements Visitor {
             gen.gen("call _put");
             gen.gen("");
         } catch(java.io.IOException e) {
+            System.err.println("Unexpected IO exception error: " + e.toString());
+            System.exit(1);
         }
     }
 
@@ -414,10 +380,11 @@ public class CodeGenVisitor implements Visitor {
             try {
                 gen.genbin("movq", "%rax", -offsetFromRbp + "(%rbp)");
             } catch(java.io.IOException e) {
-                System.out.println("ERROR FROM ASSIGN");
+                System.err.println("Unexpected IO exception error: " + e.toString());
+                System.exit(1);
             }
         } else {
-            //offsetFromRbp = (sm.getCurrClassTable().getVariableNames().indexOf(n.i.s) * 8) + 8;
+
             offsetFromRbp = -1;
             List<String> fields = fieldOffsets.get(sm.getCurrClassTable().getName());
             for (int i = fields.size() - 1; i >= 0; i--) {
@@ -429,16 +396,12 @@ public class CodeGenVisitor implements Visitor {
 
             try {
                 gen.gen("pushq %rax");
-                // a.m();
-
-                // m() {
-                // n = 2;
-
                 gen.genbin("movq" , "-8(%rbp)", "%rax");
                 gen.gen("popq %rdx");
                 gen.genbin("movq", "%rdx", offsetFromRbp + "(%rax)");
             } catch(java.io.IOException e) {
-                System.out.println("ERROR FROM ASSIGN");
+                System.err.println("Unexpected IO exception error: " + e.toString());
+                System.exit(1);
             }
         }
     }
@@ -449,6 +412,8 @@ public class CodeGenVisitor implements Visitor {
         try {
             gen.gen("pushq %rax");
         } catch(java.io.IOException e) {
+            System.err.println("Unexpected IO exception error: " + e.toString());
+            System.exit(1);
         }
 
         n.e2.accept(this);
@@ -467,6 +432,8 @@ public class CodeGenVisitor implements Visitor {
                 gen.genbin("addq", "$8", "%rcx");
                 gen.genbin("movq", "%rax", "(%rcx)");
             } catch(java.io.IOException e) {
+                System.err.println("Unexpected IO exception error: " + e.toString());
+                System.exit(1);
             }
         } else {
             offsetFromRbp = -1;
@@ -492,6 +459,8 @@ public class CodeGenVisitor implements Visitor {
 
                 gen.genbin("movq", "%rdx", "(%rax)");
             } catch(java.io.IOException e) {
+                System.err.println("Unexpected IO exception error: " + e.toString());
+                System.exit(1);
             }
         }
     }
@@ -505,6 +474,8 @@ public class CodeGenVisitor implements Visitor {
         try {
             gen.gen("pushq %rax \t\t # Plus");
         } catch(java.io.IOException e) {
+            System.err.println("Unexpected IO exception error: " + e.toString());
+            System.exit(1);
         }
 
         // visit second expression and put result in %rax
@@ -516,6 +487,8 @@ public class CodeGenVisitor implements Visitor {
             gen.genbin("and", "%rdx", "%rax");
             gen.gen("");
         } catch(java.io.IOException e) {
+            System.err.println("Unexpected IO exception error: " + e.toString());
+            System.exit(1);
         }
 
     }
@@ -530,6 +503,8 @@ public class CodeGenVisitor implements Visitor {
             gen.gen("setg %al");
             gen.gen("movzbl %al,%eax");
         } catch(Exception e) {
+            System.err.println("Unexpected IO exception error: " + e.toString());
+            System.exit(1);
         }
 
     }
@@ -542,6 +517,8 @@ public class CodeGenVisitor implements Visitor {
         try {
             gen.gen("pushq %rax \t\t # Plus");
         } catch(java.io.IOException e) {
+            System.err.println("Unexpected IO exception error: " + e.toString());
+            System.exit(1);
         }
 
         // visit second expression and put result in %rax
@@ -553,6 +530,8 @@ public class CodeGenVisitor implements Visitor {
             gen.genbin("addq", "%rdx", "%rax");
             gen.gen("");
         } catch(java.io.IOException e) {
+            System.err.println("Unexpected IO exception error: " + e.toString());
+            System.exit(1);
         }
     }
 
@@ -564,6 +543,8 @@ public class CodeGenVisitor implements Visitor {
         try {
             gen.gen("pushq %rax \t\t # Minus");
         } catch(java.io.IOException e) {
+            System.err.println("Unexpected IO exception error: " + e.toString());
+            System.exit(1);
         }
 
         // visit second expression and put result in %rax
@@ -576,6 +557,8 @@ public class CodeGenVisitor implements Visitor {
             gen.genbin("movq", "%rdx", "%rax");
             gen.gen("");
         } catch(java.io.IOException e) {
+            System.err.println("Unexpected IO exception error: " + e.toString());
+            System.exit(1);
         }
     }
 
@@ -587,6 +570,8 @@ public class CodeGenVisitor implements Visitor {
         try {
             gen.gen("pushq %rax \t\t # Times");
         } catch(java.io.IOException e) {
+            System.err.println("Unexpected IO exception error: " + e.toString());
+            System.exit(1);
         }
 
         // visit second expression and put result in %rax
@@ -598,6 +583,8 @@ public class CodeGenVisitor implements Visitor {
             gen.genbin("imulq", "%rdx", "%rax");
             gen.gen("");
         } catch(java.io.IOException e) {
+            System.err.println("Unexpected IO exception error: " + e.toString());
+            System.exit(1);
         }
     }
 
@@ -607,6 +594,8 @@ public class CodeGenVisitor implements Visitor {
             gen.gen("pushq %rax");
 
         } catch(java.io.IOException e) {
+            System.err.println("Unexpected IO exception error: " + e.toString());
+            System.exit(1);
         }
 
         n.e2.accept(this);
@@ -619,6 +608,8 @@ public class CodeGenVisitor implements Visitor {
             gen.genbin("movq", "(%rdx)", "%rax");
             gen.gen("");
         } catch(java.io.IOException e) {
+            System.err.println("Unexpected IO exception error: " + e.toString());
+            System.exit(1);
         }
     }
 
@@ -629,6 +620,8 @@ public class CodeGenVisitor implements Visitor {
         gen.genbin("movq", "0(%rax)", "%rax");
         gen.gen("");
         } catch(java.io.IOException e) {
+            System.err.println("Unexpected IO exception error: " + e.toString());
+            System.exit(1);
         }
     }
 
@@ -696,11 +689,6 @@ public class CodeGenVisitor implements Visitor {
                 }
             }
 
-            /*
-            int methodOffset = (vTable.get(n.e.type.toString())
-                    .indexOf(n.e.type.toString() + "$" + n.i.toString()) * 8) + 8;
-             */
-
             // load variable's vtable
             gen.genbin("movq", "%rax", "%rdi \t\t # Load pointer of object making call in first arg register");
             gen.genbin("movq", "0(%rdi)", "%rax");
@@ -710,6 +698,8 @@ public class CodeGenVisitor implements Visitor {
 
             gen.gen("");
         } catch(java.io.IOException e) {
+            System.err.println("Unexpected IO exception error: " + e.toString());
+            System.exit(1);
         }
     }
 
@@ -719,6 +709,8 @@ public class CodeGenVisitor implements Visitor {
             // move number into %rax
             gen.genbin("movq", "$"+n.i, "%rax \t\t # Integer Literal");
         } catch(java.io.IOException e) {
+            System.err.println("Unexpected IO exception error: " + e.toString());
+            System.exit(1);
         }
     }
 
@@ -727,6 +719,8 @@ public class CodeGenVisitor implements Visitor {
             // move true into %rax
             gen.genbin("movq", "$1", "%rax \t\t # Boolean true");
         } catch(java.io.IOException e) {
+            System.err.println("Unexpected IO exception error: " + e.toString());
+            System.exit(1);
         }
     }
 
@@ -735,6 +729,8 @@ public class CodeGenVisitor implements Visitor {
             // move false into %rax
             gen.genbin("movq", "$0", "%rax \t\t # Boolean false");
         } catch(java.io.IOException e) {
+            System.err.println("Unexpected IO exception error: " + e.toString());
+            System.exit(1);
         }
     }
 
@@ -748,10 +744,10 @@ public class CodeGenVisitor implements Visitor {
             offsetFromRbp = localVarOffset.get(n.s) * 8;
 
             try {
-
                 gen.genbin("movq", -offsetFromRbp + "(%rbp)", "%rax");
             } catch(Exception e) {
-                System.out.println("ERROR FROM IDEXP");
+                System.err.println("Unexpected IO exception error: " + e.toString());
+                System.exit(1);
             }
         } else {
             //offsetFromRbp = (sm.getCurrClassTable().getVariableNames().indexOf(n.s) * 8) + 8;
@@ -768,7 +764,8 @@ public class CodeGenVisitor implements Visitor {
                 gen.genbin("movq", "-8(%rbp)", "%rax");
                 gen.genbin("movq", offsetFromRbp + "(%rax)", "%rax");
             } catch(java.io.IOException e) {
-                System.out.println("ERROR FROM IDEXP");
+                System.err.println("Unexpected IO exception error: " + e.toString());
+                System.exit(1);
             }
         }
 
@@ -778,7 +775,8 @@ public class CodeGenVisitor implements Visitor {
         try {
             gen.genbin("movq", "-8(%rbp)", "%rax");
         } catch(java.io.IOException e) {
-            System.out.println("ERROR FROM THIS");
+            System.err.println("Unexpected IO exception error: " + e.toString());
+            System.exit(1);
         }
     }
 
@@ -799,7 +797,8 @@ public class CodeGenVisitor implements Visitor {
             gen.genbin("movq", "%rdx", "%rax");
             gen.gen("");
         } catch(java.io.IOException e) {
-            System.out.println("ERROR FROM NEW ARRAY");
+            System.err.println("Unexpected IO exception error: " + e.toString());
+            System.exit(1);
         }
     }
 
@@ -818,7 +817,8 @@ public class CodeGenVisitor implements Visitor {
             gen.gen("movq %rdx,0(%rax) \t\t # Load vtable at the beginning of %rax");
             gen.gen("");
         } catch(Exception e) {
-
+            System.err.println("Unexpected IO exception error: " + e.toString());
+            System.exit(1);
         }
 
     }
@@ -830,11 +830,11 @@ public class CodeGenVisitor implements Visitor {
             gen.genbin("xor", "$1", "%rax");
             gen.gen("");
         } catch(Exception e) {
-
+            System.err.println("Unexpected IO exception error: " + e.toString());
+            System.exit(1);
         }
     }
 
     public void visit(Identifier n) {
     }
-
 }
