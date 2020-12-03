@@ -70,7 +70,7 @@ public class MiniJava {
                 System.out.println();
 
                 if (st.hasError()) {
-                    System.out.println("SYSTEM EXIT 1");
+                    System.out.println("DID NOT PASS SEMANTIC CHECKING");
                     System.exit(1);
                 }
 
@@ -84,7 +84,7 @@ public class MiniJava {
 
                 if (gVisitor.getSemanticTable().hasError()) {
                     // error handle
-                    System.out.println("SYSTEM EXIT 1");
+                    System.err.println("DID NOT PASS SEMANTIC CHECKING");
                     System.exit(1);
                 }
 
@@ -93,7 +93,7 @@ public class MiniJava {
 
                 if (tc.getSemanticTable().hasError()) {
                     // error handle
-                    System.out.println("SYSTEM EXIT 1");
+                    System.err.println("DID NOT PASS SEMANTIC CHECKING");
                     System.exit(1);
                 }
 
@@ -108,17 +108,15 @@ public class MiniJava {
                     e.toString());
             // print out a stack dump
             e.printStackTrace();
-            System.out.println("SYSTEM EXIT 1");
             System.exit(1);
         }
 
         // if error was encountered, exit with 1
         if (crashed) {
-            System.out.println("SYSTEM EXIT 1");
+            System.err.println("PROGRAM CRASHED");
             System.exit(1);
         }
 
-        System.out.println("SYSTEM EXIT 0");
         System.exit(0);
     }
 }

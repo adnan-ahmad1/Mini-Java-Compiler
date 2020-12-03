@@ -147,7 +147,6 @@ public class CodeGenVisitor implements Visitor {
         }
 
         try {
-
             // write vtable at and close writer
             writeData();
             gen.finish();

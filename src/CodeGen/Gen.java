@@ -18,18 +18,32 @@ public class Gen {
         fileWriter.write("    .text\n");
         fileWriter.write("    .globl  _asm_main\n");
         gen("");
+
+        // direct to standard output
+        System.out.println("    .text");
+        System.out.println("    .globl  _asm_main");
+        System.out.println();
     }
 
     public void gen(String s) throws IOException {
         fileWriter.write("    " + s + "\n");
+
+        // direct to standard output
+        System.out.println("    " + s);
     }
 
     public void genbin(String op, String src, String dst) throws IOException {
         fileWriter.write("    " + op + " " + src + "," + dst + "\n");
+
+        // direct to standard output
+        System.out.println("    " + op + " " + src + "," + dst);
     }
 
     public void genLabel(String L) throws IOException {
         fileWriter.write(L + ":\n");
+
+        // direct to standard output
+        System.out.println(L + ":");
     }
 
     public void finish() throws IOException {
