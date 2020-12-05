@@ -1,0 +1,17 @@
+Class Factorial
+  fields:
+  methods:
+    main
+      return type: void
+      parameters:
+      variables:
+Class Fac
+  fields:
+  methods:
+    ComputeFac
+      return type: int
+      parameters:
+        int num
+      variables:
+        int num_aux
+

@@ -1,0 +1,37 @@
+Class Empty
+  fields:
+  methods:
+    main
+      return type: void
+      parameters:
+      variables:
+Class Test
+  fields:
+  methods:
+    test
+      return type: int
+      parameters:
+      variables:
+        boolean b
+        Dog d
+        int n
+Class Animal
+  fields:
+    int age
+  methods:
+    getAge
+      return type: int
+      parameters:
+      variables:
+    live
+      return type: boolean
+      parameters:
+      variables:
+Class Dog extends Animal
+  fields:
+  methods:
+    bark
+      return type: boolean
+      parameters:
+      variables:
+

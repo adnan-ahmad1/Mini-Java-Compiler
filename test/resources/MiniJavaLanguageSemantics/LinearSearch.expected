@@ -1,0 +1,45 @@
+Class LS
+  fields:
+    int[] number
+    int size
+  methods:
+    Print
+      return type: int
+      parameters:
+      variables:
+        int j
+    Init
+      return type: int
+      parameters:
+        int sz
+      variables:
+        int aux01
+        int j
+        int k
+        int aux02
+    Start
+      return type: int
+      parameters:
+        int sz
+      variables:
+        int aux01
+        int aux02
+    Search
+      return type: int
+      parameters:
+        int num
+      variables:
+        int nt
+        int ifound
+        int aux01
+        int j
+        boolean ls01
+        int aux02
+Class LinearSearch
+  fields:
+  methods:
+    main
+      return type: void
+      parameters:
+      variables:
+

@@ -1,0 +1,30 @@
+ERROR! Line Number: 14, Assign: Variable type for b is boolean but was assigned type int
+ERROR! Line Number: 24, Return type should be int but was boolean
+Class Empty
+  fields:
+  methods:
+    main
+      return type: void
+      parameters:
+      variables:
+Class Adnand
+  fields:
+    boolean c
+    int d
+  methods:
+    laugh
+      return type: int
+      parameters:
+      variables:
+Class Baz
+  fields:
+  methods:
+    test
+      return type: boolean
+      parameters:
+      variables:
+        int a
+        boolean b
+        Adnand adnand
+
+DID NOT PASS SEMANTIC CHECKING

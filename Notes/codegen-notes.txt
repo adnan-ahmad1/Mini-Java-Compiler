@@ -1,0 +1,10 @@
+All of the code gen part of the compiler should be working. We added tests and tried to automate them by
+writing a script.
+
+We ended up using some assembly language that was outside the scope of what was discussed in lecture.
+
+We tried to be clever with boolean expressions by setting only one bit of %rax to 1 or 0 depending on
+if something was true or false while setting all the other bits to 0.
+
+We did have to go back and fix some of the semantics checking issues that we were docked down on. If we didn't fix them,
+we would have had some issues with inheritance.

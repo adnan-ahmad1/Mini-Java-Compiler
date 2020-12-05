@@ -1,0 +1,23 @@
+ERROR! Line Number: 12, If: Type in parentheses was int
+ERROR! Line Number: 18, Plus: Expression2 is not IntegerType
+ERROR! Line Number: 18, Assign: Variable type for b is int but was assigned type unknown
+ERROR! Line Number: 20, And: Expression1 is not BooleanType
+ERROR! Line Number: 20, While: Type in parentheses was unknown
+Class Empty
+  fields:
+  methods:
+    main
+      return type: void
+      parameters:
+      variables:
+Class T
+  fields:
+    int a
+    int b
+  methods:
+    calculate
+      return type: int
+      parameters:
+      variables:
+
+DID NOT PASS SEMANTIC CHECKING

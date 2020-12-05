@@ -1,0 +1,178 @@
+Class TreeVisitor
+  fields:
+  methods:
+    main
+      return type: void
+      parameters:
+      variables:
+Class TV
+  fields:
+  methods:
+    Start
+      return type: int
+      parameters:
+      variables:
+        int nti
+        MyVisitor v
+        Tree root
+        boolean ntb
+Class Visitor
+  fields:
+    Tree r
+    Tree l
+  methods:
+    visit
+      return type: int
+      parameters:
+        Tree n
+      variables:
+        int nti
+Class Tree
+  fields:
+    Tree left
+    boolean has_right
+    Tree my_null
+    Tree right
+    boolean has_left
+    int key
+  methods:
+    Delete
+      return type: boolean
+      parameters:
+        int v_key
+      variables:
+        Tree current_node
+        boolean found
+        Tree parent_node
+        boolean cont
+        boolean is_root
+        boolean ntb
+        int key_aux
+    SetHas_Left
+      return type: boolean
+      parameters:
+        boolean val
+      variables:
+    RemoveLeft
+      return type: boolean
+      parameters:
+        Tree p_node
+        Tree c_node
+      variables:
+        boolean ntb
+    GetKey
+      return type: int
+      parameters:
+      variables:
+    SetRight
+      return type: boolean
+      parameters:
+        Tree rn
+      variables:
+    GetLeft
+      return type: Tree
+      parameters:
+      variables:
+    GetRight
+      return type: Tree
+      parameters:
+      variables:
+    Remove
+      return type: boolean
+      parameters:
+        Tree p_node
+        Tree c_node
+      variables:
+        int auxkey1
+        int auxkey2
+        boolean ntb
+    SetLeft
+      return type: boolean
+      parameters:
+        Tree ln
+      variables:
+    Insert
+      return type: boolean
+      parameters:
+        int v_key
+      variables:
+        Tree current_node
+        Tree new_node
+        boolean cont
+        boolean ntb
+        int key_aux
+    accept
+      return type: int
+      parameters:
+        Visitor v
+      variables:
+        int nti
+    Print
+      return type: boolean
+      parameters:
+      variables:
+        Tree current_node
+        boolean ntb
+    Init
+      return type: boolean
+      parameters:
+        int v_key
+      variables:
+    GetHas_Right
+      return type: boolean
+      parameters:
+      variables:
+    GetHas_Left
+      return type: boolean
+      parameters:
+      variables:
+    RemoveRight
+      return type: boolean
+      parameters:
+        Tree p_node
+        Tree c_node
+      variables:
+        boolean ntb
+    Search
+      return type: int
+      parameters:
+        int v_key
+      variables:
+        Tree current_node
+        int ifound
+        boolean cont
+        int key_aux
+    SetKey
+      return type: boolean
+      parameters:
+        int v_key
+      variables:
+    Compare
+      return type: boolean
+      parameters:
+        int num1
+        int num2
+      variables:
+        int nti
+        boolean ntb
+    SetHas_Right
+      return type: boolean
+      parameters:
+        boolean val
+      variables:
+    RecPrint
+      return type: boolean
+      parameters:
+        Tree node
+      variables:
+        boolean ntb
+Class MyVisitor extends Visitor
+  fields:
+  methods:
+    visit
+      return type: int
+      parameters:
+        Tree n
+      variables:
+        int nti
+

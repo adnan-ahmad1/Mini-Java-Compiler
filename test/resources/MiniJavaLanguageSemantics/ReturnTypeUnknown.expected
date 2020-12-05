@@ -1,0 +1,21 @@
+ERROR! Line Number: 9, Type Foo does NOT exist
+ERROR! Line Number: 10, NewObject: Class Foo is unknown!
+ERROR! Line Number: 10, Assign: You are assigning an unknown to an unknown!
+ERROR! Line Number: 8, Return type for method definiton is unknown!
+Class A
+  fields:
+  methods:
+    get
+      return type: unknown
+      parameters:
+      variables:
+        unknown f
+Class Empty
+  fields:
+  methods:
+    main
+      return type: void
+      parameters:
+      variables:
+
+DID NOT PASS SEMANTIC CHECKING

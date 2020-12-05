@@ -1,0 +1,30 @@
+ERROR! Line Number: 27, Call: Method meow does not exist for type Dog
+ERROR! Line Number: 27, Assign: Variable type for d is boolean but was assigned type unknown
+Class Empty
+  fields:
+  methods:
+    main
+      return type: void
+      parameters:
+      variables:
+Class Zoo
+  fields:
+    Dog a
+    Dog b
+  methods:
+    play
+      return type: boolean
+      parameters:
+      variables:
+        boolean c
+        boolean d
+Class Dog
+  fields:
+    int age
+  methods:
+    bark
+      return type: boolean
+      parameters:
+      variables:
+
+DID NOT PASS SEMANTIC CHECKING

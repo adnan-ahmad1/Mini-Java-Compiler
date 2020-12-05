@@ -1,0 +1,51 @@
+ERROR! method Bar in class Foo does not have same return type as in super class.
+ERROR! OVERRIDE ERROR IN METHOD Bar OF CLASS Foo
+ERROR! method jesus in class Foo does not have same number of parameters as in super class.
+ERROR! Parameter 1 of method jesus in class Foo is not of same type as super class method
+ERROR! OVERRIDE ERROR IN METHOD jesus OF CLASS Foo
+ERROR! Line Number: 12, IdentifierExp: Variable cheese does not exist!
+ERROR! Line Number: 11, Return type should be int but was unknown
+Class Empty
+  fields:
+  methods:
+    main
+      return type: void
+      parameters:
+      variables:
+Class Foo extends Baz
+  fields:
+    int a
+    int b
+  methods:
+    Bar
+      return type: int
+      parameters:
+        int cheeze
+        boolean ham
+      variables:
+    jesus
+      return type: int[]
+      parameters:
+        int wine
+        boolean bread
+        int[] holy_spirit
+      variables:
+Class Baz
+  fields:
+    int c
+    int d
+  methods:
+    Bar
+      return type: boolean
+      parameters:
+        int cheeze
+        boolean ham
+      variables:
+    jesus
+      return type: int[]
+      parameters:
+        int[] wine
+        boolean bread
+      variables:
+
+DID NOT PASS SEMANTIC CHECKING

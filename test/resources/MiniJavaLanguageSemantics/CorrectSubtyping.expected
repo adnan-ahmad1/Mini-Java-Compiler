@@ -1,0 +1,67 @@
+ERROR! Line Number: 52, Return type should be Cat but was Animal
+ERROR! Line Number: 57, Return type should be Cat but was Dog
+Class Empty
+  fields:
+  methods:
+    main
+      return type: void
+      parameters:
+      variables:
+Class Test
+  fields:
+    Animal a
+    Cat c
+    Dog d
+    Wolf w
+  methods:
+    getA
+      return type: Animal
+      parameters:
+      variables:
+    getC
+      return type: Cat
+      parameters:
+      variables:
+    getD
+      return type: Wolf
+      parameters:
+      variables:
+    getD3
+      return type: Cat
+      parameters:
+      variables:
+    getD2
+      return type: Animal
+      parameters:
+      variables:
+Class Animal
+  fields:
+    int age
+  methods:
+    getAge
+      return type: int
+      parameters:
+      variables:
+Class Cat extends Animal
+  fields:
+  methods:
+    meow
+      return type: boolean
+      parameters:
+      variables:
+Class Wolf extends Animal
+  fields:
+  methods:
+    bark
+      return type: boolean
+      parameters:
+      variables:
+Class Dog extends Wolf
+  fields:
+  methods:
+    bark
+      return type: boolean
+      parameters:
+      variables:
+
+DID NOT PASS SEMANTIC CHECKING

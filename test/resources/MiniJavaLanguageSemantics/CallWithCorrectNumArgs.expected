@@ -1,0 +1,42 @@
+ERROR! Line Number: 26, Call: Number or type of arguments is incorrect for method bigSum of class Dog
+ERROR! Line Number: 26, Assign: Variable type for t1 is int but was assigned type unknown
+ERROR! Line Number: 27, Call: Number or type of arguments is incorrect for method bigSum of class Dog
+ERROR! Line Number: 27, Assign: Variable type for t2 is int but was assigned type unknown
+ERROR! Line Number: 28, Call: Number or type of arguments is incorrect for method bigSum of class Dog
+ERROR! Line Number: 28, Assign: Variable type for t3 is int but was assigned type unknown
+ERROR! Line Number: 29, Call: Number or type of arguments is incorrect for method bigSum of class Dog
+ERROR! Line Number: 29, Assign: Variable type for t4 is int but was assigned type unknown
+Class Empty
+  fields:
+  methods:
+    main
+      return type: void
+      parameters:
+      variables:
+Class Test
+  fields:
+  methods:
+    testBigSum
+      return type: int
+      parameters:
+      variables:
+        int t4
+        int[] arr
+        int t5
+        Dog dog
+        int t1
+        int t2
+        int t3
+Class Dog
+  fields:
+  methods:
+    bigSum
+      return type: int
+      parameters:
+        int n1
+        int n2
+        int n3
+        int n4
+      variables:
+
+DID NOT PASS SEMANTIC CHECKING

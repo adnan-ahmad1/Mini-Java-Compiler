@@ -1,0 +1,25 @@
+ERROR! Line Number: 11, Type Foo does NOT exist
+ERROR! Line Number: 11, Parameter c has class type that does not exist!
+ERROR! Line Number: 14, Assign: Variable type for a is int but was assigned type boolean
+Class Empty
+  fields:
+  methods:
+    main
+      return type: void
+      parameters:
+      variables:
+Class declareTwice
+  fields:
+    int a
+    int b
+  methods:
+    fooey
+      return type: int
+      parameters:
+        boolean baz
+        unknown c
+      variables:
+        int a
+        boolean baz
+
+DID NOT PASS SEMANTIC CHECKING

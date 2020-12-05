@@ -1,0 +1,43 @@
+Class QuickSort
+  fields:
+  methods:
+    main
+      return type: void
+      parameters:
+      variables:
+Class QS
+  fields:
+    int[] number
+    int size
+  methods:
+    Print
+      return type: int
+      parameters:
+      variables:
+        int j
+    Init
+      return type: int
+      parameters:
+        int sz
+      variables:
+    Start
+      return type: int
+      parameters:
+        int sz
+      variables:
+        int aux01
+    Sort
+      return type: int
+      parameters:
+        int left
+        int right
+      variables:
+        int t
+        int v
+        int nt
+        int i
+        int j
+        int aux03
+        boolean cont02
+        boolean cont01
+

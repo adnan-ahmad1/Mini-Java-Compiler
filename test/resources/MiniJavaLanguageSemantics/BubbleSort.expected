@@ -1,0 +1,42 @@
+Class BBS
+  fields:
+    int[] number
+    int size
+  methods:
+    Print
+      return type: int
+      parameters:
+      variables:
+        int j
+    Init
+      return type: int
+      parameters:
+        int sz
+      variables:
+    Start
+      return type: int
+      parameters:
+        int sz
+      variables:
+        int aux01
+    Sort
+      return type: int
+      parameters:
+      variables:
+        int aux05
+        int t
+        int aux04
+        int nt
+        int aux07
+        int aux06
+        int i
+        int j
+        int aux02
+Class BubbleSort
+  fields:
+  methods:
+    main
+      return type: void
+      parameters:
+      variables:
+

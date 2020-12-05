@@ -1,0 +1,47 @@
+ERROR! Line Number: 12, Type Dog does NOT exist
+ERROR! Line Number: 14, Type Baz does NOT exist
+ERROR! Line Number: 27, Type Lion does NOT exist
+ERROR! Line Number: 28, Type Tiger does NOT exist
+ERROR! Line Number: 35, Type Lion does NOT exist
+ERROR! Line Number: 17, Call: Method method does not exist for type Foo
+ERROR! Line Number: 17, Assign: You are assigning an unknown to an unknown!
+ERROR! Line Number: 22, Assign: You are assigning an unknown to an unknown!
+ERROR! Line Number: 30, Assign: You are assigning an unknown to an unknown!
+ERROR! Line Number: 36, Assign: You are assigning an unknown to an unknown!
+Class Empty
+  fields:
+  methods:
+    main
+      return type: void
+      parameters:
+      variables:
+Class Bar
+  fields:
+    unknown b
+    unknown d
+    Foo f
+  methods:
+    m1
+      return type: int
+      parameters:
+      variables:
+    m2
+      return type: int
+      parameters:
+      variables:
+    m3
+      return type: int
+      parameters:
+      variables:
+        unknown t
+        unknown l
+    m4
+      return type: int
+      parameters:
+      variables:
+        unknown l
+Class Foo
+  fields:
+  methods:
+
+DID NOT PASS SEMANTIC CHECKING

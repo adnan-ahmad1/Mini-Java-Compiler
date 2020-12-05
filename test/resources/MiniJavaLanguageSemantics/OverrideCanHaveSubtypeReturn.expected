@@ -1,0 +1,24 @@
+Class Empty
+  fields:
+  methods:
+    main
+      return type: void
+      parameters:
+      variables:
+Class Animal
+  fields:
+  methods:
+    get
+      return type: Animal
+      parameters:
+      variables:
+        Animal a
+Class Dog extends Animal
+  fields:
+  methods:
+    get
+      return type: Dog
+      parameters:
+      variables:
+        Dog d
+

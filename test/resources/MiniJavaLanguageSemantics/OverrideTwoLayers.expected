@@ -1,0 +1,58 @@
+ERROR! method m in class AlienDog does not have same number of parameters as in super class.
+ERROR! method m in class AlienDog does not have same return type as in super class.
+ERROR! OVERRIDE ERROR IN METHOD m OF CLASS AlienDog
+ERROR! Parameter 1 of method m in class RegularDog is not of same type as super class method
+ERROR! Parameter 2 of method m in class RegularDog is not of same type as super class method
+ERROR! method m in class RegularDog does not have same return type as in super class.
+ERROR! OVERRIDE ERROR IN METHOD m OF CLASS RegularDog
+Class Empty
+  fields:
+  methods:
+    main
+      return type: void
+      parameters:
+      variables:
+Class MoonDog extends Wolf
+  fields:
+  methods:
+    m
+      return type: int
+      parameters:
+        int a
+        boolean b
+        int[] c
+      variables:
+Class Animal
+  fields:
+  methods:
+    m
+      return type: int
+      parameters:
+        int a
+        boolean b
+        int[] c
+      variables:
+Class AlienDog extends Wolf
+  fields:
+  methods:
+    m
+      return type: boolean
+      parameters:
+        int a
+        boolean b
+      variables:
+Class Wolf extends Animal
+  fields:
+  methods:
+Class RegularDog extends Wolf
+  fields:
+  methods:
+    m
+      return type: boolean
+      parameters:
+        boolean a
+        int b
+        int[] c
+      variables:
+
+DID NOT PASS SEMANTIC CHECKING

@@ -1,0 +1,136 @@
+Class LL
+  fields:
+  methods:
+    Start
+      return type: int
+      parameters:
+      variables:
+        List head
+        List last_elem
+        Element el03
+        Element el02
+        Element el01
+        boolean aux01
+Class Element
+  fields:
+    int Salary
+    boolean Married
+    int Age
+  methods:
+    GetSalary
+      return type: int
+      parameters:
+      variables:
+    Init
+      return type: boolean
+      parameters:
+        int v_Age
+        int v_Salary
+        boolean v_Married
+      variables:
+    GetAge
+      return type: int
+      parameters:
+      variables:
+    Equal
+      return type: boolean
+      parameters:
+        Element other
+      variables:
+        int nt
+        int aux01
+        int aux02
+        boolean ret_val
+    GetMarried
+      return type: boolean
+      parameters:
+      variables:
+    Compare
+      return type: boolean
+      parameters:
+        int num1
+        int num2
+      variables:
+        int aux02
+        boolean retval
+Class List
+  fields:
+    Element elem
+    List next
+    boolean end
+  methods:
+    Delete
+      return type: List
+      parameters:
+        Element e
+      variables:
+        boolean aux05
+        int aux04
+        int nt
+        List prev
+        List aux01
+        boolean var_end
+        boolean ret_val
+        List my_head
+        Element var_elem
+    Print
+      return type: boolean
+      parameters:
+      variables:
+        List aux01
+        boolean var_end
+        Element var_elem
+    Init
+      return type: boolean
+      parameters:
+      variables:
+    GetElem
+      return type: Element
+      parameters:
+      variables:
+    GetNext
+      return type: List
+      parameters:
+      variables:
+    SetNext
+      return type: boolean
+      parameters:
+        List v_next
+      variables:
+    Search
+      return type: int
+      parameters:
+        Element e
+      variables:
+        int nt
+        List aux01
+        boolean var_end
+        int int_ret_val
+        Element var_elem
+    GetEnd
+      return type: boolean
+      parameters:
+      variables:
+    InitNew
+      return type: boolean
+      parameters:
+        Element v_elem
+        List v_next
+        boolean v_end
+      variables:
+    Insert
+      return type: List
+      parameters:
+        Element new_elem
+      variables:
+        List aux03
+        List aux02
+        boolean ret_val
+Class LinkedList
+  fields:
+  methods:
+    main
+      return type: void
+      parameters:
+      variables:
+

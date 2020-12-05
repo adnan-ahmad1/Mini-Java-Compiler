@@ -1,0 +1,22 @@
+ERROR! Line Number: 11, Type Foo does NOT exist
+ERROR! extendsItself is its own superclass
+Class Empty
+  fields:
+  methods:
+    main
+      return type: void
+      parameters:
+      variables:
+Class extendsItself extends extendsItself
+  fields:
+    int a
+    int b
+  methods:
+    fooey
+      return type: int
+      parameters:
+        boolean baz
+        unknown c
+      variables:
+        int a
+        boolean baz

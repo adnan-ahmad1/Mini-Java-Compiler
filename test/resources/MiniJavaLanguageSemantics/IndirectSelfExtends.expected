@@ -1,0 +1,23 @@
+ERROR! Boo is its own superclass
+Class Empty
+  fields:
+  methods:
+    main
+      return type: void
+      parameters:
+      variables:
+Class Boo extends Foo
+  fields:
+    int a
+    int b
+  methods:
+Class Foo extends Baz
+  fields:
+    int a
+    int b
+  methods:
+Class Baz extends Boo
+  fields:
+    int a
+    int b
+  methods:
