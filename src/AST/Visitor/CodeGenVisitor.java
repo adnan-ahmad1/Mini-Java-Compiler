@@ -153,7 +153,7 @@ public class CodeGenVisitor implements Visitor {
         sm.goIntoMethod("main");
 
         // visit main class and generate label
-        gen.genLabel("_asm_main");
+        gen.genLabel("asm_main");
         gen.prologue();
         vTable.remove(n.i1.s);
 
@@ -332,7 +332,7 @@ public class CodeGenVisitor implements Visitor {
 
         // move %rax into %rdi since put call uses %rdi
         gen.genbin("movq", "%rax", "%rdi \t\t # Print");
-        gen.gen("call _put");
+        gen.gen("call put");
         gen.gen("");
     }
 
@@ -384,11 +384,11 @@ public class CodeGenVisitor implements Visitor {
 
             // check array out of bounds: index >= length
             gen.gen("cmpq (%rcx),%rdx");
-            gen.gen("jge _runtime_error_exit");
+            gen.gen("jge runtime_error_exit");
 
             // check array out of bounds: index < 0
             gen.gen("cmpq $0,%rdx");
-            gen.gen("jl _runtime_error_exit");
+            gen.gen("jl runtime_error_exit");
 
             // calculate byte offset
             gen.genbin("imulq", "$8", "%rdx");
@@ -417,11 +417,11 @@ public class CodeGenVisitor implements Visitor {
 
             // check array out of bounds: index >= length
             gen.gen("cmpq (%rax),%rcx");
-            gen.gen("jge _runtime_error_exit");
+            gen.gen("jge runtime_error_exit");
 
             // check array out of bounds: index < 0
             gen.gen("cmpq $0,%rcx");
-            gen.gen("jl _runtime_error_exit");
+            gen.gen("jl runtime_error_exit");
 
             // get bytes to check from array
             gen.genbin("imulq", "$8", "%rcx");
@@ -524,11 +524,11 @@ public class CodeGenVisitor implements Visitor {
 
         // check array out of bounds: index >= length
         gen.gen("cmpq (%rdx),%rax");
-        gen.gen("jge _runtime_error_exit");
+        gen.gen("jge runtime_error_exit");
 
         // check array out of bounds: index < 0
         gen.gen("cmpq $0,%rax");
-        gen.gen("jl _runtime_error_exit");
+        gen.gen("jl runtime_error_exit");
 
         // add byte size to index and move array in %rdx to that location
         // then get value from that location
@@ -674,7 +674,7 @@ public class CodeGenVisitor implements Visitor {
 
         // check array out of bounds: index < 0
         gen.gen("cmpq $0,%rax");
-        gen.gen("jl _runtime_error_exit");
+        gen.gen("jl runtime_error_exit");
 
         // add size + 1 for length spot
         gen.genbin("addq", "$1", "%rax");
@@ -682,7 +682,7 @@ public class CodeGenVisitor implements Visitor {
 
         // move 'bytes needed' for array to %rdi
         gen.genbin("movq", "%rax", "%rdi \t\t # New array declaration");
-        gen.gen("call _mjcalloc \t\t # Allocate space and return pointer in %rax");
+        gen.gen("call mjcalloc \t\t # Allocate space and return pointer in %rax");
         gen.gen("pushq %rax");
 
         // accept expression again to get length numbers
@@ -706,7 +706,7 @@ public class CodeGenVisitor implements Visitor {
 
         // load vtable at 0 offset of malloced bytes
         gen.gen("movq $" + nBytesNeeded + ",%rdi \t\t # New object declaration");
-        gen.gen("call _mjcalloc \t\t # Allocate space and return pointer in %rax");
+        gen.gen("call mjcalloc \t\t # Allocate space and return pointer in %rax");
         gen.gen("leaq " + c + "$$(%rip),%rdx \t\t # Load class vtable into %rdx");
         gen.gen("movq %rdx,0(%rax) \t\t # Load vtable at the beginning of %rax");
         gen.gen("");

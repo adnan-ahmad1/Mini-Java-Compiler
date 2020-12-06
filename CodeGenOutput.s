@@ -1,15 +1,15 @@
     .text
-    .globl  _asm_main
+    .globl  asm_main
 
-_runtime_error_exit:
-    call _runtime_error
+runtime_error_exit:
+    call runtime_error
 
-_asm_main:
+asm_main:
     pushq %rbp 		 # Prologue
     movq %rsp,%rbp
     
     movq $8,%rdi 		 # New object declaration
-    call _mjcalloc 		 # Allocate space and return pointer in %rax
+    call mjcalloc 		 # Allocate space and return pointer in %rax
     leaq TV$$(%rip),%rdx 		 # Load class vtable into %rdx
     movq %rdx,0(%rax) 		 # Load vtable at the beginning of %rax
     
@@ -18,7 +18,7 @@ _asm_main:
     call *8(%rax) 		 # Call variable's method
     
     movq %rax,%rdi 		 # Print
-    call _put
+    call put
     
     movq %rbp,%rsp 		 # Epilogue
     popq %rbp
@@ -32,7 +32,7 @@ TV$Start:
     subq $40,%rsp 		 # Subtract space for variables to push on stack
     movq %rdi,-8(%rbp) 		 # Move variable onto stack
     movq $56,%rdi 		 # New object declaration
-    call _mjcalloc 		 # Allocate space and return pointer in %rax
+    call mjcalloc 		 # Allocate space and return pointer in %rax
     leaq Tree$$(%rip),%rdx 		 # Load class vtable into %rdx
     movq %rdx,0(%rax) 		 # Load vtable at the beginning of %rax
     
@@ -62,7 +62,7 @@ TV$Start:
     movq %rax,-24(%rbp) 		 # Assign to local var
     movq $100000000,%rax 		 # Integer Literal
     movq %rax,%rdi 		 # Print
-    call _put
+    call put
     
     pushq %rax 		 # Push Dummy
     
@@ -163,17 +163,17 @@ TV$Start:
     movq %rax,-24(%rbp) 		 # Assign to local var
     movq $100000000,%rax 		 # Integer Literal
     movq %rax,%rdi 		 # Print
-    call _put
+    call put
     
     movq $24,%rdi 		 # New object declaration
-    call _mjcalloc 		 # Allocate space and return pointer in %rax
+    call mjcalloc 		 # Allocate space and return pointer in %rax
     leaq MyVisitor$$(%rip),%rdx 		 # Load class vtable into %rdx
     movq %rdx,0(%rax) 		 # Load vtable at the beginning of %rax
     
     movq %rax,-40(%rbp) 		 # Assign to local var
     movq $50000000,%rax 		 # Integer Literal
     movq %rax,%rdi 		 # Print
-    call _put
+    call put
     
     movq -40(%rbp),%rax
     pushq %rax 		 # Evaluate args and push on stack
@@ -190,7 +190,7 @@ TV$Start:
     movq %rax,-32(%rbp) 		 # Assign to local var
     movq $100000000,%rax 		 # Integer Literal
     movq %rax,%rdi 		 # Print
-    call _put
+    call put
     
     pushq %rax 		 # Push Dummy
     
@@ -205,7 +205,7 @@ TV$Start:
     call *136(%rax) 		 # Call variable's method
     
     movq %rax,%rdi 		 # Print
-    call _put
+    call put
     
     movq $12,%rax 		 # Integer Literal
     pushq %rax 		 # Evaluate args and push on stack
@@ -220,7 +220,7 @@ TV$Start:
     call *136(%rax) 		 # Call variable's method
     
     movq %rax,%rdi 		 # Print
-    call _put
+    call put
     
     pushq %rax 		 # Push Dummy
     
@@ -235,7 +235,7 @@ TV$Start:
     call *136(%rax) 		 # Call variable's method
     
     movq %rax,%rdi 		 # Print
-    call _put
+    call put
     
     movq $50,%rax 		 # Integer Literal
     pushq %rax 		 # Evaluate args and push on stack
@@ -250,7 +250,7 @@ TV$Start:
     call *136(%rax) 		 # Call variable's method
     
     movq %rax,%rdi 		 # Print
-    call _put
+    call put
     
     pushq %rax 		 # Push Dummy
     
@@ -265,7 +265,7 @@ TV$Start:
     call *136(%rax) 		 # Call variable's method
     
     movq %rax,%rdi 		 # Print
-    call _put
+    call put
     
     movq $12,%rax 		 # Integer Literal
     pushq %rax 		 # Evaluate args and push on stack
@@ -303,7 +303,7 @@ TV$Start:
     call *136(%rax) 		 # Call variable's method
     
     movq %rax,%rdi 		 # Print
-    call _put
+    call put
     
     movq $0,%rax 		 # Integer Literal
     
@@ -564,7 +564,7 @@ Tree$Insert:
     movq %rdi,-8(%rbp) 		 # Move variable onto stack
     movq %rsi,-16(%rbp) 		 # Move variable onto stack
     movq $56,%rdi 		 # New object declaration
-    call _mjcalloc 		 # Allocate space and return pointer in %rax
+    call mjcalloc 		 # Allocate space and return pointer in %rax
     leaq Tree$$(%rip),%rdx 		 # Load class vtable into %rdx
     movq %rdx,0(%rax) 		 # Load vtable at the beginning of %rax
     
@@ -1476,7 +1476,7 @@ RecPrint_done_24:
     call *32(%rax) 		 # Call variable's method
     
     movq %rax,%rdi 		 # Print
-    call _put
+    call put
     
     pushq %rax 		 # Push Dummy
     
@@ -1527,7 +1527,7 @@ Tree$accept:
     movq %rsi,-16(%rbp) 		 # Move variable onto stack
     movq $333,%rax 		 # Integer Literal
     movq %rax,%rdi 		 # Print
-    call _put
+    call put
     
     movq -8(%rbp),%rax 		 # This
     pushq %rax 		 # Evaluate args and push on stack
@@ -1697,7 +1697,7 @@ visit_done_28:
     call *32(%rax) 		 # Call variable's method
     
     movq %rax,%rdi 		 # Print
-    call _put
+    call put
     
     movq -16(%rbp),%rax
     movq %rax,%rdi 		 # Load pointer of object making call in first arg register

@@ -6,11 +6,11 @@ public class Gen {
     public Gen() {
         // direct to standard output
         System.out.println("    .text");
-        System.out.println("    .globl  _asm_main");
+        System.out.println("    .globl  asm_main");
         System.out.println();
 
-        System.out.println("_runtime_error_exit:");
-        System.out.println("    call _runtime_error");
+        System.out.println("runtime_error_exit:");
+        System.out.println("    call runtime_error");
         System.out.println();
     }
 
