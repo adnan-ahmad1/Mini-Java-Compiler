@@ -5,7 +5,6 @@ import CodeGen.Gen;
 import Semantics.ClassSemanticTable;
 import Semantics.SemanticTable;
 import java.util.*;
-import java.io.IOException;
 
 // java -cp build/classes:lib/java-cup-11b.jar MiniJava filename.java
 
@@ -27,10 +26,10 @@ public class CodeGenVisitor implements Visitor {
     // mapping from variable name to offset in stack
     Map<String, Integer> localVarOffset;
 
-    public CodeGenVisitor(SemanticTable sm) throws IOException {
+    public CodeGenVisitor(SemanticTable sm) {
         counter = 0;
         controlFlowCounter = 0;
-        gen = new Gen("src/runtime/asmOutput.s");
+        gen = new Gen();
         this.sm  = sm;
         vTable = new HashMap<>();
         makeVTableInfo();
@@ -40,6 +39,8 @@ public class CodeGenVisitor implements Visitor {
     }
 
     public void calculateFieldOffsets() {
+
+        // go through variables of all classes and calculate their offsets
         for (String c : sm.getClasses().keySet()) {
             List<String> variables = new ArrayList<>();
             ClassSemanticTable cst = sm.getClass(c);
@@ -51,6 +52,8 @@ public class CodeGenVisitor implements Visitor {
     }
 
     public void calculateFieldOffsetsHelper(ClassSemanticTable cst, List<String> variables) {
+
+        // calculate super class offsets first
         if (cst.getSuperClass() != null) {
             calculateFieldOffsetsHelper(cst.getSuperClass(), variables);
         }
@@ -110,25 +113,20 @@ public class CodeGenVisitor implements Visitor {
 
     // write vtable
     private void writeData() {
-        try {
-            gen.gen(".data");
-            for (String key : vTable.keySet()) {
-                gen.gen(key + "$$:");
+        gen.gen(".data");
+        for (String key : vTable.keySet()) {
+            gen.gen(key + "$$:");
 
-                if (sm.getClass(key).getSuperClass() != null) {
-                    gen.gen(".quad " + sm.getClass(key).getSuperClassName() + "$$");
-                } else {
-                    gen.gen(".quad 0");
-                }
-
-                List<String> methods = vTable.get(key);
-                for (String method : methods) {
-                    gen.gen(".quad " + method);
-                }
+            if (sm.getClass(key).getSuperClass() != null) {
+                gen.gen(".quad " + sm.getClass(key).getSuperClassName() + "$$");
+            } else {
+                gen.gen(".quad 0");
             }
-        } catch(java.io.IOException e) {
-            System.err.println("Unexpected IO exception error: " + e.toString());
-            System.exit(1);
+
+            List<String> methods = vTable.get(key);
+            for (String method : methods) {
+                gen.gen(".quad " + method);
+            }
         }
     }
 
@@ -146,15 +144,8 @@ public class CodeGenVisitor implements Visitor {
             n.cl.get(i).accept(this);
         }
 
-        try {
-            // write vtable at and close writer
-            writeData();
-            gen.finish();
-        } catch(java.io.IOException e) {
-            System.err.println("Unexpected IO exception error: " + e.toString());
-            System.exit(1);
-        }
-
+        // write vtable at end
+        writeData();
     }
 
     public void visit(MainClass n) {
@@ -162,24 +153,14 @@ public class CodeGenVisitor implements Visitor {
         sm.goIntoMethod("main");
 
         // visit main class and generate label
-        try {
-            gen.genLabel("_asm_main");
-            gen.prologue();
-            vTable.remove(n.i1.s);
-        } catch(java.io.IOException e) {
-            System.err.println("Unexpected IO exception error: " + e.toString());
-            System.exit(1);
-        }
+        gen.genLabel("_asm_main");
+        gen.prologue();
+        vTable.remove(n.i1.s);
 
         // execute statements in main class
         n.s.accept(this);
 
-        try {
-            gen.epilogue();
-        } catch(java.io.IOException e) {
-            System.err.println("Unexpected IO exception error: " + e.toString());
-            System.exit(1);
-        }
+        gen.epilogue();
     }
 
     public void visit(ClassDeclSimple n) {
@@ -200,76 +181,71 @@ public class CodeGenVisitor implements Visitor {
     }
 
     public void visit(MethodDecl n) {
-        try {
-            sm.goIntoMethod(n.i.s);
+        sm.goIntoMethod(n.i.s);
 
-            // find method name
-            String methodH = "";
-            List<String> methods = vTable.get(sm.getCurrClassTable().getName());
-            for (int i = 0; i < methods.size(); i++) {
-                int dollarSign = methods.get(i).indexOf("$");
-                if (methods.get(i).substring(dollarSign + 1).equals(n.i.s)) {
-                    methodH = methods.get(i);
-                    break;
-                }
+        // find method name
+        String methodH = "";
+        List<String> methods = vTable.get(sm.getCurrClassTable().getName());
+        for (int i = 0; i < methods.size(); i++) {
+            int dollarSign = methods.get(i).indexOf("$");
+            if (methods.get(i).substring(dollarSign + 1).equals(n.i.s)) {
+                methodH = methods.get(i);
+                break;
             }
-
-            // generate label for method and create prologue
-            gen.genLabel(methodH);
-            gen.prologue();
-
-            // go through parameters and input offsets
-            for (int i = 0; i < n.fl.size();i++) {
-                localVarOffset.put(n.fl.get(i).i.s, i + 2);
-            }
-
-            // go through local variables and input offsets
-            for (int i = 0; i < n.vl.size(); i++) {
-                localVarOffset.put(n.vl.get(i).i.s, ((i + 2) + n.fl.size()));
-            }
-
-            // if we have an even number of variables, then we push dummy variable ('this' is passed but not counted)
-            if (localVarOffset.size()%2 == 0) {
-                gen.gen("subq $8,%rsp");
-                counter += 1;
-            }
-
-            // subtract space from stack for variables and add to counter
-            gen.gen("subq " + "$" + ((localVarOffset.size() + 1) * 8) + ",%rsp \t\t # Subtract space for variables to push on stack");
-            counter += (localVarOffset.size() + 1);
-
-            // go through parameters and move register arg values to stack
-            for(int j = 0; j <= n.fl.size();j++) {
-                String assemblyCommand = "movq ";
-                assemblyCommand += registers[j] + ",";
-                assemblyCommand += ((j + 1) * (-8));
-                assemblyCommand += "(%rbp) \t\t # Move variable onto stack";
-                gen.gen(assemblyCommand);
-            }
-
-            // execute statements within the method
-            // only on assigns do you set value to local variable offsets
-            for (int i = 0; i < n.sl.size(); i++) {
-                n.sl.get(i).accept(this);
-            }
-
-            // process return expression which is stored in %rax
-            n.e.accept(this);
-
-            // remove space for dummy val from counter
-            if (localVarOffset.size() % 2 == 0) {
-                counter--;
-            }
-            counter -= (localVarOffset.size() + 1);
-
-            gen.gen("");
-            gen.epilogue();
-
-            localVarOffset.clear();
-        } catch (Exception e) {
-            System.err.println("Unexpected IO exception error: " + e.toString());
-            System.exit(1);
         }
+
+        // generate label for method and create prologue
+        gen.genLabel(methodH);
+        gen.prologue();
+
+        // go through parameters and input offsets
+        for (int i = 0; i < n.fl.size();i++) {
+            localVarOffset.put(n.fl.get(i).i.s, i + 2);
+        }
+
+        // go through local variables and input offsets
+        for (int i = 0; i < n.vl.size(); i++) {
+            localVarOffset.put(n.vl.get(i).i.s, ((i + 2) + n.fl.size()));
+        }
+
+        // if we have an even number of variables, then we push dummy variable ('this' is passed but not counted)
+        if (localVarOffset.size()%2 == 0) {
+            gen.gen("subq $8,%rsp");
+            counter += 1;
+        }
+
+        // subtract space from stack for variables and add to counter
+        gen.gen("subq " + "$" + ((localVarOffset.size() + 1) * 8) + ",%rsp \t\t # Subtract space for variables to push on stack");
+        counter += (localVarOffset.size() + 1);
+
+        // go through parameters and move register arg values to stack
+        for(int j = 0; j <= n.fl.size();j++) {
+            String assemblyCommand = "movq ";
+            assemblyCommand += registers[j] + ",";
+            assemblyCommand += ((j + 1) * (-8));
+            assemblyCommand += "(%rbp) \t\t # Move variable onto stack";
+            gen.gen(assemblyCommand);
+        }
+
+        // execute statements within the method
+        // only on assigns do you set value to local variable offsets
+        for (int i = 0; i < n.sl.size(); i++) {
+            n.sl.get(i).accept(this);
+        }
+
+        // process return expression which is stored in %rax
+        n.e.accept(this);
+
+        // remove space for dummy val from counter
+        if (localVarOffset.size() % 2 == 0) {
+            counter--;
+        }
+        counter -= (localVarOffset.size() + 1);
+
+        gen.gen("");
+        gen.epilogue();
+
+        localVarOffset.clear();
     }
 
     public void visit(Formal n) {
@@ -297,55 +273,55 @@ public class CodeGenVisitor implements Visitor {
     }
 
     public void visit(If n) {
-        try {
-            controlFlowCounter++;
-            int labelID = controlFlowCounter;
 
-            n.e.accept(this);
-            gen.gen("cmpq $0,%rax");
-            gen.gen("je " + sm.getCurrMethodTable().getName() + "_else_" + labelID);
+        // generate unique id for label
+        controlFlowCounter++;
+        int labelID = controlFlowCounter;
 
-            n.s1.accept(this);
-            gen.gen("jmp " + sm.getCurrMethodTable().getName() + "_done_" + labelID);
-            gen.genLabel(sm.getCurrMethodTable().getName() + "_else_" + labelID);
-            n.s2.accept(this);
-            gen.genLabel(sm.getCurrMethodTable().getName() + "_done_" + labelID);
-        } catch (Exception e) {
-            System.err.println("Unexpected IO exception error: " + e.toString());
-            System.exit(1);
-        }
+        n.e.accept(this);
 
+        // if 0 then it is the else branch of if statement
+        gen.gen("cmpq $0,%rax \t\t # If statement");
+        gen.gen("je " + sm.getCurrMethodTable().getName() + "_else_" + labelID);
+
+        // not 0 so execute first statement
+        n.s1.accept(this);
+
+        // jump to done when first statement is finished
+        gen.gen("jmp " + sm.getCurrMethodTable().getName() + "_done_" + labelID);
+
+
+        // go to else and execute second statement
+        gen.genLabel(sm.getCurrMethodTable().getName() + "_else_" + labelID);
+        n.s2.accept(this);
+
+        // in done, do nothing
+        gen.genLabel(sm.getCurrMethodTable().getName() + "_done_" + labelID);
     }
 
     public void visit(While n) {
-        try {
-            controlFlowCounter++;
-            int labelID = controlFlowCounter;
+        controlFlowCounter++;
+        int labelID = controlFlowCounter;
 
-            // jmp to condition initially
-            gen.gen("jmp " + sm.getCurrMethodTable().getName() + "_while_" + labelID);
+        // jmp to condition initially
+        gen.gen("jmp " + sm.getCurrMethodTable().getName() + "_while_" + labelID + " \t\t # While statement");
 
-            // generate label for statement in while
-            gen.genLabel(sm.getCurrMethodTable().getName() + "_while_" + labelID);
-            n.e.accept(this);
-            gen.gen("cmpq $0,%rax");
+        // generate label for statement in while
+        gen.genLabel(sm.getCurrMethodTable().getName() + "_while_" + labelID);
+        n.e.accept(this);
+        gen.gen("cmpq $0,%rax");
 
-            // if condition is false go to done
-            gen.gen("je " + sm.getCurrMethodTable().getName() + "_while_done_" + labelID);
+        // if condition is false go to done
+        gen.gen("je " + sm.getCurrMethodTable().getName() + "_while_done_" + labelID);
 
-            // process statement inside
-            n.s.accept(this);
+        // process statement inside
+        n.s.accept(this);
 
-            // jmp back to condition
-            gen.gen("jmp " + sm.getCurrMethodTable().getName() + "_while_" + labelID);
+        // jmp back to condition
+        gen.gen("jmp " + sm.getCurrMethodTable().getName() + "_while_" + labelID);
 
-            // done label
-            gen.genLabel(sm.getCurrMethodTable().getName() + "_while_done_" + labelID);
-
-        } catch(java.io.IOException e) {
-            System.err.println("Unexpected IO exception error: " + e.toString());
-            System.exit(1);
-        }
+        // done label
+        gen.genLabel(sm.getCurrMethodTable().getName() + "_while_done_" + labelID);
     }
 
     public void visit(Print n) {
@@ -353,16 +329,11 @@ public class CodeGenVisitor implements Visitor {
         // process expression inside print which is stored in %rax
         n.e.accept(this);
 
-        try {
 
-            // move %rax into %rdi since put call uses %rdi
-            gen.genbin("movq", "%rax", "%rdi \t\t # Print");
-            gen.gen("call _put");
-            gen.gen("");
-        } catch(java.io.IOException e) {
-            System.err.println("Unexpected IO exception error: " + e.toString());
-            System.exit(1);
-        }
+        // move %rax into %rdi since put call uses %rdi
+        gen.genbin("movq", "%rax", "%rdi \t\t # Print");
+        gen.gen("call _put");
+        gen.gen("");
     }
 
     public void visit(Assign n) {
@@ -375,13 +346,8 @@ public class CodeGenVisitor implements Visitor {
         if (localVarOffset.containsKey(n.i.s)) {
 
             offsetFromRbp = localVarOffset.get(n.i.s) * 8;
+            gen.genbin("movq", "%rax", -offsetFromRbp + "(%rbp) \t\t # Assign to local var");
 
-            try {
-                gen.genbin("movq", "%rax", -offsetFromRbp + "(%rbp)");
-            } catch(java.io.IOException e) {
-                System.err.println("Unexpected IO exception error: " + e.toString());
-                System.exit(1);
-            }
         } else {
 
             offsetFromRbp = -1;
@@ -393,27 +359,17 @@ public class CodeGenVisitor implements Visitor {
                 }
             }
 
-            try {
-                gen.gen("pushq %rax");
-                gen.genbin("movq" , "-8(%rbp)", "%rax");
-                gen.gen("popq %rdx");
-                gen.genbin("movq", "%rdx", offsetFromRbp + "(%rax)");
-            } catch(java.io.IOException e) {
-                System.err.println("Unexpected IO exception error: " + e.toString());
-                System.exit(1);
-            }
+            gen.gen("pushq %rax");
+            gen.genbin("movq" , "-8(%rbp)", "%rax");
+            gen.gen("popq %rdx");
+            gen.genbin("movq", "%rdx", offsetFromRbp + "(%rax) \t\t # Assign to field");
         }
     }
 
     public void visit(ArrayAssign n) {
         n.e1.accept(this);
 
-        try {
-            gen.gen("pushq %rax");
-        } catch(java.io.IOException e) {
-            System.err.println("Unexpected IO exception error: " + e.toString());
-            System.exit(1);
-        }
+        gen.gen("pushq %rax");
 
         n.e2.accept(this);
 
@@ -423,26 +379,22 @@ public class CodeGenVisitor implements Visitor {
 
             offsetFromRbp = localVarOffset.get(n.i.s) * 8;
 
-            try {
-                gen.gen("popq %rdx");
-                gen.genbin("movq", -offsetFromRbp + "(%rbp)", "%rcx");
+            gen.gen("popq %rdx");
+            gen.genbin("movq", -offsetFromRbp + "(%rbp)", "%rcx \t\t # Array Assign local var");
 
-                // check array out of bounds: index >= length
-                gen.gen("cmpq (%rcx),%rdx");
-                gen.gen("jge _runtime_error_exit");
+            // check array out of bounds: index >= length
+            gen.gen("cmpq (%rcx),%rdx");
+            gen.gen("jge _runtime_error_exit");
 
-                // check array out of bounds: index < 0
-                gen.gen("cmpq $0,%rdx");
-                gen.gen("jl _runtime_error_exit");
+            // check array out of bounds: index < 0
+            gen.gen("cmpq $0,%rdx");
+            gen.gen("jl _runtime_error_exit");
 
-                gen.genbin("imulq", "$8", "%rdx");
-                gen.genbin("addq", "%rdx", "%rcx");
-                gen.genbin("addq", "$8", "%rcx");
-                gen.genbin("movq", "%rax", "(%rcx)");
-            } catch(java.io.IOException e) {
-                System.err.println("Unexpected IO exception error: " + e.toString());
-                System.exit(1);
-            }
+            // calculate byte offset
+            gen.genbin("imulq", "$8", "%rdx");
+            gen.genbin("addq", "%rdx", "%rcx");
+            gen.genbin("addq", "$8", "%rcx");
+            gen.genbin("movq", "%rax", "(%rcx)");
         } else {
             offsetFromRbp = -1;
             List<String> fields = fieldOffsets.get(sm.getCurrClassTable().getName());
@@ -453,23 +405,29 @@ public class CodeGenVisitor implements Visitor {
                 }
             }
 
-            try {
-                gen.gen("pushq %rax");
-                gen.genbin("movq" , "-8(%rbp)", "%rax");
-                gen.genbin("movq",offsetFromRbp + "(%rax)", "%rax");
+            // push expression 2 on stack
+            gen.gen("pushq %rax");
 
-                gen.gen("popq %rdx"); // exp 2
-                gen.gen("popq %rcx"); // exp 1
+            // put array from fields into %rax
+            gen.genbin("movq" , "-8(%rbp)", "%rax");
+            gen.genbin("movq",offsetFromRbp + "(%rax)", "%rax");
 
-                gen.genbin("imulq", "$8", "%rcx");
-                gen.genbin("addq", "%rcx", "%rax");
-                gen.genbin("addq", "$8", "%rax");
+            gen.gen("popq %rdx"); // exp 2
+            gen.gen("popq %rcx"); // exp 1
 
-                gen.genbin("movq", "%rdx", "(%rax)");
-            } catch(java.io.IOException e) {
-                System.err.println("Unexpected IO exception error: " + e.toString());
-                System.exit(1);
-            }
+            // check array out of bounds: index >= length
+            gen.gen("cmpq (%rax),%rcx");
+            gen.gen("jge _runtime_error_exit");
+
+            // check array out of bounds: index < 0
+            gen.gen("cmpq $0,%rcx");
+            gen.gen("jl _runtime_error_exit");
+
+            // get bytes to check from array
+            gen.genbin("imulq", "$8", "%rcx");
+            gen.genbin("addq", "%rcx", "%rax");
+            gen.genbin("addq", "$8", "%rax");
+            gen.genbin("movq", "%rdx", "(%rax)");
         }
     }
 
@@ -479,42 +437,31 @@ public class CodeGenVisitor implements Visitor {
         n.e1.accept(this);
 
         // push expression 1 onto stack
-        try {
-            gen.gen("pushq %rax \t\t # Plus");
-        } catch(java.io.IOException e) {
-            System.err.println("Unexpected IO exception error: " + e.toString());
-            System.exit(1);
-        }
+        gen.gen("pushq %rax \t\t # Plus");
 
         // visit second expression and put result in %rax
         n.e2.accept(this);
 
         // pop expression 1 into %rdx and add both
-        try {
-            gen.gen("popq %rdx");
-            gen.genbin("and", "%rdx", "%rax");
-            gen.gen("");
-        } catch(java.io.IOException e) {
-            System.err.println("Unexpected IO exception error: " + e.toString());
-            System.exit(1);
-        }
-
+        gen.gen("popq %rdx");
+        gen.genbin("and", "%rdx", "%rax");
+        gen.gen("");
     }
 
     public void visit(LessThan n) {
-        try {
-            n.e1.accept(this);
-            gen.gen("pushq %rax");
-            n.e2.accept(this);
-            gen.gen("popq %rdx");
-            gen.gen("cmpq %rdx, %rax");
-            gen.gen("setg %al");
-            gen.gen("movzbl %al,%eax");
-        } catch(Exception e) {
-            System.err.println("Unexpected IO exception error: " + e.toString());
-            System.exit(1);
-        }
+        // process expression 1
+        n.e1.accept(this);
 
+        gen.gen("pushq %rax");
+
+        // process expression 2
+        n.e2.accept(this);
+        gen.gen("popq %rdx");
+
+        // compare and set bit
+        gen.gen("cmpq %rdx, %rax \t\t # Less Than");
+        gen.gen("setg %al");
+        gen.gen("movzbl %al,%eax");
     }
 
     public void visit(Plus n) {
@@ -522,25 +469,15 @@ public class CodeGenVisitor implements Visitor {
         n.e1.accept(this);
 
         // push expression 1 onto stack
-        try {
-            gen.gen("pushq %rax \t\t # Plus");
-        } catch(java.io.IOException e) {
-            System.err.println("Unexpected IO exception error: " + e.toString());
-            System.exit(1);
-        }
+        gen.gen("pushq %rax \t\t # Plus");
 
         // visit second expression and put result in %rax
         n.e2.accept(this);
 
         // pop expression 1 into %rdx and add both
-        try {
-            gen.gen("popq %rdx");
-            gen.genbin("addq", "%rdx", "%rax");
-            gen.gen("");
-        } catch(java.io.IOException e) {
-            System.err.println("Unexpected IO exception error: " + e.toString());
-            System.exit(1);
-        }
+        gen.gen("popq %rdx");
+        gen.genbin("addq", "%rdx", "%rax");
+        gen.gen("");
     }
 
     public void visit(Minus n) {
@@ -548,26 +485,16 @@ public class CodeGenVisitor implements Visitor {
         n.e1.accept(this);
 
         // push expression 1 onto stack
-        try {
-            gen.gen("pushq %rax \t\t # Minus");
-        } catch(java.io.IOException e) {
-            System.err.println("Unexpected IO exception error: " + e.toString());
-            System.exit(1);
-        }
+        gen.gen("pushq %rax \t\t # Minus");
 
         // visit second expression and put result in %rax
         n.e2.accept(this);
 
         // pop expression 1 into %rdx and subtract both
-        try {
-            gen.gen("popq %rdx");
-            gen.genbin("subq", "%rax", "%rdx");
-            gen.genbin("movq", "%rdx", "%rax");
-            gen.gen("");
-        } catch(java.io.IOException e) {
-            System.err.println("Unexpected IO exception error: " + e.toString());
-            System.exit(1);
-        }
+        gen.gen("popq %rdx");
+        gen.genbin("subq", "%rax", "%rdx");
+        gen.genbin("movq", "%rdx", "%rax");
+        gen.gen("");
     }
 
     public void visit(Times n) {
@@ -575,182 +502,138 @@ public class CodeGenVisitor implements Visitor {
         n.e1.accept(this);
 
         // push expression 1 onto stack
-        try {
-            gen.gen("pushq %rax \t\t # Times");
-        } catch(java.io.IOException e) {
-            System.err.println("Unexpected IO exception error: " + e.toString());
-            System.exit(1);
-        }
+        gen.gen("pushq %rax \t\t # Times");
 
         // visit second expression and put result in %rax
         n.e2.accept(this);
 
         // pop expression 1 into %rdx and multiply both
-        try {
-            gen.gen("popq %rdx");
-            gen.genbin("imulq", "%rdx", "%rax");
-            gen.gen("");
-        } catch(java.io.IOException e) {
-            System.err.println("Unexpected IO exception error: " + e.toString());
-            System.exit(1);
-        }
+        gen.gen("popq %rdx");
+        gen.genbin("imulq", "%rdx", "%rax");
+        gen.gen("");
     }
 
     public void visit(ArrayLookup n) {
         n.e1.accept(this);
-        try {
-            gen.gen("pushq %rax");
 
-        } catch(java.io.IOException e) {
-            System.err.println("Unexpected IO exception error: " + e.toString());
-            System.exit(1);
-        }
+        gen.gen("pushq %rax");
 
         n.e2.accept(this);
 
-        try {
-            gen.gen("popq %rdx");
+        gen.gen("popq %rdx");
 
-            // check array out of bounds: index >= length
-            gen.gen("cmpq (%rdx),%rax");
-            gen.gen("jge _runtime_error_exit");
+        // check array out of bounds: index >= length
+        gen.gen("cmpq (%rdx),%rax");
+        gen.gen("jge _runtime_error_exit");
 
-            // check array out of bounds: index < 0
-            gen.gen("cmpq $0,%rax");
-            gen.gen("jl _runtime_error_exit");
+        // check array out of bounds: index < 0
+        gen.gen("cmpq $0,%rax");
+        gen.gen("jl _runtime_error_exit");
 
-            // add byte size to index and move array in %rdx to that location
-            // then get value from that location
-            gen.genbin("imulq", "$8", "%rax");
-            gen.genbin("addq", "%rax", "%rdx");
-            gen.genbin("addq", "$8", "%rdx");
-            gen.genbin("movq", "(%rdx)", "%rax");
-            gen.gen("");
-        } catch(java.io.IOException e) {
-            System.err.println("Unexpected IO exception error: " + e.toString());
-            System.exit(1);
-        }
+        // add byte size to index and move array in %rdx to that location
+        // then get value from that location
+        gen.genbin("imulq", "$8", "%rax \t\t # Array Lookup");
+        gen.genbin("addq", "%rax", "%rdx");
+        gen.genbin("addq", "$8", "%rdx");
+        gen.genbin("movq", "(%rdx)", "%rax");
+        gen.gen("");
     }
 
     public void visit(ArrayLength n) {
+
+        // process expression
         n.e.accept(this);
 
-        try {
-        gen.genbin("movq", "0(%rax)", "%rax");
+        // get length stored in first position
+        gen.genbin("movq", "0(%rax)", "%rax \t\t # Array Length");
         gen.gen("");
-        } catch(java.io.IOException e) {
-            System.err.println("Unexpected IO exception error: " + e.toString());
-            System.exit(1);
-        }
     }
 
     public void visit(Call n) {
-        try {
+        boolean flag = false;
 
-            boolean flag = false;
+        // go through expressions in args and process them
+        for (int i = 0; i < n.el.size(); i++) {
 
-            // go through expressions in args and process them
-            for (int i = 0; i < n.el.size(); i++) {
-
-                // if the stack is misaligned, then align by adding dummy variable (in case of nested call)
-                if (counter % 2 == 1) {
-                    gen.pushDummy();
-                    counter++;
-                    flag = true;
-                }
-
-                // process expression in arg
-                n.el.get(i).accept(this);
-
-                // if dummy value was added to align stack, then pop dummy off
-                if (flag) {
-                    gen.popDummy();
-                    counter--;
-                    flag = false;
-                }
-
-                // push processed expression of arg onto stack so registers do not get clobbered
-                gen.gen("pushq %rax \t\t # Evaluate args and push on stack");
-                counter++;
-            }
-
-            // before evaluating expression which could make another method call,
-            // push %rax if stack is not aligned
+            // if the stack is misaligned, then align by adding dummy variable (in case of nested call)
             if (counter % 2 == 1) {
                 gen.pushDummy();
                 counter++;
                 flag = true;
             }
 
-            // process variable making the call which will be stored in %rax
-            n.e.accept(this);
+            // process expression in arg
+            n.el.get(i).accept(this);
 
-            // check if dummy value was pushed
+            // if dummy value was added to align stack, then pop dummy off
             if (flag) {
                 gen.popDummy();
                 counter--;
                 flag = false;
             }
 
-            // pop args off of stack and store in registers for method call
-            for (int i = n.el.size()-1; i >= 0; i--) {
-                gen.gen("popq " + registers[i+1] + " \t\t # Pop from stack into arg registers");
-            }
-
-            // calculate offset from class vtable
-            int methodOffset = -1;
-            List<String> methods = vTable.get(n.e.type.toString());
-            for (int i = 0; i < methods.size(); i++) {
-                int dollarSign = methods.get(i).indexOf("$");
-                if (methods.get(i).substring(dollarSign + 1).equals(n.i.toString())) {
-                    methodOffset = (i * 8) + 8;
-                    break;
-                }
-            }
-
-            // load variable's vtable
-            gen.genbin("movq", "%rax", "%rdi \t\t # Load pointer of object making call in first arg register");
-            gen.genbin("movq", "0(%rdi)", "%rax");
-
-            // execute call from certain offset in vtable
-            gen.gen("call *" + methodOffset + "(%rax) \t\t # Call variable's method");
-
-            gen.gen("");
-        } catch(java.io.IOException e) {
-            System.err.println("Unexpected IO exception error: " + e.toString());
-            System.exit(1);
+            // push processed expression of arg onto stack so registers do not get clobbered
+            gen.gen("pushq %rax \t\t # Evaluate args and push on stack");
+            counter++;
         }
+
+        // before evaluating expression which could make another method call,
+        // push %rax if stack is not aligned
+        if (counter % 2 == 1) {
+            gen.pushDummy();
+            counter++;
+            flag = true;
+        }
+
+        // process variable making the call which will be stored in %rax
+        n.e.accept(this);
+
+        // check if dummy value was pushed
+        if (flag) {
+            gen.popDummy();
+            counter--;
+            flag = false;
+        }
+
+        // pop args off of stack and store in registers for method call
+        for (int i = n.el.size()-1; i >= 0; i--) {
+            gen.gen("popq " + registers[i+1] + " \t\t # Pop from stack into arg registers");
+        }
+
+        // calculate offset from class vtable
+        int methodOffset = -1;
+        List<String> methods = vTable.get(n.e.type.toString());
+        for (int i = 0; i < methods.size(); i++) {
+            int dollarSign = methods.get(i).indexOf("$");
+            if (methods.get(i).substring(dollarSign + 1).equals(n.i.toString())) {
+                methodOffset = (i * 8) + 8;
+                break;
+            }
+        }
+
+        // load variable's vtable
+        gen.genbin("movq", "%rax", "%rdi \t\t # Load pointer of object making call in first arg register");
+        gen.genbin("movq", "0(%rdi)", "%rax");
+
+        // execute call from certain offset in vtable
+        gen.gen("call *" + methodOffset + "(%rax) \t\t # Call variable's method");
+
+        gen.gen("");
     }
 
     public void visit(IntegerLiteral n) {
-
-        try {
-            // move number into %rax
-            gen.genbin("movq", "$"+n.i, "%rax \t\t # Integer Literal");
-        } catch(java.io.IOException e) {
-            System.err.println("Unexpected IO exception error: " + e.toString());
-            System.exit(1);
-        }
+        // move number into %rax
+        gen.genbin("movq", "$"+n.i, "%rax \t\t # Integer Literal");
     }
 
     public void visit(True n) {
-        try {
-            // move true into %rax
-            gen.genbin("movq", "$1", "%rax \t\t # Boolean true");
-        } catch(java.io.IOException e) {
-            System.err.println("Unexpected IO exception error: " + e.toString());
-            System.exit(1);
-        }
+        // move true into %rax
+        gen.genbin("movq", "$1", "%rax \t\t # Boolean true");
     }
 
     public void visit(False n) {
-        try {
-            // move false into %rax
-            gen.genbin("movq", "$0", "%rax \t\t # Boolean false");
-        } catch(java.io.IOException e) {
-            System.err.println("Unexpected IO exception error: " + e.toString());
-            System.exit(1);
-        }
+        // move false into %rax
+        gen.genbin("movq", "$0", "%rax \t\t # Boolean false");
     }
 
     public void visit(IdentifierExp n) {
@@ -762,12 +645,7 @@ public class CodeGenVisitor implements Visitor {
         if (localVarOffset.containsKey(n.s)) {
             offsetFromRbp = localVarOffset.get(n.s) * 8;
 
-            try {
-                gen.genbin("movq", -offsetFromRbp + "(%rbp)", "%rax");
-            } catch(Exception e) {
-                System.err.println("Unexpected IO exception error: " + e.toString());
-                System.exit(1);
-            }
+            gen.genbin("movq", -offsetFromRbp + "(%rbp)", "%rax");
         } else {
             //offsetFromRbp = (sm.getCurrClassTable().getVariableNames().indexOf(n.s) * 8) + 8;
             offsetFromRbp = -1;
@@ -779,91 +657,67 @@ public class CodeGenVisitor implements Visitor {
                 }
             }
 
-            try {
-                gen.genbin("movq", "-8(%rbp)", "%rax");
-                gen.genbin("movq", offsetFromRbp + "(%rax)", "%rax");
-            } catch(java.io.IOException e) {
-                System.err.println("Unexpected IO exception error: " + e.toString());
-                System.exit(1);
-            }
+            gen.genbin("movq", "-8(%rbp)", "%rax");
+            gen.genbin("movq", offsetFromRbp + "(%rax)", "%rax");
         }
 
     }
 
     public void visit(This n) {
-        try {
-            gen.genbin("movq", "-8(%rbp)", "%rax");
-        } catch(java.io.IOException e) {
-            System.err.println("Unexpected IO exception error: " + e.toString());
-            System.exit(1);
-        }
+
+        // this pointer of object calling method should be stored in %rbp
+        gen.genbin("movq", "-8(%rbp)", "%rax \t\t # This");
     }
 
     public void visit(NewArray n) {
         n.e.accept(this);
 
-        try {
+        // check array out of bounds: index < 0
+        gen.gen("cmpq $0,%rax");
+        gen.gen("jl _runtime_error_exit");
 
-            // check array out of bounds: index < 0
-            gen.gen("cmpq $0,%rax");
-            gen.gen("jl _runtime_error_exit");
+        // add size + 1 for length spot
+        gen.genbin("addq", "$1", "%rax");
+        gen.genbin("imulq", "$8", "%rax");
 
-            // add size + 1 for length spot
-            gen.genbin("addq", "$1", "%rax");
-            gen.genbin("imulq", "$8", "%rax");
+        // move 'bytes needed' for array to %rdi
+        gen.genbin("movq", "%rax", "%rdi \t\t # New array declaration");
+        gen.gen("call _mjcalloc \t\t # Allocate space and return pointer in %rax");
+        gen.gen("pushq %rax");
 
-            // move 'bytes needed' for array to %rdi
-            gen.genbin("movq", "%rax", "%rdi \t\t # New array declaration");
-            gen.gen("call _mjcalloc \t\t # Allocate space and return pointer in %rax");
-            gen.gen("pushq %rax");
+        // accept expression again to get length numbers
+        counter++;
+        n.e.accept(this);
+        gen.gen("popq %rdx");
+        counter--;
 
-            // accept expression again to get length numbers
-            counter++;
-            n.e.accept(this);
-            gen.gen("popq %rdx");
-            counter--;
-
-            // move size to beginning of array
-            gen.genbin("movq", "%rax", "0(%rdx)");
-            gen.genbin("movq", "%rdx", "%rax");
-            gen.gen("");
-        } catch(java.io.IOException e) {
-            System.err.println("Unexpected IO exception error: " + e.toString());
-            System.exit(1);
-        }
+        // move size to beginning of array
+        gen.genbin("movq", "%rax", "0(%rdx)");
+        gen.genbin("movq", "%rdx", "%rax");
+        gen.gen("");
     }
 
     public void visit(NewObject n) {
-        try {
-            String c = n.i.toString();
+        String c = n.i.toString();
 
-            // calculate bytes needed for class
-            //int nBytesNeeded = sm.getClass(c).getOffset();
-            int nBytesNeeded = (fieldOffsets.get(c).size() * 8) + 8;
+        // calculate bytes needed for class
+        //int nBytesNeeded = sm.getClass(c).getOffset();
+        int nBytesNeeded = (fieldOffsets.get(c).size() * 8) + 8;
 
-            // load vtable at 0 offset of malloced bytes
-            gen.gen("movq $" + nBytesNeeded + ",%rdi \t\t # New object declaration");
-            gen.gen("call _mjcalloc \t\t # Allocate space and return pointer in %rax");
-            gen.gen("leaq " + c + "$$(%rip),%rdx \t\t # Load class vtable into %rdx");
-            gen.gen("movq %rdx,0(%rax) \t\t # Load vtable at the beginning of %rax");
-            gen.gen("");
-        } catch(Exception e) {
-            System.err.println("Unexpected IO exception error: " + e.toString());
-            System.exit(1);
-        }
-
+        // load vtable at 0 offset of malloced bytes
+        gen.gen("movq $" + nBytesNeeded + ",%rdi \t\t # New object declaration");
+        gen.gen("call _mjcalloc \t\t # Allocate space and return pointer in %rax");
+        gen.gen("leaq " + c + "$$(%rip),%rdx \t\t # Load class vtable into %rdx");
+        gen.gen("movq %rdx,0(%rax) \t\t # Load vtable at the beginning of %rax");
+        gen.gen("");
     }
 
     public void visit(Not n) {
         n.e.accept(this);
 
-        try {
-            gen.genbin("xor", "$1", "%rax");
-            gen.gen("");
-        } catch(Exception e) {
-            System.err.println("Unexpected IO exception error: " + e.toString());
-            System.exit(1);
-        }
+        // just xor whatever bit is saved in %rax
+        gen.genbin("xor", "$1", "%rax \t\t # Not");
+        gen.gen("");
     }
 
     public void visit(Identifier n) {

@@ -1,10 +1,8 @@
     .text
     .globl  _asm_main
 
-_runtime_error_exit: 
-
-    call _runtime_error 
-
+_runtime_error_exit:
+    call _runtime_error
 
 _asm_main:
     pushq %rbp 		 # Prologue
@@ -38,7 +36,7 @@ TV$Start:
     leaq Tree$$(%rip),%rdx 		 # Load class vtable into %rdx
     movq %rdx,0(%rax) 		 # Load vtable at the beginning of %rax
     
-    movq %rax,-16(%rbp)
+    movq %rax,-16(%rbp) 		 # Assign to local var
     movq $16,%rax 		 # Integer Literal
     pushq %rax 		 # Evaluate args and push on stack
     pushq %rax 		 # Push Dummy
@@ -51,7 +49,7 @@ TV$Start:
     movq 0(%rdi),%rax
     call *104(%rax) 		 # Call variable's method
     
-    movq %rax,-24(%rbp)
+    movq %rax,-24(%rbp) 		 # Assign to local var
     pushq %rax 		 # Push Dummy
     
     movq -16(%rbp),%rax
@@ -61,7 +59,7 @@ TV$Start:
     movq 0(%rdi),%rax
     call *96(%rax) 		 # Call variable's method
     
-    movq %rax,-24(%rbp)
+    movq %rax,-24(%rbp) 		 # Assign to local var
     movq $100000000,%rax 		 # Integer Literal
     movq %rax,%rdi 		 # Print
     call _put
@@ -78,7 +76,7 @@ TV$Start:
     movq 0(%rdi),%rax
     call *80(%rax) 		 # Call variable's method
     
-    movq %rax,-24(%rbp)
+    movq %rax,-24(%rbp) 		 # Assign to local var
     movq $24,%rax 		 # Integer Literal
     pushq %rax 		 # Evaluate args and push on stack
     pushq %rax 		 # Push Dummy
@@ -91,7 +89,7 @@ TV$Start:
     movq 0(%rdi),%rax
     call *80(%rax) 		 # Call variable's method
     
-    movq %rax,-24(%rbp)
+    movq %rax,-24(%rbp) 		 # Assign to local var
     pushq %rax 		 # Push Dummy
     
     movq $4,%rax 		 # Integer Literal
@@ -104,7 +102,7 @@ TV$Start:
     movq 0(%rdi),%rax
     call *80(%rax) 		 # Call variable's method
     
-    movq %rax,-24(%rbp)
+    movq %rax,-24(%rbp) 		 # Assign to local var
     movq $12,%rax 		 # Integer Literal
     pushq %rax 		 # Evaluate args and push on stack
     pushq %rax 		 # Push Dummy
@@ -117,7 +115,7 @@ TV$Start:
     movq 0(%rdi),%rax
     call *80(%rax) 		 # Call variable's method
     
-    movq %rax,-24(%rbp)
+    movq %rax,-24(%rbp) 		 # Assign to local var
     pushq %rax 		 # Push Dummy
     
     movq $20,%rax 		 # Integer Literal
@@ -130,7 +128,7 @@ TV$Start:
     movq 0(%rdi),%rax
     call *80(%rax) 		 # Call variable's method
     
-    movq %rax,-24(%rbp)
+    movq %rax,-24(%rbp) 		 # Assign to local var
     movq $28,%rax 		 # Integer Literal
     pushq %rax 		 # Evaluate args and push on stack
     pushq %rax 		 # Push Dummy
@@ -143,7 +141,7 @@ TV$Start:
     movq 0(%rdi),%rax
     call *80(%rax) 		 # Call variable's method
     
-    movq %rax,-24(%rbp)
+    movq %rax,-24(%rbp) 		 # Assign to local var
     pushq %rax 		 # Push Dummy
     
     movq $14,%rax 		 # Integer Literal
@@ -156,13 +154,13 @@ TV$Start:
     movq 0(%rdi),%rax
     call *80(%rax) 		 # Call variable's method
     
-    movq %rax,-24(%rbp)
+    movq %rax,-24(%rbp) 		 # Assign to local var
     movq -16(%rbp),%rax
     movq %rax,%rdi 		 # Load pointer of object making call in first arg register
     movq 0(%rdi),%rax
     call *96(%rax) 		 # Call variable's method
     
-    movq %rax,-24(%rbp)
+    movq %rax,-24(%rbp) 		 # Assign to local var
     movq $100000000,%rax 		 # Integer Literal
     movq %rax,%rdi 		 # Print
     call _put
@@ -172,7 +170,7 @@ TV$Start:
     leaq MyVisitor$$(%rip),%rdx 		 # Load class vtable into %rdx
     movq %rdx,0(%rax) 		 # Load vtable at the beginning of %rax
     
-    movq %rax,-40(%rbp)
+    movq %rax,-40(%rbp) 		 # Assign to local var
     movq $50000000,%rax 		 # Integer Literal
     movq %rax,%rdi 		 # Print
     call _put
@@ -189,7 +187,7 @@ TV$Start:
     movq 0(%rdi),%rax
     call *88(%rax) 		 # Call variable's method
     
-    movq %rax,-32(%rbp)
+    movq %rax,-32(%rbp) 		 # Assign to local var
     movq $100000000,%rax 		 # Integer Literal
     movq %rax,%rdi 		 # Print
     call _put
@@ -281,7 +279,7 @@ TV$Start:
     movq 0(%rdi),%rax
     call *8(%rax) 		 # Call variable's method
     
-    movq %rax,-24(%rbp)
+    movq %rax,-24(%rbp) 		 # Assign to local var
     pushq %rax 		 # Push Dummy
     
     movq -16(%rbp),%rax
@@ -291,7 +289,7 @@ TV$Start:
     movq 0(%rdi),%rax
     call *96(%rax) 		 # Call variable's method
     
-    movq %rax,-24(%rbp)
+    movq %rax,-24(%rbp) 		 # Assign to local var
     pushq %rax 		 # Push Dummy
     
     movq $12,%rax 		 # Integer Literal
@@ -324,17 +322,17 @@ Tree$Init:
     pushq %rax
     movq -8(%rbp),%rax
     popq %rdx
-    movq %rdx,48(%rax)
+    movq %rdx,48(%rax) 		 # Assign to field
     movq $0,%rax 		 # Boolean false
     pushq %rax
     movq -8(%rbp),%rax
     popq %rdx
-    movq %rdx,40(%rax)
+    movq %rdx,40(%rax) 		 # Assign to field
     movq $0,%rax 		 # Boolean false
     pushq %rax
     movq -8(%rbp),%rax
     popq %rdx
-    movq %rdx,16(%rax)
+    movq %rdx,16(%rax) 		 # Assign to field
     movq $1,%rax 		 # Boolean true
     
     movq %rbp,%rsp 		 # Epilogue
@@ -352,7 +350,7 @@ Tree$SetRight:
     pushq %rax
     movq -8(%rbp),%rax
     popq %rdx
-    movq %rdx,32(%rax)
+    movq %rdx,32(%rax) 		 # Assign to field
     movq $1,%rax 		 # Boolean true
     
     movq %rbp,%rsp 		 # Epilogue
@@ -370,7 +368,7 @@ Tree$SetLeft:
     pushq %rax
     movq -8(%rbp),%rax
     popq %rdx
-    movq %rdx,8(%rax)
+    movq %rdx,8(%rax) 		 # Assign to field
     movq $1,%rax 		 # Boolean true
     
     movq %rbp,%rsp 		 # Epilogue
@@ -430,7 +428,7 @@ Tree$SetKey:
     pushq %rax
     movq -8(%rbp),%rax
     popq %rdx
-    movq %rdx,48(%rax)
+    movq %rdx,48(%rax) 		 # Assign to field
     movq $1,%rax 		 # Boolean true
     
     movq %rbp,%rsp 		 # Epilogue
@@ -476,7 +474,7 @@ Tree$SetHas_Left:
     pushq %rax
     movq -8(%rbp),%rax
     popq %rdx
-    movq %rdx,40(%rax)
+    movq %rdx,40(%rax) 		 # Assign to field
     movq $1,%rax 		 # Boolean true
     
     movq %rbp,%rsp 		 # Epilogue
@@ -494,7 +492,7 @@ Tree$SetHas_Right:
     pushq %rax
     movq -8(%rbp),%rax
     popq %rdx
-    movq %rdx,16(%rax)
+    movq %rdx,16(%rax) 		 # Assign to field
     movq $1,%rax 		 # Boolean true
     
     movq %rbp,%rsp 		 # Epilogue
@@ -511,44 +509,44 @@ Tree$Compare:
     movq %rsi,-16(%rbp) 		 # Move variable onto stack
     movq %rdx,-24(%rbp) 		 # Move variable onto stack
     movq $0,%rax 		 # Boolean false
-    movq %rax,-32(%rbp)
+    movq %rax,-32(%rbp) 		 # Assign to local var
     movq -24(%rbp),%rax
     pushq %rax 		 # Plus
     movq $1,%rax 		 # Integer Literal
     popq %rdx
     addq %rdx,%rax
     
-    movq %rax,-40(%rbp)
+    movq %rax,-40(%rbp) 		 # Assign to local var
     movq -16(%rbp),%rax
     pushq %rax
     movq -24(%rbp),%rax
     popq %rdx
-    cmpq %rdx, %rax
+    cmpq %rdx, %rax 		 # Less Than
     setg %al
     movzbl %al,%eax
-    cmpq $0,%rax
+    cmpq $0,%rax 		 # If statement
     je Compare_else_1
     movq $0,%rax 		 # Boolean false
-    movq %rax,-32(%rbp)
+    movq %rax,-32(%rbp) 		 # Assign to local var
     jmp Compare_done_1
 Compare_else_1:
     movq -16(%rbp),%rax
     pushq %rax
     movq -40(%rbp),%rax
     popq %rdx
-    cmpq %rdx, %rax
+    cmpq %rdx, %rax 		 # Less Than
     setg %al
     movzbl %al,%eax
-    xor $1,%rax
+    xor $1,%rax 		 # Not
     
-    cmpq $0,%rax
+    cmpq $0,%rax 		 # If statement
     je Compare_else_2
     movq $0,%rax 		 # Boolean false
-    movq %rax,-32(%rbp)
+    movq %rax,-32(%rbp) 		 # Assign to local var
     jmp Compare_done_2
 Compare_else_2:
     movq $1,%rax 		 # Boolean true
-    movq %rax,-32(%rbp)
+    movq %rax,-32(%rbp) 		 # Assign to local var
 Compare_done_2:
 Compare_done_1:
     movq -32(%rbp),%rax
@@ -570,7 +568,7 @@ Tree$Insert:
     leaq Tree$$(%rip),%rdx 		 # Load class vtable into %rdx
     movq %rdx,0(%rax) 		 # Load vtable at the beginning of %rax
     
-    movq %rax,-24(%rbp)
+    movq %rax,-24(%rbp) 		 # Assign to local var
     movq -16(%rbp),%rax
     pushq %rax 		 # Evaluate args and push on stack
     pushq %rax 		 # Push Dummy
@@ -583,12 +581,12 @@ Tree$Insert:
     movq 0(%rdi),%rax
     call *104(%rax) 		 # Call variable's method
     
-    movq %rax,-32(%rbp)
-    movq -8(%rbp),%rax
-    movq %rax,-40(%rbp)
+    movq %rax,-32(%rbp) 		 # Assign to local var
+    movq -8(%rbp),%rax 		 # This
+    movq %rax,-40(%rbp) 		 # Assign to local var
     movq $1,%rax 		 # Boolean true
-    movq %rax,-48(%rbp)
-    jmp Insert_while_3
+    movq %rax,-48(%rbp) 		 # Assign to local var
+    jmp Insert_while_3 		 # While statement
 Insert_while_3:
     movq -48(%rbp),%rax
     cmpq $0,%rax
@@ -602,15 +600,15 @@ Insert_while_3:
     movq 0(%rdi),%rax
     call *32(%rax) 		 # Call variable's method
     
-    movq %rax,-56(%rbp)
+    movq %rax,-56(%rbp) 		 # Assign to local var
     movq -16(%rbp),%rax
     pushq %rax
     movq -56(%rbp),%rax
     popq %rdx
-    cmpq %rdx, %rax
+    cmpq %rdx, %rax 		 # Less Than
     setg %al
     movzbl %al,%eax
-    cmpq $0,%rax
+    cmpq $0,%rax 		 # If statement
     je Insert_else_4
     pushq %rax 		 # Push Dummy
     
@@ -621,7 +619,7 @@ Insert_while_3:
     movq 0(%rdi),%rax
     call *120(%rax) 		 # Call variable's method
     
-    cmpq $0,%rax
+    cmpq $0,%rax 		 # If statement
     je Insert_else_5
     pushq %rax 		 # Push Dummy
     
@@ -632,11 +630,11 @@ Insert_while_3:
     movq 0(%rdi),%rax
     call *48(%rax) 		 # Call variable's method
     
-    movq %rax,-40(%rbp)
+    movq %rax,-40(%rbp) 		 # Assign to local var
     jmp Insert_done_5
 Insert_else_5:
     movq $0,%rax 		 # Boolean false
-    movq %rax,-48(%rbp)
+    movq %rax,-48(%rbp) 		 # Assign to local var
     pushq %rax 		 # Push Dummy
     
     movq $1,%rax 		 # Boolean true
@@ -649,7 +647,7 @@ Insert_else_5:
     movq 0(%rdi),%rax
     call *16(%rax) 		 # Call variable's method
     
-    movq %rax,-32(%rbp)
+    movq %rax,-32(%rbp) 		 # Assign to local var
     movq -24(%rbp),%rax
     pushq %rax 		 # Evaluate args and push on stack
     pushq %rax 		 # Push Dummy
@@ -662,7 +660,7 @@ Insert_else_5:
     movq 0(%rdi),%rax
     call *72(%rax) 		 # Call variable's method
     
-    movq %rax,-32(%rbp)
+    movq %rax,-32(%rbp) 		 # Assign to local var
 Insert_done_5:
     jmp Insert_done_4
 Insert_else_4:
@@ -675,7 +673,7 @@ Insert_else_4:
     movq 0(%rdi),%rax
     call *112(%rax) 		 # Call variable's method
     
-    cmpq $0,%rax
+    cmpq $0,%rax 		 # If statement
     je Insert_else_6
     pushq %rax 		 # Push Dummy
     
@@ -686,11 +684,11 @@ Insert_else_4:
     movq 0(%rdi),%rax
     call *56(%rax) 		 # Call variable's method
     
-    movq %rax,-40(%rbp)
+    movq %rax,-40(%rbp) 		 # Assign to local var
     jmp Insert_done_6
 Insert_else_6:
     movq $0,%rax 		 # Boolean false
-    movq %rax,-48(%rbp)
+    movq %rax,-48(%rbp) 		 # Assign to local var
     pushq %rax 		 # Push Dummy
     
     movq $1,%rax 		 # Boolean true
@@ -703,7 +701,7 @@ Insert_else_6:
     movq 0(%rdi),%rax
     call *160(%rax) 		 # Call variable's method
     
-    movq %rax,-32(%rbp)
+    movq %rax,-32(%rbp) 		 # Assign to local var
     movq -24(%rbp),%rax
     pushq %rax 		 # Evaluate args and push on stack
     pushq %rax 		 # Push Dummy
@@ -716,7 +714,7 @@ Insert_else_6:
     movq 0(%rdi),%rax
     call *40(%rax) 		 # Call variable's method
     
-    movq %rax,-32(%rbp)
+    movq %rax,-32(%rbp) 		 # Assign to local var
 Insert_done_6:
 Insert_done_4:
     jmp Insert_while_3
@@ -735,17 +733,17 @@ Tree$Delete:
     subq $72,%rsp 		 # Subtract space for variables to push on stack
     movq %rdi,-8(%rbp) 		 # Move variable onto stack
     movq %rsi,-16(%rbp) 		 # Move variable onto stack
-    movq -8(%rbp),%rax
-    movq %rax,-24(%rbp)
-    movq -8(%rbp),%rax
-    movq %rax,-32(%rbp)
+    movq -8(%rbp),%rax 		 # This
+    movq %rax,-24(%rbp) 		 # Assign to local var
+    movq -8(%rbp),%rax 		 # This
+    movq %rax,-32(%rbp) 		 # Assign to local var
     movq $1,%rax 		 # Boolean true
-    movq %rax,-40(%rbp)
+    movq %rax,-40(%rbp) 		 # Assign to local var
     movq $0,%rax 		 # Boolean false
-    movq %rax,-48(%rbp)
+    movq %rax,-48(%rbp) 		 # Assign to local var
     movq $1,%rax 		 # Boolean true
-    movq %rax,-64(%rbp)
-    jmp Delete_while_7
+    movq %rax,-64(%rbp) 		 # Assign to local var
+    jmp Delete_while_7 		 # While statement
 Delete_while_7:
     movq -40(%rbp),%rax
     cmpq $0,%rax
@@ -759,15 +757,15 @@ Delete_while_7:
     movq 0(%rdi),%rax
     call *32(%rax) 		 # Call variable's method
     
-    movq %rax,-72(%rbp)
+    movq %rax,-72(%rbp) 		 # Assign to local var
     movq -16(%rbp),%rax
     pushq %rax
     movq -72(%rbp),%rax
     popq %rdx
-    cmpq %rdx, %rax
+    cmpq %rdx, %rax 		 # Less Than
     setg %al
     movzbl %al,%eax
-    cmpq $0,%rax
+    cmpq $0,%rax 		 # If statement
     je Delete_else_8
     pushq %rax 		 # Push Dummy
     
@@ -778,10 +776,10 @@ Delete_while_7:
     movq 0(%rdi),%rax
     call *120(%rax) 		 # Call variable's method
     
-    cmpq $0,%rax
+    cmpq $0,%rax 		 # If statement
     je Delete_else_9
     movq -24(%rbp),%rax
-    movq %rax,-32(%rbp)
+    movq %rax,-32(%rbp) 		 # Assign to local var
     pushq %rax 		 # Push Dummy
     
     movq -24(%rbp),%rax
@@ -791,11 +789,11 @@ Delete_while_7:
     movq 0(%rdi),%rax
     call *48(%rax) 		 # Call variable's method
     
-    movq %rax,-24(%rbp)
+    movq %rax,-24(%rbp) 		 # Assign to local var
     jmp Delete_done_9
 Delete_else_9:
     movq $0,%rax 		 # Boolean false
-    movq %rax,-40(%rbp)
+    movq %rax,-40(%rbp) 		 # Assign to local var
 Delete_done_9:
     jmp Delete_done_8
 Delete_else_8:
@@ -803,10 +801,10 @@ Delete_else_8:
     pushq %rax
     movq -16(%rbp),%rax
     popq %rdx
-    cmpq %rdx, %rax
+    cmpq %rdx, %rax 		 # Less Than
     setg %al
     movzbl %al,%eax
-    cmpq $0,%rax
+    cmpq $0,%rax 		 # If statement
     je Delete_else_10
     pushq %rax 		 # Push Dummy
     
@@ -817,10 +815,10 @@ Delete_else_8:
     movq 0(%rdi),%rax
     call *112(%rax) 		 # Call variable's method
     
-    cmpq $0,%rax
+    cmpq $0,%rax 		 # If statement
     je Delete_else_11
     movq -24(%rbp),%rax
-    movq %rax,-32(%rbp)
+    movq %rax,-32(%rbp) 		 # Assign to local var
     pushq %rax 		 # Push Dummy
     
     movq -24(%rbp),%rax
@@ -830,16 +828,16 @@ Delete_else_8:
     movq 0(%rdi),%rax
     call *56(%rax) 		 # Call variable's method
     
-    movq %rax,-24(%rbp)
+    movq %rax,-24(%rbp) 		 # Assign to local var
     jmp Delete_done_11
 Delete_else_11:
     movq $0,%rax 		 # Boolean false
-    movq %rax,-40(%rbp)
+    movq %rax,-40(%rbp) 		 # Assign to local var
 Delete_done_11:
     jmp Delete_done_10
 Delete_else_10:
     movq -64(%rbp),%rax
-    cmpq $0,%rax
+    cmpq $0,%rax 		 # If statement
     je Delete_else_12
     pushq %rax 		 # Push Dummy
     
@@ -850,7 +848,7 @@ Delete_else_10:
     movq 0(%rdi),%rax
     call *112(%rax) 		 # Call variable's method
     
-    xor $1,%rax
+    xor $1,%rax 		 # Not
     
     pushq %rax 		 # Plus
     pushq %rax 		 # Push Dummy
@@ -862,15 +860,15 @@ Delete_else_10:
     movq 0(%rdi),%rax
     call *120(%rax) 		 # Call variable's method
     
-    xor $1,%rax
+    xor $1,%rax 		 # Not
     
     popq %rdx
     and %rdx,%rax
     
-    cmpq $0,%rax
+    cmpq $0,%rax 		 # If statement
     je Delete_else_13
     movq $1,%rax 		 # Boolean true
-    movq %rax,-56(%rbp)
+    movq %rax,-56(%rbp) 		 # Assign to local var
     jmp Delete_done_13
 Delete_else_13:
     pushq %rax 		 # Push Dummy
@@ -883,7 +881,7 @@ Delete_else_13:
     pushq %rax 		 # Evaluate args and push on stack
     pushq %rax 		 # Push Dummy
     
-    movq -8(%rbp),%rax
+    movq -8(%rbp),%rax 		 # This
     addq $8,%rsp 		 # Pop Dummy
     
     popq %rdx 		 # Pop from stack into arg registers
@@ -892,7 +890,7 @@ Delete_else_13:
     movq 0(%rdi),%rax
     call *64(%rax) 		 # Call variable's method
     
-    movq %rax,-56(%rbp)
+    movq %rax,-56(%rbp) 		 # Assign to local var
 Delete_done_13:
     jmp Delete_done_12
 Delete_else_12:
@@ -906,7 +904,7 @@ Delete_else_12:
     pushq %rax 		 # Evaluate args and push on stack
     pushq %rax 		 # Push Dummy
     
-    movq -8(%rbp),%rax
+    movq -8(%rbp),%rax 		 # This
     addq $8,%rsp 		 # Pop Dummy
     
     popq %rdx 		 # Pop from stack into arg registers
@@ -915,16 +913,16 @@ Delete_else_12:
     movq 0(%rdi),%rax
     call *64(%rax) 		 # Call variable's method
     
-    movq %rax,-56(%rbp)
+    movq %rax,-56(%rbp) 		 # Assign to local var
 Delete_done_12:
     movq $1,%rax 		 # Boolean true
-    movq %rax,-48(%rbp)
+    movq %rax,-48(%rbp) 		 # Assign to local var
     movq $0,%rax 		 # Boolean false
-    movq %rax,-40(%rbp)
+    movq %rax,-40(%rbp) 		 # Assign to local var
 Delete_done_10:
 Delete_done_8:
     movq $0,%rax 		 # Boolean false
-    movq %rax,-64(%rbp)
+    movq %rax,-64(%rbp) 		 # Assign to local var
     jmp Delete_while_7
 Delete_while_done_7:
     movq -48(%rbp),%rax
@@ -950,7 +948,7 @@ Tree$Remove:
     movq 0(%rdi),%rax
     call *120(%rax) 		 # Call variable's method
     
-    cmpq $0,%rax
+    cmpq $0,%rax 		 # If statement
     je Remove_else_14
     pushq %rax 		 # Push Dummy
     
@@ -962,7 +960,7 @@ Tree$Remove:
     pushq %rax 		 # Evaluate args and push on stack
     pushq %rax 		 # Push Dummy
     
-    movq -8(%rbp),%rax
+    movq -8(%rbp),%rax 		 # This
     addq $8,%rsp 		 # Pop Dummy
     
     popq %rdx 		 # Pop from stack into arg registers
@@ -971,7 +969,7 @@ Tree$Remove:
     movq 0(%rdi),%rax
     call *24(%rax) 		 # Call variable's method
     
-    movq %rax,-32(%rbp)
+    movq %rax,-32(%rbp) 		 # Assign to local var
     jmp Remove_done_14
 Remove_else_14:
     pushq %rax 		 # Push Dummy
@@ -983,7 +981,7 @@ Remove_else_14:
     movq 0(%rdi),%rax
     call *112(%rax) 		 # Call variable's method
     
-    cmpq $0,%rax
+    cmpq $0,%rax 		 # If statement
     je Remove_else_15
     pushq %rax 		 # Push Dummy
     
@@ -995,7 +993,7 @@ Remove_else_14:
     pushq %rax 		 # Evaluate args and push on stack
     pushq %rax 		 # Push Dummy
     
-    movq -8(%rbp),%rax
+    movq -8(%rbp),%rax 		 # This
     addq $8,%rsp 		 # Pop Dummy
     
     popq %rdx 		 # Pop from stack into arg registers
@@ -1004,7 +1002,7 @@ Remove_else_14:
     movq 0(%rdi),%rax
     call *128(%rax) 		 # Call variable's method
     
-    movq %rax,-32(%rbp)
+    movq %rax,-32(%rbp) 		 # Assign to local var
     jmp Remove_done_15
 Remove_else_15:
     pushq %rax 		 # Push Dummy
@@ -1016,7 +1014,7 @@ Remove_else_15:
     movq 0(%rdi),%rax
     call *32(%rax) 		 # Call variable's method
     
-    movq %rax,-40(%rbp)
+    movq %rax,-40(%rbp) 		 # Assign to local var
     pushq %rax 		 # Push Dummy
     
     movq -16(%rbp),%rax
@@ -1030,7 +1028,7 @@ Remove_else_15:
     movq 0(%rdi),%rax
     call *32(%rax) 		 # Call variable's method
     
-    movq %rax,-48(%rbp)
+    movq %rax,-48(%rbp) 		 # Assign to local var
     pushq %rax 		 # Push Dummy
     
     movq -40(%rbp),%rax
@@ -1041,7 +1039,7 @@ Remove_else_15:
     pushq %rax 		 # Evaluate args and push on stack
     pushq %rax 		 # Push Dummy
     
-    movq -8(%rbp),%rax
+    movq -8(%rbp),%rax 		 # This
     addq $8,%rsp 		 # Pop Dummy
     
     popq %rdx 		 # Pop from stack into arg registers
@@ -1050,7 +1048,7 @@ Remove_else_15:
     movq 0(%rdi),%rax
     call *152(%rax) 		 # Call variable's method
     
-    cmpq $0,%rax
+    cmpq $0,%rax 		 # If statement
     je Remove_else_16
     pushq %rax 		 # Push Dummy
     
@@ -1065,7 +1063,7 @@ Remove_else_15:
     movq 0(%rdi),%rax
     call *72(%rax) 		 # Call variable's method
     
-    movq %rax,-32(%rbp)
+    movq %rax,-32(%rbp) 		 # Assign to local var
     movq $0,%rax 		 # Boolean false
     pushq %rax 		 # Evaluate args and push on stack
     pushq %rax 		 # Push Dummy
@@ -1078,7 +1076,7 @@ Remove_else_15:
     movq 0(%rdi),%rax
     call *16(%rax) 		 # Call variable's method
     
-    movq %rax,-32(%rbp)
+    movq %rax,-32(%rbp) 		 # Assign to local var
     jmp Remove_done_16
 Remove_else_16:
     pushq %rax 		 # Push Dummy
@@ -1094,7 +1092,7 @@ Remove_else_16:
     movq 0(%rdi),%rax
     call *40(%rax) 		 # Call variable's method
     
-    movq %rax,-32(%rbp)
+    movq %rax,-32(%rbp) 		 # Assign to local var
     movq $0,%rax 		 # Boolean false
     pushq %rax 		 # Evaluate args and push on stack
     pushq %rax 		 # Push Dummy
@@ -1107,7 +1105,7 @@ Remove_else_16:
     movq 0(%rdi),%rax
     call *160(%rax) 		 # Call variable's method
     
-    movq %rax,-32(%rbp)
+    movq %rax,-32(%rbp) 		 # Assign to local var
 Remove_done_16:
 Remove_done_15:
 Remove_done_14:
@@ -1125,7 +1123,7 @@ Tree$RemoveRight:
     movq %rdi,-8(%rbp) 		 # Move variable onto stack
     movq %rsi,-16(%rbp) 		 # Move variable onto stack
     movq %rdx,-24(%rbp) 		 # Move variable onto stack
-    jmp RemoveRight_while_17
+    jmp RemoveRight_while_17 		 # While statement
 RemoveRight_while_17:
     pushq %rax 		 # Push Dummy
     
@@ -1158,15 +1156,15 @@ RemoveRight_while_17:
     movq 0(%rdi),%rax
     call *144(%rax) 		 # Call variable's method
     
-    movq %rax,-32(%rbp)
+    movq %rax,-32(%rbp) 		 # Assign to local var
     movq -24(%rbp),%rax
-    movq %rax,-16(%rbp)
+    movq %rax,-16(%rbp) 		 # Assign to local var
     movq -24(%rbp),%rax
     movq %rax,%rdi 		 # Load pointer of object making call in first arg register
     movq 0(%rdi),%rax
     call *56(%rax) 		 # Call variable's method
     
-    movq %rax,-24(%rbp)
+    movq %rax,-24(%rbp) 		 # Assign to local var
     jmp RemoveRight_while_17
 RemoveRight_while_done_17:
     movq -8(%rbp),%rax
@@ -1182,7 +1180,7 @@ RemoveRight_while_done_17:
     movq 0(%rdi),%rax
     call *40(%rax) 		 # Call variable's method
     
-    movq %rax,-32(%rbp)
+    movq %rax,-32(%rbp) 		 # Assign to local var
     pushq %rax 		 # Push Dummy
     
     movq $0,%rax 		 # Boolean false
@@ -1195,7 +1193,7 @@ RemoveRight_while_done_17:
     movq 0(%rdi),%rax
     call *160(%rax) 		 # Call variable's method
     
-    movq %rax,-32(%rbp)
+    movq %rax,-32(%rbp) 		 # Assign to local var
     movq $1,%rax 		 # Boolean true
     
     movq %rbp,%rsp 		 # Epilogue
@@ -1210,7 +1208,7 @@ Tree$RemoveLeft:
     movq %rdi,-8(%rbp) 		 # Move variable onto stack
     movq %rsi,-16(%rbp) 		 # Move variable onto stack
     movq %rdx,-24(%rbp) 		 # Move variable onto stack
-    jmp RemoveLeft_while_18
+    jmp RemoveLeft_while_18 		 # While statement
 RemoveLeft_while_18:
     movq -24(%rbp),%rax
     movq %rax,%rdi 		 # Load pointer of object making call in first arg register
@@ -1239,9 +1237,9 @@ RemoveLeft_while_18:
     movq 0(%rdi),%rax
     call *144(%rax) 		 # Call variable's method
     
-    movq %rax,-32(%rbp)
+    movq %rax,-32(%rbp) 		 # Assign to local var
     movq -24(%rbp),%rax
-    movq %rax,-16(%rbp)
+    movq %rax,-16(%rbp) 		 # Assign to local var
     pushq %rax 		 # Push Dummy
     
     movq -24(%rbp),%rax
@@ -1251,7 +1249,7 @@ RemoveLeft_while_18:
     movq 0(%rdi),%rax
     call *48(%rax) 		 # Call variable's method
     
-    movq %rax,-24(%rbp)
+    movq %rax,-24(%rbp) 		 # Assign to local var
     jmp RemoveLeft_while_18
 RemoveLeft_while_done_18:
     pushq %rax 		 # Push Dummy
@@ -1267,7 +1265,7 @@ RemoveLeft_while_done_18:
     movq 0(%rdi),%rax
     call *72(%rax) 		 # Call variable's method
     
-    movq %rax,-32(%rbp)
+    movq %rax,-32(%rbp) 		 # Assign to local var
     movq $0,%rax 		 # Boolean false
     pushq %rax 		 # Evaluate args and push on stack
     pushq %rax 		 # Push Dummy
@@ -1280,7 +1278,7 @@ RemoveLeft_while_done_18:
     movq 0(%rdi),%rax
     call *16(%rax) 		 # Call variable's method
     
-    movq %rax,-32(%rbp)
+    movq %rax,-32(%rbp) 		 # Assign to local var
     movq $1,%rax 		 # Boolean true
     
     movq %rbp,%rsp 		 # Epilogue
@@ -1294,13 +1292,13 @@ Tree$Search:
     subq $48,%rsp 		 # Subtract space for variables to push on stack
     movq %rdi,-8(%rbp) 		 # Move variable onto stack
     movq %rsi,-16(%rbp) 		 # Move variable onto stack
-    movq -8(%rbp),%rax
-    movq %rax,-24(%rbp)
+    movq -8(%rbp),%rax 		 # This
+    movq %rax,-24(%rbp) 		 # Assign to local var
     movq $1,%rax 		 # Boolean true
-    movq %rax,-40(%rbp)
+    movq %rax,-40(%rbp) 		 # Assign to local var
     movq $0,%rax 		 # Integer Literal
-    movq %rax,-32(%rbp)
-    jmp Search_while_19
+    movq %rax,-32(%rbp) 		 # Assign to local var
+    jmp Search_while_19 		 # While statement
 Search_while_19:
     movq -40(%rbp),%rax
     cmpq $0,%rax
@@ -1314,15 +1312,15 @@ Search_while_19:
     movq 0(%rdi),%rax
     call *32(%rax) 		 # Call variable's method
     
-    movq %rax,-48(%rbp)
+    movq %rax,-48(%rbp) 		 # Assign to local var
     movq -16(%rbp),%rax
     pushq %rax
     movq -48(%rbp),%rax
     popq %rdx
-    cmpq %rdx, %rax
+    cmpq %rdx, %rax 		 # Less Than
     setg %al
     movzbl %al,%eax
-    cmpq $0,%rax
+    cmpq $0,%rax 		 # If statement
     je Search_else_20
     pushq %rax 		 # Push Dummy
     
@@ -1333,7 +1331,7 @@ Search_while_19:
     movq 0(%rdi),%rax
     call *120(%rax) 		 # Call variable's method
     
-    cmpq $0,%rax
+    cmpq $0,%rax 		 # If statement
     je Search_else_21
     pushq %rax 		 # Push Dummy
     
@@ -1344,11 +1342,11 @@ Search_while_19:
     movq 0(%rdi),%rax
     call *48(%rax) 		 # Call variable's method
     
-    movq %rax,-24(%rbp)
+    movq %rax,-24(%rbp) 		 # Assign to local var
     jmp Search_done_21
 Search_else_21:
     movq $0,%rax 		 # Boolean false
-    movq %rax,-40(%rbp)
+    movq %rax,-40(%rbp) 		 # Assign to local var
 Search_done_21:
     jmp Search_done_20
 Search_else_20:
@@ -1356,10 +1354,10 @@ Search_else_20:
     pushq %rax
     movq -16(%rbp),%rax
     popq %rdx
-    cmpq %rdx, %rax
+    cmpq %rdx, %rax 		 # Less Than
     setg %al
     movzbl %al,%eax
-    cmpq $0,%rax
+    cmpq $0,%rax 		 # If statement
     je Search_else_22
     pushq %rax 		 # Push Dummy
     
@@ -1370,7 +1368,7 @@ Search_else_20:
     movq 0(%rdi),%rax
     call *112(%rax) 		 # Call variable's method
     
-    cmpq $0,%rax
+    cmpq $0,%rax 		 # If statement
     je Search_else_23
     pushq %rax 		 # Push Dummy
     
@@ -1381,18 +1379,18 @@ Search_else_20:
     movq 0(%rdi),%rax
     call *56(%rax) 		 # Call variable's method
     
-    movq %rax,-24(%rbp)
+    movq %rax,-24(%rbp) 		 # Assign to local var
     jmp Search_done_23
 Search_else_23:
     movq $0,%rax 		 # Boolean false
-    movq %rax,-40(%rbp)
+    movq %rax,-40(%rbp) 		 # Assign to local var
 Search_done_23:
     jmp Search_done_22
 Search_else_22:
     movq $1,%rax 		 # Integer Literal
-    movq %rax,-32(%rbp)
+    movq %rax,-32(%rbp) 		 # Assign to local var
     movq $0,%rax 		 # Boolean false
-    movq %rax,-40(%rbp)
+    movq %rax,-40(%rbp) 		 # Assign to local var
 Search_done_22:
 Search_done_20:
     jmp Search_while_19
@@ -1410,21 +1408,21 @@ Tree$Print:
     subq $8,%rsp
     subq $24,%rsp 		 # Subtract space for variables to push on stack
     movq %rdi,-8(%rbp) 		 # Move variable onto stack
-    movq -8(%rbp),%rax
-    movq %rax,-24(%rbp)
+    movq -8(%rbp),%rax 		 # This
+    movq %rax,-24(%rbp) 		 # Assign to local var
     pushq %rax 		 # Push Dummy
     
     movq -24(%rbp),%rax
     addq $8,%rsp 		 # Pop Dummy
     
     pushq %rax 		 # Evaluate args and push on stack
-    movq -8(%rbp),%rax
+    movq -8(%rbp),%rax 		 # This
     popq %rsi 		 # Pop from stack into arg registers
     movq %rax,%rdi 		 # Load pointer of object making call in first arg register
     movq 0(%rdi),%rax
     call *168(%rax) 		 # Call variable's method
     
-    movq %rax,-16(%rbp)
+    movq %rax,-16(%rbp) 		 # Assign to local var
     movq $1,%rax 		 # Boolean true
     
     movq %rbp,%rsp 		 # Epilogue
@@ -1444,7 +1442,7 @@ Tree$RecPrint:
     movq 0(%rdi),%rax
     call *120(%rax) 		 # Call variable's method
     
-    cmpq $0,%rax
+    cmpq $0,%rax 		 # If statement
     je RecPrint_else_24
     movq -16(%rbp),%rax
     movq %rax,%rdi 		 # Load pointer of object making call in first arg register
@@ -1454,7 +1452,7 @@ Tree$RecPrint:
     pushq %rax 		 # Evaluate args and push on stack
     pushq %rax 		 # Push Dummy
     
-    movq -8(%rbp),%rax
+    movq -8(%rbp),%rax 		 # This
     addq $8,%rsp 		 # Pop Dummy
     
     popq %rsi 		 # Pop from stack into arg registers
@@ -1462,11 +1460,11 @@ Tree$RecPrint:
     movq 0(%rdi),%rax
     call *168(%rax) 		 # Call variable's method
     
-    movq %rax,-24(%rbp)
+    movq %rax,-24(%rbp) 		 # Assign to local var
     jmp RecPrint_done_24
 RecPrint_else_24:
     movq $1,%rax 		 # Boolean true
-    movq %rax,-24(%rbp)
+    movq %rax,-24(%rbp) 		 # Assign to local var
 RecPrint_done_24:
     pushq %rax 		 # Push Dummy
     
@@ -1489,7 +1487,7 @@ RecPrint_done_24:
     movq 0(%rdi),%rax
     call *112(%rax) 		 # Call variable's method
     
-    cmpq $0,%rax
+    cmpq $0,%rax 		 # If statement
     je RecPrint_else_25
     pushq %rax 		 # Push Dummy
     
@@ -1501,17 +1499,17 @@ RecPrint_done_24:
     addq $8,%rsp 		 # Pop Dummy
     
     pushq %rax 		 # Evaluate args and push on stack
-    movq -8(%rbp),%rax
+    movq -8(%rbp),%rax 		 # This
     popq %rsi 		 # Pop from stack into arg registers
     movq %rax,%rdi 		 # Load pointer of object making call in first arg register
     movq 0(%rdi),%rax
     call *168(%rax) 		 # Call variable's method
     
-    movq %rax,-24(%rbp)
+    movq %rax,-24(%rbp) 		 # Assign to local var
     jmp RecPrint_done_25
 RecPrint_else_25:
     movq $1,%rax 		 # Boolean true
-    movq %rax,-24(%rbp)
+    movq %rax,-24(%rbp) 		 # Assign to local var
 RecPrint_done_25:
     movq $1,%rax 		 # Boolean true
     
@@ -1531,7 +1529,7 @@ Tree$accept:
     movq %rax,%rdi 		 # Print
     call _put
     
-    movq -8(%rbp),%rax
+    movq -8(%rbp),%rax 		 # This
     pushq %rax 		 # Evaluate args and push on stack
     pushq %rax 		 # Push Dummy
     
@@ -1543,7 +1541,7 @@ Tree$accept:
     movq 0(%rdi),%rax
     call *8(%rax) 		 # Call variable's method
     
-    movq %rax,-24(%rbp)
+    movq %rax,-24(%rbp) 		 # Assign to local var
     movq $0,%rax 		 # Integer Literal
     
     movq %rbp,%rsp 		 # Epilogue
@@ -1567,7 +1565,7 @@ Visitor$visit:
     movq 0(%rdi),%rax
     call *112(%rax) 		 # Call variable's method
     
-    cmpq $0,%rax
+    cmpq $0,%rax 		 # If statement
     je visit_else_26
     pushq %rax 		 # Push Dummy
     
@@ -1581,10 +1579,10 @@ Visitor$visit:
     pushq %rax
     movq -8(%rbp),%rax
     popq %rdx
-    movq %rdx,8(%rax)
+    movq %rdx,8(%rax) 		 # Assign to field
     pushq %rax 		 # Push Dummy
     
-    movq -8(%rbp),%rax
+    movq -8(%rbp),%rax 		 # This
     addq $8,%rsp 		 # Pop Dummy
     
     pushq %rax 		 # Evaluate args and push on stack
@@ -1595,18 +1593,18 @@ Visitor$visit:
     movq 0(%rdi),%rax
     call *88(%rax) 		 # Call variable's method
     
-    movq %rax,-24(%rbp)
+    movq %rax,-24(%rbp) 		 # Assign to local var
     jmp visit_done_26
 visit_else_26:
     movq $0,%rax 		 # Integer Literal
-    movq %rax,-24(%rbp)
+    movq %rax,-24(%rbp) 		 # Assign to local var
 visit_done_26:
     movq -16(%rbp),%rax
     movq %rax,%rdi 		 # Load pointer of object making call in first arg register
     movq 0(%rdi),%rax
     call *120(%rax) 		 # Call variable's method
     
-    cmpq $0,%rax
+    cmpq $0,%rax 		 # If statement
     je visit_else_27
     movq -16(%rbp),%rax
     movq %rax,%rdi 		 # Load pointer of object making call in first arg register
@@ -1616,8 +1614,8 @@ visit_done_26:
     pushq %rax
     movq -8(%rbp),%rax
     popq %rdx
-    movq %rdx,16(%rax)
-    movq -8(%rbp),%rax
+    movq %rdx,16(%rax) 		 # Assign to field
+    movq -8(%rbp),%rax 		 # This
     pushq %rax 		 # Evaluate args and push on stack
     pushq %rax 		 # Push Dummy
     
@@ -1630,11 +1628,11 @@ visit_done_26:
     movq 0(%rdi),%rax
     call *88(%rax) 		 # Call variable's method
     
-    movq %rax,-24(%rbp)
+    movq %rax,-24(%rbp) 		 # Assign to local var
     jmp visit_done_27
 visit_else_27:
     movq $0,%rax 		 # Integer Literal
-    movq %rax,-24(%rbp)
+    movq %rax,-24(%rbp) 		 # Assign to local var
 visit_done_27:
     movq $0,%rax 		 # Integer Literal
     
@@ -1659,7 +1657,7 @@ MyVisitor$visit:
     movq 0(%rdi),%rax
     call *112(%rax) 		 # Call variable's method
     
-    cmpq $0,%rax
+    cmpq $0,%rax 		 # If statement
     je visit_else_28
     pushq %rax 		 # Push Dummy
     
@@ -1673,10 +1671,10 @@ MyVisitor$visit:
     pushq %rax
     movq -8(%rbp),%rax
     popq %rdx
-    movq %rdx,8(%rax)
+    movq %rdx,8(%rax) 		 # Assign to field
     pushq %rax 		 # Push Dummy
     
-    movq -8(%rbp),%rax
+    movq -8(%rbp),%rax 		 # This
     addq $8,%rsp 		 # Pop Dummy
     
     pushq %rax 		 # Evaluate args and push on stack
@@ -1687,11 +1685,11 @@ MyVisitor$visit:
     movq 0(%rdi),%rax
     call *88(%rax) 		 # Call variable's method
     
-    movq %rax,-24(%rbp)
+    movq %rax,-24(%rbp) 		 # Assign to local var
     jmp visit_done_28
 visit_else_28:
     movq $0,%rax 		 # Integer Literal
-    movq %rax,-24(%rbp)
+    movq %rax,-24(%rbp) 		 # Assign to local var
 visit_done_28:
     movq -16(%rbp),%rax
     movq %rax,%rdi 		 # Load pointer of object making call in first arg register
@@ -1706,7 +1704,7 @@ visit_done_28:
     movq 0(%rdi),%rax
     call *120(%rax) 		 # Call variable's method
     
-    cmpq $0,%rax
+    cmpq $0,%rax 		 # If statement
     je visit_else_29
     movq -16(%rbp),%rax
     movq %rax,%rdi 		 # Load pointer of object making call in first arg register
@@ -1716,8 +1714,8 @@ visit_done_28:
     pushq %rax
     movq -8(%rbp),%rax
     popq %rdx
-    movq %rdx,16(%rax)
-    movq -8(%rbp),%rax
+    movq %rdx,16(%rax) 		 # Assign to field
+    movq -8(%rbp),%rax 		 # This
     pushq %rax 		 # Evaluate args and push on stack
     pushq %rax 		 # Push Dummy
     
@@ -1730,11 +1728,11 @@ visit_done_28:
     movq 0(%rdi),%rax
     call *88(%rax) 		 # Call variable's method
     
-    movq %rax,-24(%rbp)
+    movq %rax,-24(%rbp) 		 # Assign to local var
     jmp visit_done_29
 visit_else_29:
     movq $0,%rax 		 # Integer Literal
-    movq %rax,-24(%rbp)
+    movq %rax,-24(%rbp) 		 # Assign to local var
 visit_done_29:
     movq $0,%rax 		 # Integer Literal
     
