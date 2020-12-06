@@ -109,7 +109,7 @@ public class ClassSemanticTable extends Table implements Type{
         if (superClass != null && superClass.containsVariable(variable)) {
             return superClass.getVarType(variable);
         }
-        return null;
+        return Semantics.Unknown.getInstance();
     }
 
     public boolean containsMethod(String method) {

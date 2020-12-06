@@ -1,6 +1,10 @@
-    
     .text
     .globl  _asm_main
+
+_runtime_error_exit: 
+
+    call _runtime_error 
+
 
 _asm_main:
     pushq %rbp 		 # Prologue

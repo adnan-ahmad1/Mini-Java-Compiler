@@ -426,6 +426,15 @@ public class CodeGenVisitor implements Visitor {
             try {
                 gen.gen("popq %rdx");
                 gen.genbin("movq", -offsetFromRbp + "(%rbp)", "%rcx");
+
+                // check array out of bounds: index >= length
+                gen.gen("cmpq (%rcx),%rdx");
+                gen.gen("jge _runtime_error_exit");
+
+                // check array out of bounds: index < 0
+                gen.gen("cmpq $0,%rdx");
+                gen.gen("jl _runtime_error_exit");
+
                 gen.genbin("imulq", "$8", "%rdx");
                 gen.genbin("addq", "%rdx", "%rcx");
                 gen.genbin("addq", "$8", "%rcx");
@@ -601,6 +610,17 @@ public class CodeGenVisitor implements Visitor {
 
         try {
             gen.gen("popq %rdx");
+
+            // check array out of bounds: index >= length
+            gen.gen("cmpq (%rdx),%rax");
+            gen.gen("jge _runtime_error_exit");
+
+            // check array out of bounds: index < 0
+            gen.gen("cmpq $0,%rax");
+            gen.gen("jl _runtime_error_exit");
+
+            // add byte size to index and move array in %rdx to that location
+            // then get value from that location
             gen.genbin("imulq", "$8", "%rax");
             gen.genbin("addq", "%rax", "%rdx");
             gen.genbin("addq", "$8", "%rdx");
@@ -783,15 +803,27 @@ public class CodeGenVisitor implements Visitor {
         n.e.accept(this);
 
         try {
+
+            // check array out of bounds: index < 0
+            gen.gen("cmpq $0,%rax");
+            gen.gen("jl _runtime_error_exit");
+
+            // add size + 1 for length spot
             gen.genbin("addq", "$1", "%rax");
             gen.genbin("imulq", "$8", "%rax");
+
+            // move 'bytes needed' for array to %rdi
             gen.genbin("movq", "%rax", "%rdi \t\t # New array declaration");
             gen.gen("call _mjcalloc \t\t # Allocate space and return pointer in %rax");
             gen.gen("pushq %rax");
+
+            // accept expression again to get length numbers
             counter++;
             n.e.accept(this);
             gen.gen("popq %rdx");
             counter--;
+
+            // move size to beginning of array
             gen.genbin("movq", "%rax", "0(%rdx)");
             gen.genbin("movq", "%rdx", "%rax");
             gen.gen("");

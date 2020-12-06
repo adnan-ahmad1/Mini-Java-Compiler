@@ -28,7 +28,7 @@ public class Table {
         if (variables.containsKey(variable)) {
             return variables.get(variable);
         }
-        return null;
+        return Semantics.Unknown.getInstance();
     }
 
     public List<String> getVariableNames() {

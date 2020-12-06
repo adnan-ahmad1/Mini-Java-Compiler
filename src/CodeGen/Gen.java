@@ -17,11 +17,17 @@ public class Gen {
         fileWriter = new FileWriter(asmFile);
         fileWriter.write("    .text\n");
         fileWriter.write("    .globl  _asm_main\n");
-        gen("");
+
+        fileWriter.write("_runtime_error_exit: \n");
+        fileWriter.write("    call _runtime_error\n");
 
         // direct to standard output
         System.out.println("    .text");
         System.out.println("    .globl  _asm_main");
+        System.out.println();
+
+        System.out.println("_runtime_error_exit: \n");
+        System.out.println("    call _runtime_error \n");
         System.out.println();
     }
 

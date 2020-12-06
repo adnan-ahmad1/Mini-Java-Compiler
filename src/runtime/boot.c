@@ -42,3 +42,8 @@ int main() {
   asm_main();
   return 0;
 }
+
+void runtime_error() {
+    printf("ARRAY OUT OF BOUNDS. EXITED WITH STATUS 1\n");
+    exit(1);
+}
