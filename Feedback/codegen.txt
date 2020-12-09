@@ -1,0 +1,5 @@
+CSE 401/M501 Project IV - Code Generation
+
+The compiler doesn’t properly implement short circuiting of boolean expressions. For example, if the method, ‘this.m()’, prints 5, then if (false && this.m()) {...} will print 5. (-2)
+
+Total: 78/80
